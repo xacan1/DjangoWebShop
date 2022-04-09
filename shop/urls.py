@@ -1,0 +1,47 @@
+from django.urls import path
+from shop.views import *
+
+
+urlpatterns = [
+    path('', IndexView.as_view(), name='home'),
+    path('api/v1/tokens', TokensAPIList.as_view()),
+    path('api/v1/users/<str:email>', UsersAPIRetrieve.as_view()),
+    path('api/v1/products/categories', CategoryAPIList.as_view()),
+    path('api/v1/products/categories_create', CategoryAPICreate.as_view()),
+    path('api/v1/products/categories/<str:external_code>', CategoryAPIRetrieve.as_view()),
+    path('api/v1/products/categories_update/<str:external_code>', CategoryAPIUpdate.as_view()),
+    path('api/v1/products/categories_delete/<str:external_code>', CategoryAPIDelete.as_view()),
+    path('api/v1/products', ProductAPIList.as_view()),
+    path('api/v1/products_create', ProductAPICreate.as_view()),
+    path('api/v1/products/<str:external_code>', ProductAPIRetrieve.as_view()),
+    path('api/v1/products_update/<str:external_code>', ProductAPIUpdate.as_view()),
+    path('api/v1/products_delete/<str:external_code>', ProductAPIDelete.as_view()),
+    path('api/v1/prices', PricesAPIList.as_view()),
+    path('api/v1/prices_create', PricesAPICreate.as_view()),
+    path('api/v1/prices/<int:product>', PricesAPIRetrieve.as_view()),
+    path('api/v1/prices_update/<int:product>', PricesAPIUpdate.as_view()),
+    path('api/v1/prices_delete/<int:product>', PricesAPIDelete.as_view()),
+    path('api/v1/stocks', StockProductsAPIList.as_view()),
+    path('api/v1/stocks_create', StockProductsAPICreate.as_view()),
+    path('api/v1/stocks/<int:product>', StockProductsAPIRetrieve.as_view()),
+    path('api/v1/stocks_update/<int:product>', StockProductsAPIUpdate.as_view()),
+    path('api/v1/stocks_delete/<int:product>', StockProductsAPIDelete.as_view()),
+    path('api/v1/warehouses', WarehouseAPIList.as_view()),
+    path('api/v1/warehouses_create', WarehouseAPICreate.as_view()),
+    path('api/v1/warehouses/<str:external_code>', WarehouseAPIRetrieve.as_view()),
+    path('api/v1/warehouses_update/<str:external_code>', WarehouseAPIUpdate.as_view()),
+    path('api/v1/warehouses_delete/<str:external_code>', WarehouseAPIDelete.as_view()),
+    path('api/v1/carts/product_to_cart', CartProductAPILIst.as_view()), # если надо получить список товаров в корзине по ID мессенджера
+    path('api/v1/carts/product_to_cart_create', CartProductAPICreate.as_view()), # <-- тут создается строка товара для корзины и возвращается в виде данных JSON
+    path('api/v1/carts/product_to_cart_update', CartProductAPIUpdate.as_view()),
+    path('api/v1/carts/product_to_cart_delete/<int:pk>', CartProductAPIDelete.as_view()),
+    path('api/v1/carts_create', CartAPICreate.as_view()),
+    path('api/v1/carts/<int:user>', CartAPIRetrieve.as_view()),
+    path('api/v1/carts_update/<int:pk>', CartAPIUpdate.as_view()),
+    path('api/v1/carts_delete/<int:pk>', CartAPIDelete.as_view()),
+    path('api/v1/orders', OrdersAPIList.as_view()),
+    path('api/v1/orders_create', OrdersAPICreate.as_view()),
+    path('api/v1/orders/<str:number>', OrderAPIRetrieve.as_view()),
+    path('api/v1/orders_update/<str:number>', OrderAPIUpdate.as_view()),
+    path('api/v1/orders_delete/<str:number>', OrderAPIDelete.as_view()),
+]
