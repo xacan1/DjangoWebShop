@@ -28,10 +28,25 @@ class UsersAPIRetrieve(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
 
 
+# top_level_only - GET-параметр, сообщающий, что нужно вернуть только верхний уровень иерархии групп номенклатуры
+# category_pk - если надо вернуть состав только одной группы номенклатуры
+# может быть уставнолен только один параметр либо ни одного
 class CategoryAPIList(generics.ListAPIView):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        top_level_only = self.request.query_params.get('top_level_only', False)
+        category_pk = self.request.query_params.get('category_pk', 0)
+
+        if top_level_only:
+            queryset = Category.objects.filter(parent=None)
+        elif category_pk:
+            queryset = Category.objects.filter(parent=category_pk)
+        else:
+            queryset = Category.objects.all()
+
+        return queryset
 
 
 class CategoryAPICreate(generics.CreateAPIView):
@@ -42,28 +57,24 @@ class CategoryAPICreate(generics.CreateAPIView):
 class CategoryAPIRetrieve(generics.RetrieveAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    lookup_field = 'external_code'
     permission_classes = (IsAuthenticated,)
 
 
 class CategoryAPIUpdate(generics.UpdateAPIView):
     queryset = Category.objects.all()
-    lookup_field = 'external_code'
     serializer_class = CategorySerializer
     permission_classes = (IsAdminUser,)
 
 
 class CategoryAPIDelete(generics.DestroyAPIView):
     queryset = Category.objects.all()
-    lookup_field = 'external_code'
     serializer_class = CategorySerializer
     permission_classes = (IsAdminUser,)
 
 
-# Параметры:
+# Выводит список товаров с остатками по складам и ценами
 # category_pk - категория товара (каталог)
 # warehouse_pk - склад
-# Выводит список товаров с остатками по складам и ценами
 class ProductAPIList(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = (IsAuthenticated,)
@@ -74,6 +85,7 @@ class ProductAPIList(generics.ListAPIView):
         category_pk = self.request.query_params.get('category_pk', 0)
         warehouse_pk = self.request.query_params.get('warehouse_pk', 0)
 
+        # Сначала проверим идет ли запросм от телеграм бота по категории и складу
         if category_pk and warehouse_pk:
             queryset = Product.objects.filter(
                 category=category_pk, get_stock_product__warehouse=warehouse_pk)
@@ -83,7 +95,10 @@ class ProductAPIList(generics.ListAPIView):
             queryset = Product.objects.filter(
                 get_stock_product__warehouse=warehouse_pk)
         else:
-            queryset = Product.objects.all()
+            # значит это запрос не от телеграм бота, сделаем отбор по всем параметрам
+            get_params = self.request.query_params
+            get_params = {param: get_params[param] for param in get_params}
+            queryset = Product.objects.filter(**get_params)
 
         return queryset
 
@@ -95,29 +110,31 @@ class ProductAPICreate(generics.CreateAPIView):
 
 class ProductAPIRetrieve(generics.RetrieveAPIView):
     queryset = Product.objects.all()
-    lookup_field = 'external_code'
     serializer_class = ProductSerializer
     permission_classes = (IsAuthenticated,)
 
 
 class ProductAPIUpdate(generics.UpdateAPIView):
     queryset = Product.objects.all()
-    lookup_field = 'external_code'
     serializer_class = ProductSerializer
     permission_classes = (IsAdminUser,)
 
 
 class ProductAPIDelete(generics.DestroyAPIView):
     queryset = Product.objects.all()
-    lookup_field = 'external_code'
     serializer_class = ProductSerializer
     permission_classes = (IsAdminUser,)
 
 
 class WarehouseAPIList(generics.ListAPIView):
-    queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = Warehouse.objects.filter(**get_params)
+        return queryset
 
 
 class WarehouseAPICreate(generics.CreateAPIView):
@@ -127,21 +144,18 @@ class WarehouseAPICreate(generics.CreateAPIView):
 
 class WarehouseAPIRetrieve(generics.RetrieveAPIView):
     queryset = Warehouse.objects.all()
-    lookup_field = 'external_code'
     serializer_class = WarehouseSerializer
     permission_classes = (IsAuthenticated,)
 
 
 class WarehouseAPIUpdate(generics.UpdateAPIView):
     queryset = Warehouse.objects.all()
-    lookup_field = 'external_code'
     serializer_class = WarehouseSerializer
     permission_classes = (IsAdminUser,)
 
 
 class WarehouseAPIDelete(generics.DestroyAPIView):
     queryset = Warehouse.objects.all()
-    lookup_field = 'external_code'
     serializer_class = WarehouseSerializer
     permission_classes = (IsAdminUser,)
 
@@ -176,7 +190,7 @@ class PricesAPIRetrieve(generics.RetrieveAPIView):
 class PricesAPIUpdate(generics.UpdateAPIView):
     queryset = Prices.objects.all()
     lookup_field = 'product'
-    erializer_class = PriceSerializer
+    serializer_class = PriceSerializer
     permission_classes = (IsAdminUser,)
 
 
@@ -209,7 +223,7 @@ class StockProductsAPIList(generics.ListAPIView):
 
 
 class StockProductsAPICreate(generics.CreateAPIView):
-    serializer_class = StockProductSerializer
+    serializer_class = StockProductCreateSerializer
     permission_classes = (IsAdminUser,)
 
 
@@ -223,7 +237,7 @@ class StockProductsAPIRetrieve(generics.RetrieveAPIView):
 class StockProductsAPIUpdate(generics.UpdateAPIView):
     queryset = StockProducts.objects.all()
     lookup_field = 'product'
-    serializer_class = StockProductSerializer
+    serializer_class = StockProductCreateSerializer
     permission_classes = (IsAdminUser,)
 
 
@@ -240,28 +254,14 @@ class CartProductAPILIst(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        id_messenger = self.request.query_params.get('id_messenger', 0)
-        # user_pk = self.request.query_params.get('user_pk', 0)
-        cart_pk = self.request.query_params.get('cart_pk', 0)
-        product_pk = self.request.query_params.get('product_pk', 0)
-
-        if id_messenger and cart_pk and product_pk:
-            queryset = CartProduct.objects.filter(
-                id_anonymous=id_messenger, cart=cart_pk, product_id=product_pk)
-        elif id_messenger and cart_pk:
-            queryset = CartProduct.objects.filter(
-                id_anonymous=id_messenger, cart=cart_pk)
-        elif id_messenger:
-            queryset = CartProduct.objects.filter(id_anonymous=id_messenger)
-        elif cart_pk:
-            queryset = CartProduct.objects.filter(cart=cart_pk)
-        else:
-            queryset = CartProduct.objects.all()
-
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        # queryset = CartProduct.objects.filter(**get_params).annotate(quantity_sum=models.Sum('quantity')).order_by()
+        queryset = CartProduct.objects.filter(**get_params)
         return queryset
 
 
-# Создаю строку товара для корзины (пока отдельно)
+# Создаю строку товара для корзины (отдельным сериализатором)
 class CartProductAPICreate(generics.CreateAPIView):
     serializer_class = CartProductCreateSerializer
     permission_classes = (IsAuthenticated,)
@@ -270,7 +270,7 @@ class CartProductAPICreate(generics.CreateAPIView):
 # product - уникальная строка, так как не может один и тот же товар быть в разных строках корзины
 class CartProductAPIUpdate(generics.UpdateAPIView):
     queryset = CartProduct.objects.all()
-    serializer_class = CartProductSerializer
+    serializer_class = CartProductCreateSerializer
     permission_classes = (IsAuthenticated,)
 
 
@@ -304,33 +304,69 @@ class CartAPIDelete(generics.DestroyAPIView):
     permission_classes = (IsAuthenticated,)
 
 
+class StatusesAPIList(generics.ListAPIView):
+    serializer_class = StatusSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = Status.objects.filter(**get_params)
+        return queryset
+
+
+class PaymentTypesAPIList(generics.ListAPIView):
+    serializer_class = PaymentTypeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = PaymentType.objects.filter(**get_params)
+        return queryset
+
+
+class DeliveryTypesAPIList(generics.ListAPIView):
+    serializer_class = DeliveryTypeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = DeliveryType.objects.filter(**get_params)
+        return queryset
+
+
 class OrdersAPIList(generics.ListAPIView):
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
 
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = Order.objects.filter(**get_params)
+        return queryset
+
 
 class OrdersAPICreate(generics.CreateAPIView):
-    serializer_class = OrderSerializer
+    serializer_class = OrderCreateSerializer
     permission_classes = (IsAuthenticated,)
 
 
 class OrderAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Cart.objects.all()
+    queryset = Order.objects.all()
     lookup_field = 'number'
-    serializer_class = CartSerializer
+    serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
 
 
 class OrderAPIUpdate(generics.UpdateAPIView):
-    queryset = Cart.objects.all()
-    lookup_field = 'number'
-    serializer_class = CartSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderCreateSerializer
     permission_classes = (IsAuthenticated,)
 
 
 class OrderAPIDelete(generics.DestroyAPIView):
-    queryset = Cart.objects.all()
-    lookup_field = 'number'
-    serializer_class = CartSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)

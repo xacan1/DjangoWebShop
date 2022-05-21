@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
 
 class CategoryAdmin(admin.ModelAdmin):
     model = Category
-    list_display = ('name', 'external_code',)
+    list_display = ('parent', 'name', 'external_code',)
     list_display_links = ('name',)
     search_fields = ('name', 'external_code',)
     prepopulated_fields = {'slug': ('name',)}
@@ -39,9 +39,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class ProductAdmin(admin.ModelAdmin):
     model = Product
-    list_display = ('name', 'photo', 'category',
+    list_display = ('name', 'photo', 'category', 'is_service',
                     'is_published', 'external_code',)
-    list_filter = ('category', 'is_published',)
+    list_filter = ('category', 'is_published', 'is_service',)
     search_fields = ('name', 'external_code',)
     list_editable = ('is_published',)
     prepopulated_fields = {'slug': ('name',)}
@@ -79,26 +79,45 @@ class StockProductsAdmin(admin.ModelAdmin):
 
 class CartProductAdmin(admin.ModelAdmin):
     model = CartProduct
-    list_display = ('user', 'cart', 'product', 'quantity', 'price', 'discount',
-                    'discount_percentage', 'amount', 'warehouse', 'id_anonymous',)
-    list_display_links = ('user',)
-    list_filter = ('user',)
-    search_fields = ('id_anonymous',)
+    list_display = ('user', 'cart', 'order', 'product', 'quantity', 'price', 'discount',
+                    'discount_percentage', 'amount', 'warehouse', 'phone', 'id_messenger',)
+    list_display_links = ('user', 'order',)
+    search_fields = ('phone', 'id_messenger', 'amount',)
 
 
 class CartAdmin(admin.ModelAdmin):
     model = Cart
-    list_display = ('user', 'quantity', 'amount', 'discount',
-                    'in_order', 'for_anonymous_user',)
-    list_filter = ('in_order', 'for_anonymous_user',)
+    list_display = ('user', 'quantity', 'amount',
+                    'discount', 'for_anonymous_user',)
+    list_filter = ('for_anonymous_user',)
+
+
+class StatusAdmin(admin.ModelAdmin):
+    model = Status
+    list_display = ('name', 'repr', 'for_bot', 'use',)
+    list_filter = ('use', 'for_bot',)
+
+
+class PaymentTypeAdmin(admin.ModelAdmin):
+    model = Status
+    list_display = ('name', 'repr', 'for_bot', 'use',)
+    list_filter = ('use', 'for_bot',)
+
+
+class DeliveryTypeAdmin(admin.ModelAdmin):
+    model = Status
+    list_display = ('name', 'repr', 'for_bot', 'use',)
+    list_filter = ('use', 'for_bot',)
 
 
 class OrderAdmin(admin.ModelAdmin):
     model = Order
-    list_display = ('castomer', 'phone', 'status',
-                    'buying_type', 'number', 'id_anonymous',)
-    list_filter = ('status', 'buying_type', 'time_create',)
-    search_fields = ('castomer', 'phone', 'number',)
+    list_display = ('pk', 'user', 'phone', 'status', 'delivery_date', 'delivery_type',
+                    'paid', 'quantity', 'amount', 'discount', 'number', 'time_create',)
+    list_display_links = ('pk', 'user', 'phone', 'status',)
+    list_filter = ('status', 'delivery_type',
+                   'payment_type', 'paid', 'time_create',)
+    search_fields = ('user', 'phone', 'number',)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
@@ -112,4 +131,7 @@ admin.site.register(Warehouse, WarehouseAdmin)
 admin.site.register(StockProducts, StockProductsAdmin)
 admin.site.register(CartProduct, CartProductAdmin)
 admin.site.register(Cart, CartAdmin)
+admin.site.register(Status, StatusAdmin)
+admin.site.register(PaymentType, PaymentTypeAdmin)
+admin.site.register(DeliveryType, DeliveryTypeAdmin)
 admin.site.register(Order, OrderAdmin)

@@ -3,7 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
+from django.utils.text import slugify
+from django.utils import timezone, datetime_safe
 from rest_framework.authtoken.models import Token
 
 
@@ -39,9 +40,7 @@ class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(_('email address'), unique=True)
     phone = models.CharField(max_length=15, unique=True,
-                             blank=True, verbose_name='Телефон')
-    # orders = models.ManyToManyField(
-    #     'Order', related_name='related_orders', verbose_name='Заказы покупателя')
+                             verbose_name='Телефон')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -72,9 +71,16 @@ def product_image_path(instance, filename):
 # Категории - это корневые папки справочника Номенклатура в 1С
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='Имя категории')
-    slug = models.SlugField(unique=True)
-    external_code = models.CharField(
-        max_length=11, unique=True, verbose_name='Внешний код')
+    slug = models.SlugField(max_length=255, unique=True)
+    external_code = models.CharField(max_length=11, unique=True,
+                                     verbose_name='Внешний код')
+    parent = models.ForeignKey('self', on_delete=models.PROTECT, default=None,
+                               null=True, blank=True, related_name='nested_category',
+                               verbose_name='Родитель')
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name, allow_unicode=True)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.name
@@ -82,24 +88,30 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ('name',)
+        ordering = ('parent__name', 'name',)
 
 
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name='Наименование')
-    slug = models.SlugField(unique=True)
-    description = models.TextField(blank=True, verbose_name='Описание')
+    slug = models.SlugField(max_length=255, unique=True)
+    description = models.TextField(default='', blank=True,
+                                   verbose_name='Описание')
     photo = models.ImageField(upload_to=product_image_path,
                               verbose_name='Изображение')
     time_create = models.DateTimeField(auto_now_add=True,
                                        verbose_name='Создан')
     time_update = models.DateTimeField(auto_now=True, verbose_name='Изменен')
-    is_published = models.BooleanField(default=True,
+    is_published = models.BooleanField(default=True, blank=True,
                                        verbose_name='Доступен к покупке')
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name='get_products', verbose_name='Категория')
     external_code = models.CharField(max_length=11,
                                      unique=True, verbose_name='Внешний код')
+    is_service = models.BooleanField(default=False, verbose_name='Услуга')
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name, allow_unicode=True)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.name
@@ -114,7 +126,8 @@ class Product(models.Model):
 class Attribute(models.Model):
     name = models.CharField(max_length=255, unique=True,
                             verbose_name='Атрибут')
-    description = models.TextField(blank=True, verbose_name='Описание')
+    description = models.TextField(default='', blank=True,
+                                   verbose_name='Описание')
 
     def __str__(self) -> str:
         return self.name
@@ -125,7 +138,7 @@ class Attribute(models.Model):
 
 
 # Назначение атрибутов для категорий, у каждой категории свой набор атрибутов
-# В дальнейшем нужно быдет сделать форму для заполнения категорий у товаров на сайте,
+# В дальнейшем нужно будет сделать форму для заполнения категорий у товаров на сайте,
 # с фильтрацией по этой таблице, что бы видеть какие именно атрибуты есть у всех товаров данной категории
 class AttributeCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
@@ -211,18 +224,26 @@ class StockProducts(models.Model):
         verbose_name_plural = 'Остатки'
 
 
-# Строка в корзине товаров, превращается в строку заказа когда корзина прикрепляется к заказу
+# Строка в корзине товаров, превращается в строку заказа когда строка прикрепляется к заказу,
+# изначально order=null, а затем становится cart=null, когда заказ появляется
 # discount - скидка в деньгах на всю строку, а не на штуку товара
-# тут или товар на пользователе или товар на id_anonymous(ID из мессенджера), если товар покупается из телеграма
+# тут или товар на пользователе или товар на id_messenger(ID из мессенджера), если товар покупается из телеграма
 # id_anonymous - по сути специальный разрез учета по номеру телефона для подкорзины телеграм бота,
 # что бы отделить товар одного покупателя от другого в общей корзине телеграм бота
+# phone - заполняется когда строка корзины превращается в строку заказа
 class CartProduct(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              verbose_name='Покупатель')
-    id_anonymous = models.IntegerField(default=0,
+    id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')
+    phone = models.CharField(max_length=15, default='', blank=True,
+                             verbose_name='Телефон')
     cart = models.ForeignKey('Cart', on_delete=models.CASCADE,
-                             related_name='get_cart_products', verbose_name='Корзина')
+                             related_name='get_cart_products', null=True,
+                             blank=True, verbose_name='Корзина')
+    order = models.ForeignKey('Order', on_delete=models.CASCADE,
+                              related_name='get_order_products', null=True,
+                              blank=True, verbose_name='Заказ')
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
                                 verbose_name='Товар')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE,
@@ -231,10 +252,10 @@ class CartProduct(models.Model):
                                    default=1, verbose_name='Количество')
     price = models.DecimalField(max_digits=15, decimal_places=2,
                                 default=0, verbose_name='Цена')
-    discount = models.DecimalField(max_digits=15, decimal_places=2,
-                                   default=0, verbose_name='Скидка')
+    discount = models.DecimalField(max_digits=15, decimal_places=2, default=0,
+                                   blank=True, verbose_name='Скидка')
     discount_percentage = models.DecimalField(max_digits=3, decimal_places=0,
-                                              default=0, verbose_name='Скидка %')
+                                              default=0, blank=True, verbose_name='Скидка %')
     amount = models.DecimalField(max_digits=15, decimal_places=2,
                                  default=0, verbose_name='Сумма')
 
@@ -255,16 +276,13 @@ class CartProduct(models.Model):
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,
                                 related_name='get_user_cart', verbose_name='Покупатель')
-    # cart_products = models.ManyToManyField(CartProduct, blank=True,
-    #                                        related_name='get_cart', verbose_name='Товары')
-    quantity = models.DecimalField(max_digits=15, decimal_places=3,
+    quantity = models.DecimalField(max_digits=15, decimal_places=3, blank=True,
                                    default=0, verbose_name='Общее количество')
-    amount = models.DecimalField(max_digits=15, decimal_places=2,
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True,
                                  default=0, verbose_name='Общая сумма')
-    discount = models.DecimalField(max_digits=15, decimal_places=2,
+    discount = models.DecimalField(max_digits=15, decimal_places=2, blank=True,
                                    default=0, verbose_name='Общая скидка')
-    in_order = models.BooleanField(default=False, verbose_name='В заказе')
-    for_anonymous_user = models.BooleanField(default=False,
+    for_anonymous_user = models.BooleanField(default=False, blank=True,
                                              verbose_name='Анонимный покупатель')
 
     def __str__(self) -> str:
@@ -275,58 +293,128 @@ class Cart(models.Model):
         verbose_name_plural = 'Корзины'
 
 
-# id_anonymous необязательное поле, нужно только если заказ анонимный, по этому полю осуществляется связь строк корзины и анонимного заказа
+# for_bot - что бы любой бот знал что ему надо выбирать в заказе
+class Status(models.Model):
+    name = models.CharField(max_length=50, verbose_name='Статус заказа')
+    repr = models.CharField(max_length=50,
+                            verbose_name='Представление статуса')
+    for_bot = models.BooleanField(default=False,
+                                  verbose_name='Для бота магазина')
+    use = models.BooleanField(default=True, verbose_name='Использовать')
+
+    def __str__(self) -> str:
+        return f'Статус заказа: {self.repr}'
+
+    class Meta:
+        verbose_name = 'Статус заказа'
+        verbose_name_plural = 'Статусы заказов'
+
+
+class PaymentType(models.Model):
+    name = models.CharField(max_length=50, verbose_name='Вид оплаты')
+    repr = models.CharField(max_length=50,
+                            verbose_name='Представление вида оплаты')
+    for_bot = models.BooleanField(default=False,
+                                  verbose_name='Для бота магазина')
+    use = models.BooleanField(default=True, verbose_name='Использовать')
+
+    def __str__(self) -> str:
+        return f'Вид оплаты: {self.repr}'
+
+    class Meta:
+        verbose_name = 'Вид оплаты'
+        verbose_name_plural = 'Виды оплат'
+
+
+class DeliveryType(models.Model):
+    name = models.CharField(max_length=50, verbose_name='Способ получения')
+    repr = models.CharField(max_length=50,
+                            verbose_name='Представление способа получения')
+    for_bot = models.BooleanField(default=False,
+                                  verbose_name='Для бота магазина')
+    use = models.BooleanField(default=True, verbose_name='Использовать')
+
+    def __str__(self) -> str:
+        return f'Способ получения: {self.repr}'
+
+    class Meta:
+        verbose_name = 'Способ получения'
+        verbose_name_plural = 'Способы получения'
+
+
+# id_messenger необязательное поле, нужно только если заказ анонимный, по этому полю осуществляется связь строк корзины и анонимного заказа
 # например из телеграм бота, где пользолватель не имея учетки на сайте сам вводит свои данные в заказе
 # phone при анонимном заказе заполняется при получении телефона ботом, иначе из учетки на сайте
+# в 1С заказ будет загружаться и в документе будет сохраняться pk заказа
 class Order(models.Model):
-    STATUS_NEW = 'new'
-    STATUS_IN_PROGRESS = 'in_progress'
-    STATUS_READY = 'is_ready'
-    STATUS_COMPLETED = 'completed'
+    # STATUS_NEW = 'new'
+    # STATUS_IN_PROGRESS = 'in_progress'
+    # STATUS_READY = 'is_ready'
+    # STATUS_COMPLETED = 'completed'
+    # STATUS_CANCELLED = 'canceled'
 
-    BUYING_TYPE_SELF = 'self'
-    BUYING_TYPE_DELIVERY = 'delivery'
+    # DELIVERY_TYPE_SELF = 'self'
+    # DELIVERY_TYPE_DELIVERY = 'delivery'
 
-    STATUS_CHOICES = (
-        (STATUS_NEW, 'Новый заказ'),
-        (STATUS_IN_PROGRESS, 'Заказ в обработке'),
-        (STATUS_READY, 'Заказ готов'),
-        (STATUS_COMPLETED, 'Заказ выполнен'),
-    )
+    # PAYMENT_TYPE_CASH = 'cash'
+    # PAYMENT_TYPE_CARD = 'card'
+    # PAYMENT_TYPE_ONLINE = 'online'
 
-    BUYING_TYPE_CHOICES = (
-        (BUYING_TYPE_SELF, 'Самовывоз'),
-        (BUYING_TYPE_DELIVERY, 'Доставка'),
-    )
+    # PAYMENT_TYPES = (
+    #     (PAYMENT_TYPE_CASH, 'Наличная оплата'),
+    #     (PAYMENT_TYPE_CARD, 'Оплата банковской картой'),
+    #     (PAYMENT_TYPE_ONLINE, 'Онлайн оплата'),
+    # )
 
-    castomer = models.ForeignKey(User, on_delete=models.CASCADE,
-                                 related_name='get_orders', verbose_name='Покупатель')
+    # STATUS_CHOICES = (
+    #     (STATUS_NEW, 'Новый заказ'),
+    #     (STATUS_IN_PROGRESS, 'Заказ в обработке'),
+    #     (STATUS_READY, 'Заказ готов'),
+    #     (STATUS_COMPLETED, 'Заказ выполнен'),
+    #     (STATUS_CANCELLED, 'Заказ отменен'),
+    # )
+
+    # DELIVERY_TYPE_CHOICES = (
+    #     (DELIVERY_TYPE_SELF, 'Самовывоз'),
+    #     (DELIVERY_TYPE_DELIVERY, 'Доставка'),
+    # )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='get_orders', verbose_name='Покупатель')
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
     phone = models.CharField(max_length=15, verbose_name='Телефон')
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE,
-                             null=True, blank=True, verbose_name='Корзина')
-    id_anonymous = models.IntegerField(default=0,
+    id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')
-    address = models.CharField(max_length=1024,
-                               null=True, blank=True, verbose_name='Адрес')
+    address = models.CharField(max_length=1024, default='', blank=True,
+                               verbose_name='Адрес')
     time_create = models.DateTimeField(auto_now_add=True,
                                        verbose_name='Дата создания')
     time_update = models.DateTimeField(auto_now=True,
                                        verbose_name='Дата изменения')
-    order_date = models.DateField(default=timezone.now,
-                                  verbose_name='Желаемая дата получения')
-    comment = models.TextField(null=True,
-                               blank=True, verbose_name='Комментарий к заказу')
-    status = models.CharField(max_length=100, choices=STATUS_CHOICES,
-                              default=STATUS_NEW, verbose_name='Статус заказа')
-    buying_type = models.CharField(max_length=100, choices=BUYING_TYPE_CHOICES,
-                                   default=BUYING_TYPE_SELF, verbose_name='Способ получения')
-    # здесь этот номер уникален лишь в пределах 1 года как в 1С
-    number = models.CharField(max_length=11, verbose_name='Номер заказа')
+    delivery_date = models.DateField(default=datetime_safe.date.today,
+                                     verbose_name='Плановая дата доставки')
+    comment = models.TextField(default='', blank=True,
+                               verbose_name='Комментарий к заказу')
+    status = models.ForeignKey(Status, on_delete=models.PROTECT,
+                               verbose_name='Статус заказа')
+    delivery_type = models.ForeignKey(DeliveryType, on_delete=models.PROTECT,
+                                      verbose_name='Способ получения')
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.PROTECT,
+                                     verbose_name='Вид оплаты')
+    quantity = models.DecimalField(max_digits=15, decimal_places=3, blank=True,
+                                   default=0, verbose_name='Общее количество')
+    amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True,
+                                 default=0, verbose_name='Общая сумма')
+    discount = models.DecimalField(max_digits=15, decimal_places=2, blank=True,
+                                   default=0, verbose_name='Общая скидка')
+    paid = models.BooleanField(default=False, verbose_name='Оплачен')
+    # номер уникален в пределах 1 года как в 1С, заполняется когда 1С загрузит заказ и вернет назад свой код документа
+    number = models.CharField(max_length=11, default='', blank=True,
+                              verbose_name='Внешний номер заказа')
 
     def __str__(self) -> str:
-        return f'Заказ {self.number} от {self.time_update}'
+        return f'Заказ №{self.pk} от {self.time_update.strftime("%d.%m.%Y")}'
 
     class Meta:
         verbose_name = 'Заказ'

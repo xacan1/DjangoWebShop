@@ -17,13 +17,15 @@ class UserSerializer(serializers.ModelSerializer):
 class PriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prices
-        fields = ('price', 'date_update', 'discount_percentage',)
+        fields = ('pk', 'product', 'price',
+                  'date_update', 'discount_percentage',)
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Warehouse
-        fields = ('pk', 'name', 'city', 'external_code',)
+        fields = ('pk', 'name', 'country', 'province',
+                  'city', 'address', 'external_code',)
 
 
 # Сериализатор остатков на складах с детализацией по складам
@@ -32,7 +34,20 @@ class StockProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockProducts
-        fields = ('warehouse', 'stock',)
+        fields = ('pk', 'warehouse', 'stock',)
+
+
+# для функции сохранения остатков
+class StockProductCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockProducts
+        fields = ('product', 'warehouse', 'stock',)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('pk', 'name', 'external_code', 'parent', 'nested_category',)
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -41,25 +56,20 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('pk', 'name', 'external_code', 'photo', 'time_create',
-                  'get_prices', 'get_stock_product',)
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    # get_products = ProductSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Category
-        fields = '__all__'
+        fields = ('pk', 'name', 'external_code', 'category', 'photo',
+                  'time_create', 'get_prices', 'get_stock_product', 'description',)
 
 
 # Сериализатор строки Корзины для просмотра данных с детализацией по товару и складу
 class CartProductSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     warehouse = WarehouseSerializer()
+    # quantity_sum = serializers.DecimalField(max_digits=15, decimal_places=3)
 
     class Meta:
         model = CartProduct
+        # fields = ('pk', 'user', 'id_messenger', 'cart', 'order', 'product', 'warehouse', 'quantity',
+        #           'price', 'discount', 'discount_percentage', 'amount', 'quantity_sum',)
         fields = '__all__'
 
 
@@ -76,10 +86,39 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ('pk', 'user', 'get_cart_products', 'quantity',
-                  'amount', 'discount', 'in_order', 'for_anonymous_user',)
+                  'amount', 'discount', 'for_anonymous_user',)
+
+
+class StatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Status
+        fields = '__all__'
+
+
+class PaymentTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentType
+        fields = '__all__'
+
+
+class DeliveryTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryType
+        fields = '__all__'
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    status = StatusSerializer(read_only=True)
+    delivery_type = DeliveryTypeSerializer(read_only=True)
+    payment_type = PaymentTypeSerializer(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+# для создания заказа без лишних сериализаций
+class OrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
