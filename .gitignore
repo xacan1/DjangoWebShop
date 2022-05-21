@@ -4,3 +4,7 @@
 **/*.sqlite3
 **/*.db
 **/config.py
+**/prod_settings.py
+**/local_settings.py
+**/config/
+**/logs/

@@ -11,7 +11,12 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-import uzmshop.config as config
+from . import config
+
+try:
+    from .local_settings import *
+except ImportError:
+    from .prod_settings import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,9 +29,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.88.102', '176.213.228.250', 'localhost']
+# ALLOWED_HOSTS = []
 
 
 # Application definition
