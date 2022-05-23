@@ -17,9 +17,9 @@
 
 <body class="d-flex flex-column h-100">
     <header>
-        <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-primary">
+        <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="{% url 'home' %}">UZM Shop</a>
+                <a class="navbar-brand" href="{% url 'home' %}">Маркет скидок</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -30,12 +30,12 @@
                         {% for key, value in menu.items %}
                         {% if not user.is_authenticated and value == 'autonorms' %}
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{ url 'login' }"
+                            <a class="nav-link active" aria-current="page" href="#"
                                 data-bs-toggle="modal" data-bs-target="#ModalLogin">{{ key }}</a>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{ url value }">{{ key }}</a>
+                            <a class="nav-link active" aria-current="page" href="#">{{ key }}</a>
                         </li>
                         {% endif %}
                         {% endfor %}
@@ -44,16 +44,16 @@
                         {% for key, value in user_menu.items %}
                         {% if user.is_authenticated and user.email == key %}
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{ url 'profile' user.pk }">{{ key }}</a>
+                            <a class="nav-link active" aria-current="page" href="#">{{ key }}</a>
                         </li>
                         {% elif value == 'login' %}
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{ url value }" data-bs-toggle="modal"
+                            <a class="nav-link active" aria-current="page" href="#" data-bs-toggle="modal"
                                 data-bs-target="#ModalLogin">{{ key }}</a>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="{%url value }">{{ key }}</a>
+                            <a class="nav-link active" aria-current="page" href="#">{{ key }}</a>
                         </li>
                         {% endif %}
                         {% endfor %}
@@ -64,45 +64,45 @@
     </header>
     <!--  include 'main/modal_login.html' -->
     <main>
-        <div class="container px-2">
+        <div class="container">
             {% block content %}
             {% endblock content %}
         </div>
     </main>
-    <footer class="footer mt-auto py-3 bg-primary">
-        <div class="container">
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container text-light">
             <div class="row">
                 <div class="col-md-4 col-6">
                     <h4>Информация</h4>
                     <ul>
-                        <li><a href="{ url 'home' }">Главная</a></li>
-                        <li><a href="{ url 'about' }">О сайте</a></li>
-                        <li><a href="#">Размещение рекламы</a></li>
+                        <li><a class="text-light" href="#">Главная</a></li>
+                        <li><a class="text-light" href="#">О сайте</a></li>
+                        <li><a class="text-light" href="#">Размещение рекламы</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4 col-6">
                     <h4>Контакты</h4>
                     <ul>
-                        <li>8(927)777-77-77</li>
-                        <li>Мой адрес не дом и не улица</li>
-                        <li>admin@mail.ru</li>
+                        <li><a class="text-light" href="#">+7(777)777-77-77</a></li>
+                        <li><a class="text-light" href="#">Адрес</li>
+                        <li><a class="text-light" href="#">mail@mail.ru</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4 col-6">
                     <h4>Ссылки</h4>
                     <ul>
                         {% if not user.is_authenticated %}
-                        <li><a href="{ url 'login' }" data-bs-toggle="modal"
-                                data-bs-target="#ModalLogin">UZM Shop</a></li>
+                        <li><a class="text-light" href="#" data-bs-toggle="modal"
+                                data-bs-target="#ModalLogin">Маркет скидок</a></li>
                         {% else %}
-                        <li><a href="{ url 'autonorms' }">UZM Shop</a></li>
+                        <li><a class="text-light" href="#">Маркет скидок</a></li>
                         {% endif %}
-                        <li><a href="{ url 'home' }">Главная</a></li>
-                        <li><a href="{ url 'feedback' }">Обратная связь</a></li>
+                        <li><a class="text-light" href="#">Главная</a></li>
+                        <li><a class="text-light" href="#">Обратная связь</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="footer-year text-center"><span>©UZM {% now 'Y' %}</span></div>
+            <div class="footer-year text-center"><span>Маркет скидок {% now 'Y' %}</span></div>
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
