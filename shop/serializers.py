@@ -62,14 +62,11 @@ class ProductSerializer(serializers.ModelSerializer):
 
 # Сериализатор строки Корзины для просмотра данных с детализацией по товару и складу
 class CartProductSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()
-    warehouse = WarehouseSerializer()
-    # quantity_sum = serializers.DecimalField(max_digits=15, decimal_places=3)
+    product = ProductSerializer(read_only=True)
+    warehouse = WarehouseSerializer(read_only=True)
 
     class Meta:
         model = CartProduct
-        # fields = ('pk', 'user', 'id_messenger', 'cart', 'order', 'product', 'warehouse', 'quantity',
-        #           'price', 'discount', 'discount_percentage', 'amount', 'quantity_sum',)
         fields = '__all__'
 
 

@@ -82,7 +82,7 @@ class CartProductAdmin(admin.ModelAdmin):
     list_display = ('user', 'cart', 'order', 'product', 'quantity', 'price', 'discount',
                     'discount_percentage', 'amount', 'warehouse', 'phone', 'id_messenger',)
     list_display_links = ('user', 'order',)
-    search_fields = ('phone', 'id_messenger', 'amount',)
+    search_fields = ('phone', 'id_messenger', 'amount', 'user__email',)
 
 
 class CartAdmin(admin.ModelAdmin):
@@ -90,6 +90,7 @@ class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'quantity', 'amount',
                     'discount', 'for_anonymous_user',)
     list_filter = ('for_anonymous_user',)
+    search_fields = ('user__email',)
 
 
 class StatusAdmin(admin.ModelAdmin):

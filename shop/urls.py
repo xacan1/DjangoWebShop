@@ -4,6 +4,7 @@ from shop.views import *
 
 urlpatterns = [
     path('', IndexView.as_view(), name='home'),
+    # REST API общий
     path('api/v1/tokens', TokensAPIList.as_view()),
     path('api/v1/users/<str:email>', UsersAPIRetrieve.as_view()),
     path('api/v1/products/categories', CategoryAPIList.as_view()),
@@ -31,8 +32,8 @@ urlpatterns = [
     path('api/v1/warehouses/<int:pk>', WarehouseAPIRetrieve.as_view()),
     path('api/v1/warehouses_update/<int:pk>', WarehouseAPIUpdate.as_view()),
     path('api/v1/warehouses_delete/<int:pk>', WarehouseAPIDelete.as_view()),
-    path('api/v1/carts/product_to_cart', CartProductAPILIst.as_view()), # если надо получить список товаров в корзине или заказе по ID мессенджера
-    path('api/v1/carts/product_to_cart_create', CartProductAPICreate.as_view()), # <-- тут создается строка товара для корзины и возвращается в виде данных JSON
+    path('api/v1/carts/product_to_cart', CartProductAPILIst.as_view()), # получить список товаров в корзине или заказе по ID мессенджера
+    path('api/v1/carts/product_to_cart_create', CartProductAPICreate.as_view()), # создать строку Корзины или Заказа, но лучше это сделать через update_product_to_cart
     path('api/v1/carts/product_to_cart_update/<int:pk>', CartProductAPIUpdate.as_view()),
     path('api/v1/carts/product_to_cart_delete/<int:pk>', CartProductAPIDelete.as_view()),
     path('api/v1/carts_create', CartAPICreate.as_view()),
@@ -47,4 +48,11 @@ urlpatterns = [
     path('api/v1/orders/<str:number>', OrderAPIRetrieve.as_view()),
     path('api/v1/orders_update/<int:pk>', OrderAPIUpdate.as_view()),
     path('api/v1/orders_delete/<int:pk>', OrderAPIDelete.as_view()),
+    # API специализированный для магазина
+    path('api/v1/get_cart_user', APIGetCartUser.as_view()),
+    path('api/v1/update_product_to_cart', APIUpdateProductToCart.as_view()),
+    path('api/v1/delete_product_from_cart', APIDeleteProductFromCart.as_view()),
+    path('api/v1/create_update_order', APICreateUpdateOrder.as_view()),
+    path('api/v1/check_stock_for_order', APICheckStockForOrder.as_view()),
+    path('api/v1/get_order_info', APIGetOrderInfo.as_view()),
 ]

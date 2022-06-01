@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
@@ -263,8 +263,8 @@ class CartProduct(models.Model):
         return f'Товар в корзине {self.product.name} в количестве {self.quantity}'
 
     class Meta:
-        verbose_name = 'Строка товара в корзине'
-        verbose_name_plural = 'Строки товаров в корзинах'
+        verbose_name = 'Строка товара в корзине или заказе'
+        verbose_name_plural = 'Строки товаров в корзинах или заказах'
 
 
 # Корзина товаров покупателя сайта, один аккаунт может иметь только одну корзину, а телеграм бот является

@@ -1,8 +1,10 @@
 from django.views.generic import ListView
 from rest_framework import generics
+from rest_framework.views import Response, Request, APIView 
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import *
 from .serializers import *
+from . import services
 
 
 class IndexView(ListView):
@@ -82,10 +84,11 @@ class ProductAPIList(generics.ListAPIView):
     def get_queryset(self):
         # self.request.data - данные POST запроса
         # self.request.query_params - данные GET запроса
-        category_pk = self.request.query_params.get('category_pk', 0)
-        warehouse_pk = self.request.query_params.get('warehouse_pk', 0)
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        category_pk = get_params.get('category_pk', 0)
+        warehouse_pk = get_params.get('warehouse_pk', 0)
 
-        # Сначала проверим идет ли запросм от телеграм бота по категории и складу
         if category_pk and warehouse_pk:
             queryset = Product.objects.filter(
                 category=category_pk, get_stock_product__warehouse=warehouse_pk)
@@ -95,9 +98,6 @@ class ProductAPIList(generics.ListAPIView):
             queryset = Product.objects.filter(
                 get_stock_product__warehouse=warehouse_pk)
         else:
-            # значит это запрос не от телеграм бота, сделаем отбор по всем параметрам
-            get_params = self.request.query_params
-            get_params = {param: get_params[param] for param in get_params}
             queryset = Product.objects.filter(**get_params)
 
         return queryset
@@ -208,14 +208,16 @@ class StockProductsAPIList(generics.ListAPIView):
     def get_queryset(self):
         product_pk = self.request.query_params.get('product_pk', 0)
         warehouse_pk = self.request.query_params.get('warehouse_pk', 0)
+        params = {}
 
-        if product_pk and warehouse_pk:
-            queryset = StockProducts.objects.filter(
-                product=product_pk, warehouse=warehouse_pk)
-        elif product_pk:
-            queryset = StockProducts.objects.filter(product=product_pk)
-        elif warehouse_pk:
-            queryset = StockProducts.objects.filter(warehouse=warehouse_pk)
+        if product_pk:
+            params['product'] = product_pk
+
+        if warehouse_pk:
+            params['warehouse'] = warehouse_pk
+
+        if params:
+            queryset = StockProducts.objects.filter(**params)
         else:
             queryset = StockProducts.objects.order_by('product', 'warehouse')
 
@@ -344,7 +346,16 @@ class OrdersAPIList(generics.ListAPIView):
     def get_queryset(self):
         get_params = self.request.query_params
         get_params = {param: get_params[param] for param in get_params}
-        queryset = Order.objects.filter(**get_params)
+        
+        user_pk = self.request.user.pk
+        id_messenger = get_params.get('id_messenger', 0)
+        paid = get_params.get('paid', False)
+
+        if user_pk and id_messenger:
+            queryset = services.get_orders_for_user(user_pk, id_messenger, paid)
+        else:
+            queryset = Order.objects.filter(**get_params)
+ 
         return queryset
 
 
@@ -370,3 +381,67 @@ class OrderAPIDelete(generics.DestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
+
+
+# API специализированный для магазина
+
+
+# Возвращает данные корзины пользователя, если не находит, создает новую корзину
+class APIGetCartUser(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request: Request) -> Response:
+        get_params = request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        for_anonymous_user = get_params.get('for_anonymous_user', False)
+        cart_info = services.get_cart_by_user_id(request.user.pk, for_anonymous_user)
+
+        if not cart_info:
+            cart_info = {'error': 'Cart not created'}     
+
+        return Response(cart_info)
+
+
+class APIUpdateProductToCart(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request: Request) -> Response:
+        data_response = services.add_or_update_product_to_cart(request.user, request.data)
+        return Response(data_response)
+
+
+class APIDeleteProductFromCart(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request: Request) -> Response:
+        data_response = services.delete_product_from_cart_or_order(request.user, request.data)
+        return Response(data_response)
+
+
+class APICreateUpdateOrder(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request: Request) -> Response:
+        data_response = services.create_or_update_order(request.user, request.data)
+        return Response(data_response)
+
+
+class APICheckStockForOrder(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request: Request) -> Response:
+        get_params = request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        order_pk = int(get_params.get('order_pk', 0))
+        result = services.check_stock_in_order(order_pk)
+        return Response(result)
+
+
+class APIGetOrderInfo(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request: Request) -> Response:
+        get_params = request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        order_info = services.get_order_full_info(request.user, get_params)
+        return Response(order_info)
