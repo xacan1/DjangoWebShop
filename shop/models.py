@@ -187,6 +187,7 @@ class Prices(models.Model):
     class Meta:
         verbose_name = 'Цена'
         verbose_name_plural = 'Цены'
+        ordering = ('-date_update', )
 
 
 class Warehouse(models.Model):

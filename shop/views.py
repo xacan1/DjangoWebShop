@@ -386,22 +386,6 @@ class OrderAPIDelete(generics.DestroyAPIView):
 # API специализированный для магазина
 
 
-# Возвращает данные корзины пользователя, если не находит, создает новую корзину
-class APIGetCartUser(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request: Request) -> Response:
-        get_params = request.query_params
-        get_params = {param: get_params[param] for param in get_params}
-        for_anonymous_user = get_params.get('for_anonymous_user', False)
-        cart_info = services.get_cart_by_user_id(request.user.pk, for_anonymous_user)
-
-        if not cart_info:
-            cart_info = {'error': 'Cart not created'}     
-
-        return Response(cart_info)
-
-
 class APIUpdateProductToCart(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -445,3 +429,13 @@ class APIGetOrderInfo(APIView):
         get_params = {param: get_params[param] for param in get_params}
         order_info = services.get_order_full_info(request.user, get_params)
         return Response(order_info)
+
+
+class APIGetCartInfo(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request: Request) -> Response:
+        get_params = request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        cart_info = services.get_cart_full_info(request.user, get_params)
+        return Response(cart_info)

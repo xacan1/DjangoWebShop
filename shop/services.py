@@ -49,8 +49,18 @@ def get_orders_for_user(user_pk: int, id_messenger: int = 0, paid: bool = False)
     return orders
 
 
+# создает новую Корзину пользователя если ее ещё нет
+def create_new_cart(new_cart_info: dict) -> dict:
+    serializer = CartSerializer(data=new_cart_info)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    cart_info = serializer.data
+    cart_info['products'] = []
+    return cart_info
+
+
 # получает или создает Корзину пользователя по ID пользователя в виде словаря
-def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool) -> dict:
+def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool = False) -> dict:
     cart_info = {}
     cartset = Cart.objects.filter(user=user_pk).values()
 
@@ -61,10 +71,7 @@ def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool) -> dict:
             'user': user_pk,
             'for_anonymous_user': for_anonymous_user
         }
-        serializer = CartSerializer(data=new_cart_info)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        cart_info = serializer.data
+        cart_info = create_new_cart(new_cart_info)
 
     return cart_info
 
@@ -340,8 +347,11 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
 
     user_pk = user.pk
     order_pk = get_params.get('order_pk', 0)
-    id_messenger = get_params.get('id_messenger', 0)
+    id_messenger = get_params.get('id_messenger', '0')
+    id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
     paid = get_params.get('paid', None)
+
+    update_price_in_cart_order(order_pk, id_messenger, True)
 
     params = {'user': user_pk, 'pk': order_pk}
 
@@ -374,3 +384,72 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
         order_info['products'] = products
 
     return order_info
+
+
+# получает полную информацию о Корзине с товарами
+def get_cart_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
+    cart_info = {}
+    products = []
+
+    user_pk = user.pk
+    for_anonymous_user = get_params.get('for_anonymous_user', False)
+    id_messenger = get_params.get('id_messenger', '0')
+    id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
+
+    cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
+    cart_pk = cart_info.get('id', 0)
+
+    # надо обновить строки и корзину если цены не совпадают
+    update_price_in_cart_order(cart_pk, id_messenger, False)
+
+    cartset = Cart.objects.filter(user=user_pk)
+
+    if cartset.exists():
+        serializer_cart = CartSerializer(cartset[0])
+        cart_info = serializer_cart.data
+        products_cart_set = cart_info['get_cart_products']
+
+        for product_cart in products_cart_set:
+            product_info = product_cart['product']
+            if 'get_prices' in product_info:
+                product_cart['product'].pop('get_prices')
+
+            if 'get_stock_product' in product_info:
+                product_cart['product'].pop('get_stock_product')
+            
+            if not id_messenger:
+                products.append(product_cart)
+            elif id_messenger == product_cart['id_messenger']:
+                products.append(product_cart)
+
+        cart_info['products'] = products
+        cart_info.pop('get_cart_products')
+    else:
+        new_cart_info = {
+            'user': user_pk,
+            'for_anonymous_user': for_anonymous_user
+        }
+        cart_info = create_new_cart(new_cart_info)
+
+    return cart_info
+
+
+# проверяет актуальность цен в строках Заказа(Корзины) и обновляет данные строк и Заказа(Корзины) перед отправкой пользовтаелю
+def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_order: bool = False) -> None:
+    cart_products = get_cart_order_products(cart_order_pk, id_messenger, for_order)
+
+    for product_row in cart_products:
+        product_pk = product_row.product.pk
+        price_info = get_last_price(product_pk)
+        current_price = price_info.get('price', 0)
+        current_discount_percentage = price_info.get('discount_percentage', 0)
+
+        if product_row.price == current_price and product_row.discount_percentage == current_discount_percentage:
+            continue
+
+        product_row.price = current_price
+        product_row.discount_percentage = current_discount_percentage
+        amount_without_discount = product_row.price * product_row.quantity
+        product_row.amount = amount_without_discount - (amount_without_discount * current_discount_percentage)
+        product_row.save()
+        
