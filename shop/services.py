@@ -166,7 +166,7 @@ def get_last_price(product_pk: int) -> dict:
 
 # Добавляет товар в корзину(создает её при необходимости) или изменяет количество товара как в большую так и меньшую сторону
 # Если количество товара опускается до нуля, то строка удаляется
-def add_or_update_product_to_cart(user: AbstractBaseUser, request_data: dict) -> dict:
+def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict) -> dict:
     user_pk = user.pk
     product_pk = request_data.get('product_pk', 0)
     warehouse_pk = request_data.get('warehouse_pk', 0)
@@ -191,35 +191,25 @@ def add_or_update_product_to_cart(user: AbstractBaseUser, request_data: dict) ->
         'user': user_pk,
         'cart': cart_pk,
         'id_messenger': id_messenger,
-        'quantity': float(request_data['quantity']),
+        'quantity': Decimal(request_data['quantity']),
         'warehouse': warehouse_pk,
         'product': product_pk,
-        'price': float(price_info.get('price', 0.0)),
+        'price': Decimal(price_info.get('price', 0.0)),
         'discount_percentage': int(price_info.get('discount_percentage', 0)),
     }
-
-    amount = new_cart_product['price'] * new_cart_product['quantity']
-    discount = amount / 100 * new_cart_product['discount_percentage']
-
-    new_cart_product['amount'] = amount - discount
-    new_cart_product['discount'] = discount
 
     # Строка товара для корзины готова, теперь попробуем найти строку с этим товаром в Корзине
     product_cart, product_cart_info = get_cart_order_product(cart_pk, product_pk, id_messenger)
 
     # если нашли строку в корзине с этим же товаром, пересчитаем количество и сумму, если нет, добавим новую строку или вообще не добавим ничего
     if product_cart:
-        quantity = new_cart_product['quantity'] + float(product_cart.quantity)
-        amount = new_cart_product['price'] * quantity
-        discount = amount / 100 * new_cart_product['discount_percentage']
+        quantity = new_cart_product['quantity'] + product_cart.quantity
 
         if quantity <= 0:
             product_cart.delete()
             data_response = {'delete': 'Product delete from cart'}
         else:
             product_cart.quantity = quantity
-            product_cart.amount = amount - discount if amount - discount >= 0 else 0
-            product_cart.discount = discount
             product_cart.save()
             data_response = product_cart_info
     # если создаём новую строку, то количество должно быть больше нуля
@@ -314,7 +304,7 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
     product_carts = get_cart_order_products(cart_pk, id_messenger)
 
     for product_cart in product_carts:
-        # увеличу общие данные Заказа для ответа на запрос
+        # увеличу общие данные Заказа только для того, что бы вернуть их в ответе, расчет в саиой БД делается сигналами
         order_info['quantity'] += float(product_cart.quantity)
         order_info['discount'] += float(product_cart.discount)
         order_info['amount'] += float(product_cart.amount)
@@ -324,8 +314,6 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
         
         if order_row:
             order_row.quantity = float(order_row.quantity) + float(product_cart.quantity)
-            order_row.discount = float(order_row.discount) + float(product_cart.discount)
-            order_row.amount = float(order_row.amount) + float(product_cart.amount)
             order_row.save()
             product_cart.delete()
         else:
@@ -436,6 +424,14 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
 
 # проверяет актуальность цен в строках Заказа(Корзины) и обновляет данные строк и Заказа(Корзины) перед отправкой пользовтаелю
 def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_order: bool = False) -> None:
+    # проверю оплату Заказа, в оплаченных Заказах не нужно менять цены
+    if for_order:
+        orderset = Order.objects.filter(pk=cart_order_pk)
+
+        if orderset.exists():
+            if orderset[0].paid:
+                return
+
     cart_products = get_cart_order_products(cart_order_pk, id_messenger, for_order)
 
     for product_row in cart_products:
@@ -449,7 +445,4 @@ def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_or
 
         product_row.price = current_price
         product_row.discount_percentage = current_discount_percentage
-        amount_without_discount = product_row.price * product_row.quantity
-        product_row.amount = amount_without_discount - (amount_without_discount * current_discount_percentage)
         product_row.save()
-        

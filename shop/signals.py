@@ -1,19 +1,32 @@
-from django.db.models.signals import post_save, post_delete
-from .models import *
-from .services import get_default_status
+from django.db.models.signals import pre_save, post_save, post_delete
+from .services import *
+
+
+# стандартно расчитывает суммы в строке Корзины или Заказа, данные строки передаются в виде словаря
+# ВНИМАНИЕ! Цена не проверяется, может быть хоть нулевой
+def calculate_product_cart_table_row(sender, **kwars) -> None:
+    product_row = kwars['instance']
+
+    if product_row.quantity < 0:
+        product_row.quantity = 0
+
+    amount_without_discount = product_row.price * product_row.quantity
+    discount = amount_without_discount * product_row.discount_percentage / 100
+    product_row.discount = discount
+    product_row.amount = amount_without_discount - discount
 
 
 # после записи или удаления CartProduct пересчитаем Cart
 def update_cart_product_signal(sender, **kwars) -> None:
-    cart_order_product = kwars['instance']
-    cart_user = cart_order_product.user.get_user_cart
+    product_row = kwars['instance']
+    cart_user = product_row.user.get_user_cart
 
     if cart_user:
         cart_pk = cart_user.pk
     else:
         return
 
-    # в любом случае пересчитаю Корзину
+    # в любом случае пересчитаю общие суммы Корзины
     cart_sum = CartProduct.objects.filter(cart=cart_pk, order=None).aggregate(
         sum_quantity=models.Sum('quantity'),
         sum_amount=models.Sum('amount'),
@@ -29,9 +42,9 @@ def update_cart_product_signal(sender, **kwars) -> None:
         cart.discount = cart_sum['sum_discount'] if cart_sum['sum_discount'] else 0
         cart.save()
 
-    # если есть Заказ, то пересчитаю его и сменю статус
-    if cart_order_product.order:
-        order_pk = cart_order_product.order.pk
+    # если есть Заказ, то пересчитаю его общие суммы и сменю статус
+    if product_row.order:
+        order_pk = product_row.order.pk
 
         order_sum = CartProduct.objects.filter(order=order_pk, cart=None).aggregate(
             sum_quantity=models.Sum('quantity'),

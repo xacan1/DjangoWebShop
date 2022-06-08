@@ -390,7 +390,7 @@ class APIUpdateProductToCart(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request: Request) -> Response:
-        data_response = services.add_or_update_product_to_cart(request.user, request.data)
+        data_response = services.add_delete_update_product_to_cart(request.user, request.data)
         return Response(data_response)
 
 
