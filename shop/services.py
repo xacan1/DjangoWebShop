@@ -263,6 +263,7 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
 def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
     user_pk = user.pk
     id_messenger = order_info.get('id_messenger', 0)
+    phone = order_info.get('phone', '')
     for_anonymous_user = order_info.get('for_anonymous_user', False)
     order_info['status'] = order_info.get('status_pk', get_default_status())
     order_info['delivery_type'] = order_info.get('delivery_type_pk', get_default_delivery_type())
@@ -274,6 +275,8 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
         return {'error': 'DeliveryType not found'}
     elif not order_info['payment_type']:
         return {'error': 'PaymentType not found'}
+    elif not phone:
+        return {'error': 'Phone not found'}
 
     order_info['user'] = user_pk
 
@@ -304,7 +307,7 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
     product_carts = get_cart_order_products(cart_pk, id_messenger)
 
     for product_cart in product_carts:
-        # увеличу общие данные Заказа только для того, что бы вернуть их в ответе, расчет в саиой БД делается сигналами
+        # увеличу общие данные Заказа только для того, что бы вернуть их в ответе, расчет в самой БД делается сигналами
         order_info['quantity'] += float(product_cart.quantity)
         order_info['discount'] += float(product_cart.discount)
         order_info['amount'] += float(product_cart.amount)
@@ -320,6 +323,7 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
             # если строку не нашёл, то переделаю строку Корзины в строку Заказа
             product_cart.cart = None
             product_cart.order = order_instance
+            product_cart.phone = phone
             product_cart.save()
 
     return order_info
