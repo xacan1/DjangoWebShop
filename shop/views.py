@@ -74,6 +74,40 @@ class CategoryAPIDelete(generics.DestroyAPIView):
     permission_classes = (IsAdminUser,)
 
 
+class FavoriteProductAPIList(generics.ListAPIView):
+    serializer_class = FavoriteProductSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = FavoriteProduct.objects.filter(**get_params)
+        return queryset
+
+
+class FavoriteProductAPICreate(generics.CreateAPIView):
+    serializer_class = FavoriteProductCreateSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class FavoriteProductAPIRetrieve(generics.RetrieveAPIView):
+    queryset = FavoriteProduct.objects.all()
+    serializer_class = FavoriteProductSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class FavoriteProductAPIUpdate(generics.UpdateAPIView):
+    queryset = FavoriteProduct.objects.all()
+    serializer_class = FavoriteProductCreateSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class FavoriteProductAPIDelete(generics.DestroyAPIView):
+    queryset = FavoriteProduct.objects.all()
+    serializer_class = FavoriteProductCreateSerializer
+    permission_classes = (IsAuthenticated,)
+
+
 # Выводит список товаров с остатками по складам и ценами
 # category_pk - категория товара (каталог)
 # warehouse_pk - склад
@@ -126,6 +160,64 @@ class ProductAPIDelete(generics.DestroyAPIView):
     permission_classes = (IsAdminUser,)
 
 
+class CurrencyAPIList(generics.ListAPIView):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class CurrencyAPICreate(generics.CreateAPIView):
+    serializer_class = CurrencySerializer
+    permission_classes = (IsAdminUser,)
+
+
+class CurrencyAPIRetrieve(generics.RetrieveAPIView):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class CurrencyAPIUpdate(generics.UpdateAPIView):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+    permission_classes = (IsAdminUser,)
+
+
+class CurrencyAPIDelete(generics.DestroyAPIView):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+    permission_classes = (IsAdminUser,)
+
+
+class PriceTypeAPIList(generics.ListAPIView):
+    queryset = PriceType.objects.all()
+    serializer_class = PriceTypeSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class PriceTypeAPIRetrieve(generics.RetrieveAPIView):
+    queryset = PriceType.objects.all()
+    serializer_class = PriceTypeSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class PriceTypeAPICreate(generics.CreateAPIView):
+    serializer_class = PriceTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class PriceTypeAPIUpdate(generics.UpdateAPIView):
+    queryset = PriceType.objects.all()
+    serializer_class = PriceTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class PriceTypeAPIDelete(generics.DestroyAPIView):
+    queryset = PriceType.objects.all()
+    serializer_class = PriceTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
 class WarehouseAPIList(generics.ListAPIView):
     serializer_class = WarehouseSerializer
     permission_classes = (IsAuthenticated,)
@@ -170,13 +262,13 @@ class PricesAPIList(generics.ListAPIView):
         if product_pk:
             queryset = Prices.objects.filter(product=product_pk)
         else:
-            queryset = Prices.objects.order_by('product', '-date_update')
+            queryset = Prices.objects.order_by('product')
 
         return queryset
 
 
 class PricesAPICreate(generics.CreateAPIView):
-    serializer_class = PriceSerializer
+    serializer_class = PriceCreateSerializer
     permission_classes = (IsAdminUser,)
 
 
@@ -190,7 +282,7 @@ class PricesAPIRetrieve(generics.RetrieveAPIView):
 class PricesAPIUpdate(generics.UpdateAPIView):
     queryset = Prices.objects.all()
     lookup_field = 'product'
-    serializer_class = PriceSerializer
+    serializer_class = PriceCreateSerializer
     permission_classes = (IsAdminUser,)
 
 

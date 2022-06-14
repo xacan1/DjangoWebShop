@@ -41,6 +41,10 @@ class CustomUser(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     phone = models.CharField(max_length=15, unique=True,
                              verbose_name='Телефон')
+    currency = models.ForeignKey('Currency', on_delete=models.PROTECT,
+                                 default=None, blank=True, null=True, verbose_name='Валюта')
+    price_type = models.ForeignKey('PriceType', on_delete=models.PROTECT,
+                                   default=None, blank=True, null=True, verbose_name='Тип цены')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -119,7 +123,26 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
-        index_together = (('id', 'slug'),)
+        indexes = (
+            models.Index(fields=('id', 'slug')),
+        )
+
+
+# таблица для избранных товаров как в разрезе пользовтаелей сайта так и в разрезе ID телеграмма
+class FavoriteProduct(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             verbose_name='Покупатель')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                verbose_name='Товар')
+    id_messenger = models.IntegerField(default=0, blank=True,
+                                       verbose_name='ID из мессенджера')
+
+    def __str__(self) -> str:
+        return f'{self.product.name} в избранном у {self.user.email} с id messenger: {self.id_messenger}'
+
+    class Meta:
+        verbose_name = 'Избранный товар'
+        verbose_name_plural = 'Избранные товары'
 
 
 # сами названия атрибутов (свойств) товаров
@@ -171,11 +194,48 @@ class AttributeProduct(models.Model):
         verbose_name_plural = 'Значения атрибутов для товаров'
 
 
+class Currency(models.Model):
+    name = models.CharField(max_length=50,
+                            verbose_name='Наименование')
+    abbreviation = models.CharField(max_length=3,
+                                    verbose_name='Аббревиатура')
+    digital_code = models.IntegerField(default=0, blank=True,
+                                       verbose_name='Цифровой код')
+    sign = models.CharField(default='', max_length=5,
+                            verbose_name='Знак')
+    default = models.BooleanField(default=False, blank=True,
+                                  verbose_name='Валюта по умолчанию')
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = 'Валюта'
+        verbose_name_plural = 'Валюты'
+
+
+class PriceType(models.Model):
+    name = models.CharField(max_length=25, verbose_name='Наименование')
+    default = models.BooleanField(default=False, blank=True,
+                                  verbose_name='Цена по умолчанию')
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = 'Тип цены'
+        verbose_name_plural = 'Типы цен'
+
+
 class Prices(models.Model):
     price = models.DecimalField(max_digits=15,
                                 decimal_places=2, verbose_name='Цена')
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
                                 related_name='get_prices', verbose_name='Товар')
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE,
+                                 verbose_name='Валюта')
+    price_type = models.ForeignKey(PriceType, on_delete=models.CASCADE,
+                                   verbose_name='Тип цены')
     date_update = models.DateTimeField(auto_now_add=True,
                                        verbose_name='Дата установки цены')
     discount_percentage = models.DecimalField(max_digits=3, decimal_places=0,

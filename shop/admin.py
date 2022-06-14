@@ -8,21 +8,21 @@ TokenAdmin.raw_id_fields = ['user']
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('email', 'phone', 'last_name', 'first_name',
-                    'last_login', 'is_staff', 'is_active',)
+    list_display = ('email', 'phone', 'last_name', 'first_name', 'currency',
+                    'price_type', 'last_login', 'is_staff', 'is_active',)
     list_filter = ('is_staff', 'is_active',)
     list_editable = ('is_staff', 'is_active',)
     list_display_links = ('email', 'phone', 'last_name', 'first_name',)
     fieldsets = (
-        (None, {'fields': ('email', 'password',
-         'phone', 'first_name', 'last_name',)}),
+        (None, {'fields': ('email', 'password', 'phone', 'first_name',
+                           'last_name', 'currency', 'price_type',)}),
         ('Permissions', {'fields': ('is_staff', 'is_active',)}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'phone',
-                       'first_name', 'last_name', 'is_staff', 'is_active',)}
+            'fields': ('email', 'password1', 'password2', 'phone', 'first_name', 'last_name',
+                       'is_staff', 'is_active', 'currency', 'price_type',)}
          ),
     )
     search_fields = ('email', 'phone', 'last_name',)
@@ -47,10 +47,35 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+class FavoriteProductAdmin(admin.ModelAdmin):
+    model = FavoriteProduct
+    list_display = ('user', 'product', 'id_messenger',)
+    list_display_links = ('user', 'product',)
+    search_fields = ('user__email', 'product__name', 'id_messenger',)
+
+
+class CurrencyAdmin(admin.ModelAdmin):
+    model = Currency
+    list_display = ('name', 'abbreviation', 'digital_code', 'sign', 'default',)
+    list_display_links = ('name', 'abbreviation', 'digital_code', 'sign',)
+    list_editable = ('default',)
+    search_fields = ('name', 'digital_code',)
+
+
+class PriceTypeAdmin(admin.ModelAdmin):
+    model = PriceType
+    list_display = ('name', 'default',)
+    list_display_links = ('name',)
+    list_editable = ('default',)
+    search_fields = ('name',)
+
+
 class PricesAdmin(admin.ModelAdmin):
     model = Prices
-    list_display = ('product', 'price', 'date_update', 'discount_percentage',)
+    list_display = ('product', 'price', 'date_update', 'discount_percentage',
+                    'currency', 'price_type',)
     list_filter = ('date_update',)
+    search_fields = ('product__name',)
 
 
 class AttributeCategoryAdmin(admin.ModelAdmin):
@@ -124,9 +149,12 @@ class OrderAdmin(admin.ModelAdmin):
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(FavoriteProduct, FavoriteProductAdmin)
 admin.site.register(Attribute, admin.ModelAdmin)
 admin.site.register(AttributeCategory, AttributeCategoryAdmin)
 admin.site.register(AttributeProduct, AttributeProductAdmin)
+admin.site.register(Currency, CurrencyAdmin)
+admin.site.register(PriceType, PriceTypeAdmin)
 admin.site.register(Prices, PricesAdmin)
 admin.site.register(Warehouse, WarehouseAdmin)
 admin.site.register(StockProducts, StockProductsAdmin)

@@ -2,6 +2,22 @@ from django.db.models.signals import pre_save, post_save, post_delete
 from .services import *
 
 
+def set_default_currency(sender, **kwars) -> None:
+    queryset = Currency.objects.filter(default=True)
+
+    if not queryset.exists():
+        currency = kwars['instance']
+        currency.default = True
+
+
+def set_default_price_type(sender, **kwars) -> None:
+    queryset = PriceType.objects.filter(default=True)
+
+    if not queryset.exists():
+        price_type = kwars['instance']
+        price_type.default = True
+
+
 # стандартно расчитывает суммы в строке Корзины или Заказа, данные строки передаются в виде словаря
 # ВНИМАНИЕ! Цена не проверяется, может быть хоть нулевой
 def calculate_product_cart_table_row(sender, **kwars) -> None:

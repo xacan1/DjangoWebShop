@@ -1,3 +1,4 @@
+from dataclasses import fields
 from rest_framework import serializers
 from .models import *
 
@@ -11,14 +12,35 @@ class TokenSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('pk', 'is_staff', 'is_active',)
+        fields = ('pk', 'is_staff', 'is_active', 'currency', 'price_type',)
+
+
+class CurrencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = '__all__'
+
+
+class PriceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PriceType
+        fields = '__all__'
 
 
 class PriceSerializer(serializers.ModelSerializer):
+    currency = CurrencySerializer(read_only=True)
+    price_type = PriceTypeSerializer(read_only=True)
+
     class Meta:
         model = Prices
-        fields = ('pk', 'product', 'price',
+        fields = ('pk', 'product', 'price', 'currency', 'price_type',
                   'date_update', 'discount_percentage',)
+
+
+class PriceCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Prices
+        fields = '__all__'
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
@@ -58,6 +80,20 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('pk', 'name', 'external_code', 'category', 'photo',
                   'time_create', 'get_prices', 'get_stock_product', 'description',)
+
+
+class FavoriteProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+
+    class Meta:
+        model = FavoriteProduct
+        fields = ('pk', 'user', 'product', 'id_messenger',)
+
+
+class FavoriteProductCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoriteProduct
+        fields = '__all__'
 
 
 # Сериализатор строки Корзины для просмотра данных с детализацией по товару и складу

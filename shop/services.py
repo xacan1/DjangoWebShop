@@ -286,17 +286,17 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
     if unpaid_orders:
         order_instance = unpaid_orders[0]
         order_info['id'] = order_instance.pk
-        order_info['quantity'] = float(order_instance.quantity)
-        order_info['discount'] = float(order_instance.discount)
-        order_info['amount'] = float(order_instance.amount)
+        order_info['quantity'] = order_instance.quantity
+        order_info['discount'] = order_instance.discount
+        order_info['amount'] = order_instance.amount
     else:
         serializer_order = OrderCreateSerializer(data=order_info)
         serializer_order.is_valid(raise_exception=True)
         serializer_order.save()
         order_info = serializer_order.data
-        order_info['quantity'] = 0.0
-        order_info['discount'] = 0.0
-        order_info['amount'] = 0.0
+        order_info['quantity'] = Decimal(0)
+        order_info['discount'] = Decimal(0)
+        order_info['amount'] = Decimal(0)
         order_instance = serializer_order.instance
 
     order_pk = order_info['id']
@@ -308,15 +308,15 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
 
     for product_cart in product_carts:
         # увеличу общие данные Заказа только для того, что бы вернуть их в ответе, расчет в самой БД делается сигналами
-        order_info['quantity'] += float(product_cart.quantity)
-        order_info['discount'] += float(product_cart.discount)
-        order_info['amount'] += float(product_cart.amount)
+        order_info['quantity'] += product_cart.quantity
+        order_info['discount'] += product_cart.discount
+        order_info['amount'] += product_cart.amount
 
         # если найду строку с тем же товаром в текущем Заказе, то изменю количество в ней, а строку Корзины удалю
         order_row, _ = get_cart_order_product(order_pk, product_cart.product.pk, id_messenger, True)
         
         if order_row:
-            order_row.quantity = float(order_row.quantity) + float(product_cart.quantity)
+            order_row.quantity = order_row.quantity + product_cart.quantity
             order_row.save()
             product_cart.delete()
         else:
