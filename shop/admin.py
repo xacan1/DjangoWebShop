@@ -64,10 +64,10 @@ class CurrencyAdmin(admin.ModelAdmin):
 
 class PriceTypeAdmin(admin.ModelAdmin):
     model = PriceType
-    list_display = ('name', 'default',)
+    list_display = ('name', 'external_code', 'default',)
     list_display_links = ('name',)
     list_editable = ('default',)
-    search_fields = ('name',)
+    search_fields = ('name', 'external_code',)
 
 
 class PricesAdmin(admin.ModelAdmin):

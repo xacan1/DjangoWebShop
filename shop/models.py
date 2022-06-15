@@ -216,8 +216,10 @@ class Currency(models.Model):
 
 class PriceType(models.Model):
     name = models.CharField(max_length=25, verbose_name='Наименование')
+    external_code = models.CharField(max_length=11,
+                                     unique=True, verbose_name='Внешний код')
     default = models.BooleanField(default=False, blank=True,
-                                  verbose_name='Цена по умолчанию')
+                                  verbose_name='Тип цен по умолчанию')
 
     def __str__(self) -> str:
         return self.name

@@ -4,17 +4,17 @@ from .services import *
 
 def set_default_currency(sender, **kwars) -> None:
     queryset = Currency.objects.filter(default=True)
+    currency = kwars['instance']
 
-    if not queryset.exists():
-        currency = kwars['instance']
+    if not queryset.exists() or (queryset.count() == 1 and queryset.first().digital_code == currency.digital_code):
         currency.default = True
 
 
 def set_default_price_type(sender, **kwars) -> None:
     queryset = PriceType.objects.filter(default=True)
+    price_type = kwars['instance']
 
-    if not queryset.exists():
-        price_type = kwars['instance']
+    if not queryset.exists() or (queryset.count() == 1 and queryset.first().external_code == price_type.external_code):
         price_type.default = True
 
 
