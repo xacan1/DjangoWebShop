@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-100">
+
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Hasan Valerievich Smirnov">
+    <meta name="publisher-email" content="author@mail.ru">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="shortcut icon" href="{% static 'main/images/favicon.ico' %}"> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <!-- <link type="text/css" rel="stylesheet" href="{% static 'main/css/main.css' %}"> -->
+    <title>{{ title }}</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header>
+        <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'home' %}">Маркет скидок</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        {% for key, value in menu.items %}
+                        {% if not user.is_authenticated and value == 'autonorms' %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#"
+                                data-bs-toggle="modal" data-bs-target="#ModalLogin">{{ key }}</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">{{ key }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        {% for key, value in user_menu.items %}
+                        {% if user.is_authenticated and user.email == key %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">{{ key }}</a>
+                        </li>
+                        {% elif value == 'login' %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#" data-bs-toggle="modal"
+                                data-bs-target="#ModalLogin">{{ key }}</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">{{ key }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <!--  include 'main/modal_login.html' -->
+    <main>
+        <div class="container">
+            {% block content %}
+            {% endblock content %}
+        </div>
+    </main>
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container text-light">
+            <div class="row">
+                <div class="col-md-4 col-6">
+                    <h4>Информация</h4>
+                    <ul>
+                        <li><a class="text-light" href="#">Главная</a></li>
+                        <li><a class="text-light" href="#">О сайте</a></li>
+                        <li><a class="text-light" href="#">Размещение рекламы</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 col-6">
+                    <h4>Контакты</h4>
+                    <ul>
+                        <li><a class="text-light" href="#">+7(777)777-77-77</a></li>
+                        <li><a class="text-light" href="#">Адрес</li>
+                        <li><a class="text-light" href="#">mail@mail.ru</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 col-6">
+                    <h4>Ссылки</h4>
+                    <ul>
+                        {% if not user.is_authenticated %}
+                        <li><a class="text-light" href="#" data-bs-toggle="modal"
+                                data-bs-target="#ModalLogin">Маркет скидок</a></li>
+                        {% else %}
+                        <li><a class="text-light" href="#">Маркет скидок</a></li>
+                        {% endif %}
+                        <li><a class="text-light" href="#">Главная</a></li>
+                        <li><a class="text-light" href="#">Обратная связь</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-year text-center"><span>Маркет скидок {% now 'Y' %}</span></div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

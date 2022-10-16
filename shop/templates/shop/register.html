@@ -1,0 +1,87 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <!-- Start Breadcrumbs -->
+    <div class="breadcrumbs">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-6 col-12">
+                    <div class="breadcrumbs-content">
+                        <h1 class="page-title">Регистрация</h1>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-12">
+                    <ul class="breadcrumb-nav">
+                        <li><a href="{% url 'home' %}"><i class="lni lni-home"></i> Главная</a></li>
+                        <li>Registration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Breadcrumbs -->
+
+    <!-- Start Account Register Area -->
+    <div class="account-login section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 offset-lg-3 col-md-10 offset-md-1 col-12">
+                    <div class="register-form">
+                        <div class="title">
+                            <h3>Нет аккаунта? Зарегистрируйтесь</h3>
+                            <p>Регистрация занимает меньше минуты, но дает вам возможность управлять заказами.</p>
+                        </div>
+                        <form class="row" method="post" action="{% url 'registration' %}">
+                            {% csrf_token %}
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="reg-fn">Имя</label>
+                                    <input class="form-control" type="text" id="reg-fn" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="reg-ln">Фамилия</label>
+                                    <input class="form-control" type="text" id="reg-ln" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="reg-email">E-mail</label>
+                                    <input class="form-control" type="email" id="reg-email" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="reg-phone">Телефон</label>
+                                    <input class="form-control" type="text" id="reg-phone" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="reg-pass">Пароль</label>
+                                    <input class="form-control" type="password" id="reg-pass" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="reg-pass-confirm">Повтор пароля</label>
+                                    <input class="form-control" type="password" id="reg-pass-confirm" required>
+                                </div>
+                            </div>
+                            <div class="button">
+                                <button class="btn" type="submit">Зарегистрироваться</button>
+                            </div>
+                            <p class="outer-link">Уже зарегистрированы? <a href="{% url 'login' %}">Войти</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Account Register Area -->
+
+{% endblock content %}

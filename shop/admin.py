@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from rest_framework.authtoken.admin import TokenAdmin
+from django import forms
 from .models import *
 
 TokenAdmin.raw_id_fields = ['user']
@@ -78,14 +79,36 @@ class PricesAdmin(admin.ModelAdmin):
     search_fields = ('product__name',)
 
 
+class AttributeAdmin(admin.ModelAdmin):
+    model = Attribute
+    search_fields = ('name',)
+
+
 class AttributeCategoryAdmin(admin.ModelAdmin):
     model = AttributeCategory
     list_display = ('category', 'attribute',)
+    search_fields = ('category__name','attribute__name',)
 
 
 class AttributeProductAdmin(admin.ModelAdmin):
     model = AttributeProduct
     list_display = ('product', 'attribute', 'value',)
+    search_fields = ('product__name','attribute__name',)
+    autocomplete_fields = ('attribute',)
+
+    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    #     if db_field.name == 'attribute':
+    #         kwargs['limit_choices_to'] = {'id': 1}
+    #         print(db_field.name)
+    #     return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    # def formfield_for_dbfield(self, db_field, request, **kwargs):
+        
+    #     if db_field.name == 'attribute':
+    #         qs = Attribute.objects.filter(pk=1)
+    #         return forms.ModelChoiceField(queryset=qs, **kwargs)
+
+    #     return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 class WarehouseAdmin(admin.ModelAdmin):
@@ -150,7 +173,7 @@ admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(FavoriteProduct, FavoriteProductAdmin)
-admin.site.register(Attribute, admin.ModelAdmin)
+admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(AttributeCategory, AttributeCategoryAdmin)
 admin.site.register(AttributeProduct, AttributeProductAdmin)
 admin.site.register(Currency, CurrencyAdmin)
