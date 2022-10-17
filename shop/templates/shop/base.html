@@ -207,7 +207,7 @@
                                                 <span class="total-amount">₽8800.00</span>
                                             </div>
                                             <div class="button">
-                                                <a href="checkout.html" class="btn animate">Оформить заказ</a>
+                                                <a href="{% url 'checkout' %}" class="btn animate">Оформить заказ</a>
                                             </div>
                                         </div>
                                     </div>
@@ -290,8 +290,8 @@
                                             <li class="nav-item"><a href="product-grids.html">Сеткой</a></li>
                                             <li class="nav-item"><a href="product-list.html">Списком</a></li>
                                             <li class="nav-item"><a href="product-details.html">Карточка товара</a></li>
-                                            <li class="nav-item"><a href="cart.html">Корзина</a></li>
-                                            <li class="nav-item"><a href="checkout.html">Оформить заказ</a></li>
+                                            <li class="nav-item"><a href="{% url 'cart' %}">Корзина</a></li>
+                                            <li class="nav-item"><a href="{% url 'checkout' %}">Оформить заказ</a></li>
                                         </ul>
                                     </li>
                                     <li class="nav-item">

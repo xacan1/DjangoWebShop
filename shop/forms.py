@@ -29,10 +29,10 @@ class RegisterUserForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ('email', 'phone')
+        fields = ('email', 'phone', 'first_name', 'last_name')
         widgets = {'email': forms.EmailInput(attrs={'class': 'form-control'}),
-                #    'company': forms.TextInput(attrs={'class': 'form-control'}),
-                #    'inn': forms.TextInput(attrs={'class': 'form-control'}),
+                   'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+                   'last_name': forms.TextInput(attrs={'class': 'form-control'}),
                    'phone': forms.TextInput(attrs={'class': 'form-control'})}
 
 

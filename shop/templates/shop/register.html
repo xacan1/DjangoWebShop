@@ -31,11 +31,11 @@
                     <div class="register-form">
                         <div class="title">
                             <h3>Нет аккаунта? Зарегистрируйтесь</h3>
-                            <p>Регистрация занимает меньше минуты, но дает вам возможность управлять заказами.</p>
+                            <p>Регистрация занимает меньше минуты и дает вам возможность управлять заказами.</p>
                         </div>
                         <form class="row" method="post" action="{% url 'registration' %}">
                             {% csrf_token %}
-                            <div class="col-sm-6">
+                            <!-- <div class="col-sm-6">
                                 <div class="form-group">
                                     <label for="reg-fn">Имя</label>
                                     <input class="form-control" type="text" id="reg-fn" required>
@@ -70,7 +70,8 @@
                                     <label for="reg-pass-confirm">Повтор пароля</label>
                                     <input class="form-control" type="password" id="reg-pass-confirm" required>
                                 </div>
-                            </div>
+                            </div> -->
+                            {{ form.as_p }}
                             <div class="button">
                                 <button class="btn" type="submit">Зарегистрироваться</button>
                             </div>

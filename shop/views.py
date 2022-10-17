@@ -51,6 +51,10 @@ class LoginUserView(auth_views.LoginView):
         return reverse_lazy('home')
 
 
+class LogoutUserView(auth_views.LogoutView):
+    next_page = 'home'
+
+
 class RegisterUserView(CreateView):
     form_class = RegisterUserForm
     template_name = 'shop/register.html'
@@ -73,4 +77,15 @@ class CartView(ListView):
         context = super().get_context_data(**kwargs)
         # c_def = self.get_user_context(title='Корзина', form_login=LoginUserForm)
         c_def = {'title': 'Корзина'}
+        return {**context, **c_def}
+
+
+class CheckoutView(FormView):
+    form_class = SimpleForm
+    template_name = 'shop/checkout.html'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        # c_def = self.get_user_context(title='Корзина', form_login=LoginUserForm)
+        c_def = {'title': 'Оформление заказа'}
         return {**context, **c_def}
