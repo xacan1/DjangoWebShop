@@ -84,7 +84,7 @@
                             <ul class="useful-links">
                                 <li><a href="{% url 'home' %}">Главная</a></li>
                                 <li><a href="{% url 'about-us' %}">О нас</a></li>
-                                <li><a href="contact.html">Свяжитесь с нами</a></li>
+                                <li><a href="{% url 'contact' %}">Свяжитесь с нами</a></li>
                             </ul>
                         </div>
                     </div>
@@ -275,11 +275,10 @@
                                             aria-expanded="false" aria-label="Toggle navigation">Страницы</a>
                                         <ul class="sub-menu collapse" id="submenu-1-2">
                                             <li class="nav-item"><a href="{% url 'about-us' %}">О нас</a></li>
-                                            <li class="nav-item"><a href="faq.html">Частые вопросы</a></li>
-                                            <li class="nav-item"><a href="login.html">Войти</a></li>
-                                            <li class="nav-item"><a href="register.html">Регистрация</a></li>
+                                            <li class="nav-item"><a href="{% url 'faq' %}">Частые вопросы</a></li>
+                                            <li class="nav-item"><a href="{% url 'login' %}">Войти</a></li>
+                                            <li class="nav-item"><a href="{% url 'registration' %}">Регистрация</a></li>
                                             <li class="nav-item"><a href="mail-success.html">Подтверждение Email</a></li>
-                                            <li class="nav-item"><a href="404.html">Ошибка 404</a></li>
                                         </ul>
                                     </li>
                                     <li class="nav-item">
@@ -307,7 +306,7 @@
                                         </ul>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="contact.html" aria-label="Toggle navigation">Контакты</a>
+                                        <a href="{% url 'contact' %}" aria-label="Toggle navigation">Свяжитесь с нами</a>
                                     </li>
                                 </ul>
                             </div> <!-- navbar collapse -->

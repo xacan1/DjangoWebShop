@@ -9,4 +9,6 @@ urlpatterns = [
     path('registration/', RegisterUserView.as_view(), name='registration'),
     path('cart/', CartView.as_view(), name='cart'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
+    path('contact/', ContactView.as_view(), name='contact'),
+    path('faq/', FaqView.as_view(), name='faq'),
 ]
