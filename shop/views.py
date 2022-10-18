@@ -18,7 +18,7 @@ class IndexView(ListView):
 
 class PageNotFound(FormView):
     form_class = SimpleForm
-    template_name = 'shop/404.html'
+    template_name = 'shop/page404.html'
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
