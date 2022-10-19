@@ -4,7 +4,6 @@ from django.urls import reverse_lazy
 from .forms import *
 from .models import *
 from .mixins import DataMixin
-from . import services
 
 
 class IndexView(DataMixin, FormView):
@@ -13,8 +12,7 @@ class IndexView(DataMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        categories = services.get_categories(None)
-        c_def = self.get_user_context(title='Маркет скидок', categories=categories)
+        c_def = self.get_user_context(title='Маркет скидок')
         return {**context, **c_def}
 
 

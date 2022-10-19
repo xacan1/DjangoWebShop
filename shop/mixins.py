@@ -1,3 +1,5 @@
+from . import services
+
 user_menu = {'Войти': 'login',
              'Регистрация': 'registration', 'Выйти': 'logout'}
 main_menu = {'Главная': 'home', 'О нас': 'about-us',
@@ -20,8 +22,9 @@ class DataMixin:
         else:
             context_user_menu[self.request.user.email] = 'profile'
             context_user_menu.pop('Войти')
-            context_user_menu.pop('Регистрация') 
+            context_user_menu.pop('Регистрация')
 
         context['user_menu'] = context_user_menu
         context['main_menu'] = context_main_menu
+        context['categories'] = services.get_categories(None)
         return context
