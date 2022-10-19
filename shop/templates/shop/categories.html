@@ -1,0 +1,10 @@
+{% for slug, name, subcategories in categories %}
+    {% if subcategories|length %}
+    <li><a href="product-grids.html">{{ name }}<i class="lni lni-chevron-right"></i></a>
+    <ul class="inner-sub-category">
+        {% include 'shop/categories.html' with categories=subcategories %}
+    </ul>
+    {% else %}
+    <li><a href="product-grids.html">{{ name }}</a></li>
+    {% endif %}
+{% endfor %}

@@ -82,9 +82,9 @@
                     <div class="col-lg-4 col-md-4 col-12">
                         <div class="top-middle">
                             <ul class="useful-links">
-                                <li><a href="{% url 'home' %}">Главная</a></li>
-                                <li><a href="{% url 'about-us' %}">О нас</a></li>
-                                <li><a href="{% url 'contact' %}">Свяжитесь с нами</a></li>
+                                {% for key, value in main_menu.items %}
+                                <li><a href="{% url value %}">{{ key }}</a></li>
+                                {% endfor %}
                             </ul>
                         </div>
                     </div>
@@ -92,15 +92,26 @@
                         <div class="top-end">
                             <div class="user">
                                 <i class="lni lni-user"></i>
-                                Пользователь
+                                {% if user.is_authenticated %}
+                                <a href="{% url 'profile' user.pk %}">Личный кабинет</a>
+                                {% endif %}
                             </div>
                             <ul class="user-login">
+                                {% if user.is_authenticated %}
+                                <li>
+                                    <a href="{% url 'profile' user.pk %}">{{ user.email }}</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'logout' %}">Выйти</a>
+                                </li>
+                                {% else %}
                                 <li>
                                     <a href="{% url 'login' %}">Войти</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'registration' %}">Регистрация</a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>
@@ -229,6 +240,9 @@
                         <div class="mega-category-menu">
                             <span class="cat-button"><i class="lni lni-menu"></i>Все категории</span>
                             <ul class="sub-category">
+                                {% include 'shop/categories.html' %}
+                            </ul>
+                            <!-- <ul class="sub-category">
                                 <li><a href="product-grids.html">Электроника <i class="lni lni-chevron-right"></i></a>
                                     <ul class="inner-sub-category">
                                         <li><a href="product-grids.html">Цифровые камеры</a></li>
@@ -252,7 +266,7 @@
                                 <li><a href="product-grids.html">Компьютеры и планшеты </a></li>
                                 <li><a href="product-grids.html">Видеоигры </a></li>
                                 <li><a href="product-grids.html">Бытовая техника </a></li>
-                            </ul>
+                            </ul> -->
                         </div>
                         <!-- End Mega Category Menu -->
                         <!-- Start Navbar -->
@@ -304,9 +318,6 @@
                                             <li class="nav-item"><a href="blog-single-sidebar.html">Страница блога
                                                     сбоку</a></li>
                                         </ul>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{% url 'contact' %}" aria-label="Toggle navigation">Свяжитесь с нами</a>
                                     </li>
                                 </ul>
                             </div> <!-- navbar collapse -->

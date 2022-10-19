@@ -3,16 +3,18 @@ from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 from .forms import *
 from .models import *
+from .mixins import DataMixin
+from . import services
 
 
-class IndexView(ListView):
-    model = Product
+class IndexView(DataMixin, FormView):
+    form_class = SimpleForm
     template_name = 'shop/index.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # c_def = self.get_user_context(title='Маркет скидок', form_login=LoginUserForm)
-        c_def = {'title': 'Маркет скидок'}
+        categories = services.get_categories(None)
+        c_def = self.get_user_context(title='Маркет скидок', categories=categories)
         return {**context, **c_def}
 
 
@@ -26,25 +28,23 @@ class PageNotFound(FormView):
         return response
 
 
-class AboutAsView(FormView):
+class AboutAsView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/about-us.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = {'title': 'О нас'}
+        c_def = self.get_user_context(title='О нас')
         return {**context, **c_def}
 
 
-class LoginUserView(auth_views.LoginView):
+class LoginUserView(DataMixin, auth_views.LoginView):
     form_class = LoginUserForm
     template_name = 'shop/login.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # c_def = self.get_user_context(
-        #     title='Авторизация', form_login=LoginUserForm)
-        c_def = {'title': 'Авторизация', 'form_login': LoginUserForm}
+        c_def = self.get_user_context(title='Авторизация')
         return {**context, **c_def}
 
     def get_success_url(self):
@@ -55,59 +55,65 @@ class LogoutUserView(auth_views.LogoutView):
     next_page = 'home'
 
 
-class RegisterUserView(CreateView):
+class RegisterUserView(DataMixin, CreateView):
     form_class = RegisterUserForm
     template_name = 'shop/register.html'
     success_url = reverse_lazy('registration_successful')
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # c_def = self.get_user_context(
-        #     title='Регистрация', form_login=LoginUserForm)
-        c_def = {'title': 'Регистрация', 'form_login': LoginUserForm}
-
+        c_def = self.get_user_context(title='Регистрация')
         return {**context, **c_def}
 
 
-class CartView(ListView):
+class CartView(DataMixin, ListView):
     model = Cart
     template_name = 'shop/cart.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # c_def = self.get_user_context(title='Корзина', form_login=LoginUserForm)
-        c_def = {'title': 'Корзина'}
+        c_def = self.get_user_context(title='Корзина')
         return {**context, **c_def}
 
 
-class CheckoutView(FormView):
+class CheckoutView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/checkout.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # c_def = self.get_user_context(title='Корзина', form_login=LoginUserForm)
-        c_def = {'title': 'Оформление заказа'}
+        c_def = self.get_user_context(title='Оформление заказа', form_login=LoginUserForm)
+        # c_def = {'title': 'Оформление заказа'}
         return {**context, **c_def}
 
 
-class ContactView(FormView):
+class ContactView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/contact.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # c_def = self.get_user_context(title='Корзина', form_login=LoginUserForm)
-        c_def = {'title': 'Форма связи'}
+        c_def = self.get_user_context(title='Обратная связь')
         return {**context, **c_def}
 
 
-class FaqView(FormView):
+class FaqView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/faq.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # c_def = self.get_user_context(title='Корзина', form_login=LoginUserForm)
-        c_def = {'title': 'FAQ'}
+        c_def = self.get_user_context(title='FAQ')
+        return {**context, **c_def}
+
+
+class ProfileUserView(DataMixin, DetailView):
+    model = CustomUser
+    template_name = 'shop/index.html'
+    context_object_name = 'user_data'
+    pk_url_kwarg = 'user_id'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Профиль пользователя')
         return {**context, **c_def}

@@ -33,6 +33,19 @@ def get_default_payment_type() -> int:
     return payment_type_pk
 
 
+# Возвращает все категории с подкатегориями в виде списка кортежей с slug, name и списокм подкатегорий если он есть
+# categories = [(slug, name, []),]
+def get_categories(parent_id) -> list:
+    categories = []
+    queryset = Category.objects.filter(parent=parent_id)
+
+    for cat in queryset:
+        category = (cat.slug, cat.name, get_categories(cat.pk))
+        categories.append(category)
+
+    return categories
+
+
 # находит отсортированные по дате неоплаченные(по умолчанию) заказы для всей корзины или только для конкретного id_messenger
 def get_orders_for_user(user_pk: int, id_messenger: int = 0, paid: bool = False) -> models.QuerySet:
     orders = []
@@ -104,7 +117,7 @@ def get_cart_order_product(cart_order_pk: int, product_pk: int, id_messenger: in
 def get_cart_order_products(cart_order_pk: int, id_messenger: int = 0, for_order: bool = False) -> models.QuerySet:
     products_cart_order = []
     params = {}
-    
+
     if id_messenger:
         params['id_messenger'] = id_messenger
 
@@ -145,7 +158,8 @@ def check_stock_in_order(order_pk: int) -> dict:
     products_order = get_cart_order_products(order_pk, 0, True)
 
     for product_row in products_order:
-        stock = get_stock_product(product_row.product_id, product_row.warehouse_id)
+        stock = get_stock_product(
+            product_row.product_id, product_row.warehouse_id)
 
         if product_row.quantity > stock:
             result[product_row.product.name] = product_row.quantity - stock
@@ -156,7 +170,8 @@ def check_stock_in_order(order_pk: int) -> dict:
 # получает последнюю ценую и скидку
 def get_last_price(product_pk: int) -> dict:
     price_info = {}
-    priceset = Prices.objects.filter(product=product_pk).order_by('-date_update').values('price', 'discount_percentage')
+    priceset = Prices.objects.filter(product=product_pk).order_by(
+        '-date_update').values('price', 'discount_percentage')
 
     if priceset.exists():
         price_info = priceset[0]
@@ -199,7 +214,8 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
     }
 
     # Строка товара для корзины готова, теперь попробуем найти строку с этим товаром в Корзине
-    product_cart, product_cart_info = get_cart_order_product(cart_pk, product_pk, id_messenger)
+    product_cart, product_cart_info = get_cart_order_product(
+        cart_pk, product_pk, id_messenger)
 
     # если нашли строку в корзине с этим же товаром, пересчитаем количество и сумму, если нет, добавим новую строку или вообще не добавим ничего
     if product_cart:
@@ -236,12 +252,14 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
         return data_response
 
     if order_pk:
-        product_cart, _ = get_cart_order_product(order_pk, product_pk, id_messenger, True)
+        product_cart, _ = get_cart_order_product(
+            order_pk, product_pk, id_messenger, True)
     else:
         for_anonymous_user = request_data.get('for_anonymous_user', False)
         cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
         cart_pk = cart_info.get('id', 0)
-        product_cart, _ = get_cart_order_product(cart_pk, product_pk, id_messenger)
+        product_cart, _ = get_cart_order_product(
+            cart_pk, product_pk, id_messenger)
 
     if product_cart:
         product_cart.delete()
@@ -266,8 +284,10 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
     phone = order_info.get('phone', '')
     for_anonymous_user = order_info.get('for_anonymous_user', False)
     order_info['status'] = order_info.get('status_pk', get_default_status())
-    order_info['delivery_type'] = order_info.get('delivery_type_pk', get_default_delivery_type())
-    order_info['payment_type'] = order_info.get('payment_type_pk', get_default_payment_type())
+    order_info['delivery_type'] = order_info.get(
+        'delivery_type_pk', get_default_delivery_type())
+    order_info['payment_type'] = order_info.get(
+        'payment_type_pk', get_default_payment_type())
 
     if not order_info['status']:
         return {'error': 'Status not found'}
@@ -282,7 +302,7 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
 
     # найду последний неоплаченный заказ, что бы добавить в него новые товары из корзины или создам новый
     unpaid_orders = get_orders_for_user(user_pk, id_messenger, False)
-    
+
     if unpaid_orders:
         order_instance = unpaid_orders[0]
         order_info['id'] = order_instance.pk
@@ -313,8 +333,9 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
         order_info['amount'] += product_cart.amount
 
         # если найду строку с тем же товаром в текущем Заказе, то изменю количество в ней, а строку Корзины удалю
-        order_row, _ = get_cart_order_product(order_pk, product_cart.product.pk, id_messenger, True)
-        
+        order_row, _ = get_cart_order_product(
+            order_pk, product_cart.product.pk, id_messenger, True)
+
         if order_row:
             order_row.quantity = order_row.quantity + product_cart.quantity
             order_row.save()
@@ -349,7 +370,7 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
 
     if paid is not None:
         params['paid'] = True if paid != '0' else False
-    
+
     if id_messenger:
         params['id_messenger'] = id_messenger
 
@@ -367,12 +388,12 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
             # удалю лишнюю инфу о ценах и остатках товаров, сериализатор их выдает по умолчанию
             if 'get_prices' in product_info['product']:
                 product_info['product'].pop('get_prices')
-            
+
             if 'get_stock_product' in product_info['product']:
                 product_info['product'].pop('get_stock_product')
 
             products.append(product_info)
-        
+
         order_info['products'] = products
 
     return order_info
@@ -408,7 +429,7 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
 
             if 'get_stock_product' in product_info:
                 product_cart['product'].pop('get_stock_product')
-            
+
             if not id_messenger:
                 products.append(product_cart)
             elif id_messenger == product_cart['id_messenger']:
@@ -436,7 +457,8 @@ def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_or
             if orderset[0].paid:
                 return
 
-    cart_products = get_cart_order_products(cart_order_pk, id_messenger, for_order)
+    cart_products = get_cart_order_products(
+        cart_order_pk, id_messenger, for_order)
 
     for product_row in cart_products:
         product_pk = product_row.product.pk
