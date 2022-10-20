@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone, datetime_safe
 from rest_framework.authtoken.models import Token
-from django.utils.text import slugify
-# from .utils import slugify
+# from django.utils.text import slugify
+from .utils import slugify
 
 
 class CustomUserManager(BaseUserManager):
@@ -84,7 +84,7 @@ class Category(models.Model):
                                verbose_name='Родитель')
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        self.slug = slugify(self.name, allow_unicode=True)
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -115,7 +115,7 @@ class Product(models.Model):
     is_service = models.BooleanField(default=False, verbose_name='Услуга')
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        self.slug = slugify(self.name, allow_unicode=True)
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
