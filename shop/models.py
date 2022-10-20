@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone, datetime_safe
 from rest_framework.authtoken.models import Token
-# from django.utils.text import slugify
-from .utils import slugify
+from django.utils.text import slugify
+# from .utils import slugify
 
 
 class CustomUserManager(BaseUserManager):
