@@ -80,7 +80,8 @@ class CheckoutView(DataMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Оформление заказа', form_login=LoginUserForm)
+        c_def = self.get_user_context(
+            title='Оформление заказа', form_login=LoginUserForm)
         # c_def = {'title': 'Оформление заказа'}
         return {**context, **c_def}
 
@@ -102,6 +103,18 @@ class FaqView(DataMixin, FormView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='FAQ')
+        return {**context, **c_def}
+
+
+class ProductListView(DataMixin, ListView):
+    model = Product
+    template_name = 'shop/product-list.html'
+    slug_url_kwarg = 'category_slug'
+    # pk_url_kwarg = 'category_id'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Список товаров')
         return {**context, **c_def}
 
 
