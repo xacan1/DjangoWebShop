@@ -25,6 +25,6 @@ def unique_slugify(instance, text: str, allow_unicode: bool):
     unique_slug = slug[:]
 
     while model.objects.filter(slug=unique_slug).exists():
-        unique_slug = f'{slug}{get_random_string(length=4)}'
+        unique_slug = f'{slug}{get_random_string(length=4, allowed_chars="abcdefghijklmnopqrstuvwxyz")}'
 
     return unique_slug
