@@ -1,4 +1,5 @@
 from dataclasses import fields
+from pyexpat import model
 from rest_framework import serializers
 from .models import *
 
@@ -80,6 +81,24 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('pk', 'name', 'external_code', 'category', 'photo',
                   'time_create', 'get_prices', 'get_stock_product', 'description',)
+
+
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = '__all__'
+
+
+class AttributeValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeValues
+        fields = '__all__'
+
+
+class AttributeProductValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeProductValues
+        fields = '__all__'
 
 
 class FavoriteProductSerializer(serializers.ModelSerializer):

@@ -1,3 +1,6 @@
+from colorsys import ONE_THIRD
+from email.policy import default
+from tabnanny import verbose
 from django.db import models
 from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
@@ -152,12 +155,17 @@ class FavoriteProduct(models.Model):
         verbose_name_plural = 'Избранные товары'
 
 
-# сами названия атрибутов (свойств) товаров
+# сами названия атрибутов (свойств) товаров из 1С, соответствует справочнику омАтрибутыТоваров
+# Каждый атрибут связан с категорией (группой номенклатуры) товаров, ведь у каждой группы товаров свой набор атрибутов,
+# например метаериал, объем ОЗУ, размер экрана. Свойства могут совпадать по названию, но каждое все равно уникально для группы товаров
 class Attribute(models.Model):
-    name = models.CharField(max_length=255, unique=True,
-                            verbose_name='Атрибут')
+    name = models.CharField(max_length=255, verbose_name='Атрибут')
     description = models.TextField(default='', blank=True,
                                    verbose_name='Описание')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,
+                                 related_name='get_attributes_category', verbose_name='Категория')
+    external_code = models.CharField(max_length=11, unique=True,
+                                     verbose_name='Внешний код')
 
     def __str__(self) -> str:
         return self.name
@@ -167,31 +175,33 @@ class Attribute(models.Model):
         verbose_name_plural = 'Атрибуты'
 
 
-# Назначение атрибутов для категорий, у каждой категории свой набор атрибутов
-# В дальнейшем нужно будет сделать форму для заполнения категорий у товаров на сайте,
-# с фильтрацией по этой таблице, что бы видеть какие именно атрибуты есть у всех товаров данной категории
-class AttributeCategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE,
-                                 related_name='get_attributes', verbose_name='Категория')
+# Значения для атрибутов из 1С, соответствует справочнику омЗначенияАтрибутовТоваров
+# для каждого атрибута мы имеем некий набор значений, например объемы ОЗУ: 4, 8, 16 Гб
+# значение может быть как строковым (name), оно обязательно, так и числовым (если числовое представление имеет смысл)
+class AttributeValues(models.Model):
     attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE,
-                                  related_name='get_categories', verbose_name='Атрибут')
-
-    def __str__(self) -> str:
-        return f'Атрибут {self.attribute.name} для {self.category.name}'
+                                  related_name='get_values', verbose_name='Атрибут')
+    string_value = models.CharField(max_length=100,
+                                    verbose_name='Строковое значение')
+    numeric_value = models.DecimalField(max_digits=15, decimal_places=3,
+                                        default=0, verbose_name='Числовое значение')
+    external_code = models.CharField(max_length=11, unique=True,
+                                     verbose_name='Внешний код')
 
     class Meta:
-        verbose_name = 'Назначение атрибута для категории'
-        verbose_name_plural = 'Назначение атрибутов для категорий'
+        verbose_name = 'Значение атрибута'
+        verbose_name_plural = 'Значения атрибута'
 
 
-# Связка товара, атрибутов и конкретных значений
+# Связка товара, атрибутов и конкретных значений из регистра сведений 1С омЗначенияАтрибутовТоваров
 # Значениями атрибутов пока что будут строки
-class AttributeProduct(models.Model):
+class AttributeProductValues(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
-                                related_name='get_attributes', verbose_name='Товар')
+                                related_name='get_attributes_product', verbose_name='Товар')
     attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE,
-                                  related_name='get_products', verbose_name='Атрибут')
-    value = models.CharField(max_length=100, verbose_name='Значение атрибута')
+                                  verbose_name='Атрибут')
+    value = models.ForeignKey(AttributeValues, on_delete=models.CASCADE,
+                              verbose_name='Значение атрибута')
 
     def __str__(self) -> str:
         return f'Атрибут {self.attribute.name} = {self.value} для {self.product.name}'

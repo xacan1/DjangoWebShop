@@ -81,19 +81,20 @@ class PricesAdmin(admin.ModelAdmin):
 
 class AttributeAdmin(admin.ModelAdmin):
     model = Attribute
-    search_fields = ('name',)
+    list_display = ('name', 'category', 'external_code',)
+    search_fields = ('name', 'external_code', 'category__name',)
 
 
-class AttributeCategoryAdmin(admin.ModelAdmin):
-    model = AttributeCategory
-    list_display = ('category', 'attribute',)
-    search_fields = ('category__name','attribute__name',)
+class AttributeValuesAdmin(admin.ModelAdmin):
+    model = AttributeValues
+    list_display = ('attribute', 'string_value', 'numeric_value', 'external_code',)
+    search_fields = ('attribute__name', 'external_code',)
 
 
-class AttributeProductAdmin(admin.ModelAdmin):
-    model = AttributeProduct
+class AttributeProductValuesAdmin(admin.ModelAdmin):
+    model = AttributeProductValues
     list_display = ('product', 'attribute', 'value',)
-    search_fields = ('product__name','attribute__name',)
+    search_fields = ('product__name','attribute__name', 'value__string_value',)
     autocomplete_fields = ('attribute',)
 
     # def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -174,8 +175,8 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(FavoriteProduct, FavoriteProductAdmin)
 admin.site.register(Attribute, AttributeAdmin)
-admin.site.register(AttributeCategory, AttributeCategoryAdmin)
-admin.site.register(AttributeProduct, AttributeProductAdmin)
+admin.site.register(AttributeValues, AttributeValuesAdmin)
+admin.site.register(AttributeProductValues, AttributeProductValuesAdmin)
 admin.site.register(Currency, CurrencyAdmin)
 admin.site.register(PriceType, PriceTypeAdmin)
 admin.site.register(Prices, PricesAdmin)
