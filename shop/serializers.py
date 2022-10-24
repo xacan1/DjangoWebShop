@@ -86,19 +86,20 @@ class ProductSerializer(serializers.ModelSerializer):
 class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attribute
-        fields = '__all__'
+        fields = ('pk', 'name', 'category', 'external_code',)
 
 
 class AttributeValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeValues
-        fields = '__all__'
+        fields = ('pk', 'attribute', 'string_value',
+                  'numeric_value', 'external_code',)
 
 
 class AttributeProductValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeProductValues
-        fields = '__all__'
+        fields = ('pk', 'product', 'attribute', 'value',)
 
 
 class FavoriteProductSerializer(serializers.ModelSerializer):
