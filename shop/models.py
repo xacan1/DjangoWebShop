@@ -156,13 +156,13 @@ class FavoriteProduct(models.Model):
 
 
 # сами названия атрибутов (свойств) товаров из 1С, соответствует справочнику омАтрибутыТоваров
-# Каждый атрибут связан с категорией (группой номенклатуры) товаров, ведь у каждой группы товаров свой набор атрибутов,
-# например метаериал, объем ОЗУ, размер экрана. Свойства могут совпадать по названию, но каждое все равно уникально для группы товаров
+# Каждый атрибут связан с категорией (группой номенклатуры) товаров, ведь у каждой группы товаров свой набор атрибутов, за ичключением общих для всех атрибутов.
+# например материал, объем ОЗУ, размер экрана. Свойства могут совпадать по названию, но каждое все равно уникально для группы товаров
 class Attribute(models.Model):
     name = models.CharField(max_length=255, verbose_name='Атрибут')
     description = models.TextField(default='', blank=True,
                                    verbose_name='Описание')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE,
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True,
                                  related_name='get_attributes_category', verbose_name='Категория')
     external_code = models.CharField(max_length=11, unique=True,
                                      verbose_name='Внешний код')

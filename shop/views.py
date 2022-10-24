@@ -64,7 +64,7 @@ class RegisterUserView(DataMixin, CreateView):
         return {**context, **c_def}
 
 
-class RegisterUserSuccessView(DataMixin, CreateView):
+class RegisterUserSuccessView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/registration-success.html'
 
