@@ -188,6 +188,9 @@ class AttributeValues(models.Model):
     external_code = models.CharField(max_length=11, unique=True,
                                      verbose_name='Внешний код')
 
+    def __str__(self) -> str:
+        return f'{self.attribute.name} = {self.string_value}'
+
     class Meta:
         verbose_name = 'Значение атрибута'
         verbose_name_plural = 'Значения атрибута'
