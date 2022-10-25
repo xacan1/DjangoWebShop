@@ -189,7 +189,7 @@ class AttributeValues(models.Model):
                                      verbose_name='Внешний код')
 
     def __str__(self) -> str:
-        return f'{self.attribute.name} = {self.string_value}'
+        return f'{self.string_value} ({self.attribute.name})'
 
     class Meta:
         verbose_name = 'Значение атрибута'
