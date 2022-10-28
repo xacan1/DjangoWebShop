@@ -389,18 +389,25 @@ class StockProductsAPIList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        product_pk = self.request.query_params.get('product_pk', 0)
-        warehouse_pk = self.request.query_params.get('warehouse_pk', 0)
-        params = {}
+        # product_pk = self.request.query_params.get('product_pk', 0)
+        # warehouse_pk = self.request.query_params.get('warehouse_pk', 0)
+        # params = {}
 
-        if product_pk:
-            params['product'] = product_pk
+        # if product_pk:
+        #     params['product'] = product_pk
 
-        if warehouse_pk:
-            params['warehouse'] = warehouse_pk
+        # if warehouse_pk:
+        #     params['warehouse'] = warehouse_pk
 
-        if params:
-            queryset = StockProducts.objects.filter(**params)
+        # if params:
+        #     queryset = StockProducts.objects.filter(**params)
+        # else:
+        #     queryset = StockProducts.objects.order_by('product', 'warehouse')
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+
+        if get_params:
+            queryset = StockProducts.objects.filter(**get_params)
         else:
             queryset = StockProducts.objects.order_by('product', 'warehouse')
 

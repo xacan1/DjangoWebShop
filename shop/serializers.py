@@ -57,7 +57,7 @@ class StockProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockProducts
-        fields = ('pk', 'warehouse', 'stock',)
+        fields = ('pk', 'product', 'warehouse', 'stock',)
 
 
 # для функции сохранения остатков

@@ -124,6 +124,7 @@ class StockProductsAdmin(admin.ModelAdmin):
     model = StockProducts
     list_display = ('product', 'stock', 'warehouse',)
     list_filter = ('warehouse',)
+    search_fields = ('product__name',)
 
 
 class CartProductAdmin(admin.ModelAdmin):
