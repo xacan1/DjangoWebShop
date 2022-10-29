@@ -358,10 +358,12 @@ class PricesAPIList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        product_pk = self.request.query_params.get('product_pk', 0)
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        # product_pk = self.request.query_params.get('product_pk', 0)
 
-        if product_pk:
-            queryset = Prices.objects.filter(product=product_pk)
+        if get_params:
+            queryset = Prices.objects.filter(**get_params)
         else:
             queryset = Prices.objects.order_by('product')
 
