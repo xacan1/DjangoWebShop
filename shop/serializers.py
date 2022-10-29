@@ -19,13 +19,14 @@ class UserSerializer(serializers.ModelSerializer):
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Currency
-        fields = '__all__'
+        fields = ('pk', 'name', 'abbreviation',
+                  'digital_code', 'sign', 'default',)
 
 
 class PriceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceType
-        fields = '__all__'
+        fields = ('pk', 'name', 'external_code', 'default',)
 
 
 class PriceSerializer(serializers.ModelSerializer):
