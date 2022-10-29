@@ -256,6 +256,12 @@ class CurrencyAPIList(generics.ListAPIView):
     serializer_class = CurrencySerializer
     permission_classes = (IsAuthenticated,)
 
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = Currency.objects.filter(**get_params)
+        return queryset
+
 
 class CurrencyAPICreate(generics.CreateAPIView):
     serializer_class = CurrencySerializer
