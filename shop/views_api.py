@@ -252,7 +252,6 @@ class AttributeProductValuesAPIDelete(generics.DestroyAPIView):
 
 
 class CurrencyAPIList(generics.ListAPIView):
-    queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
     permission_classes = (IsAuthenticated,)
 
@@ -287,9 +286,14 @@ class CurrencyAPIDelete(generics.DestroyAPIView):
 
 
 class PriceTypeAPIList(generics.ListAPIView):
-    queryset = PriceType.objects.all()
     serializer_class = PriceTypeSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = PriceType.objects.filter(**get_params)
+        return queryset
 
 
 class PriceTypeAPIRetrieve(generics.RetrieveAPIView):
