@@ -146,19 +146,19 @@ class CartSerializer(serializers.ModelSerializer):
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
-        fields = '__all__'
+        fields = ('pk', 'name', 'external_code', 'for_bot', 'use',)
 
 
 class PaymentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentType
-        fields = '__all__'
+        fields = ('pk', 'name', 'external_code', 'for_bot', 'use',)
 
 
 class DeliveryTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryType
-        fields = '__all__'
+        fields = ('pk', 'name', 'external_code', 'for_bot', 'use',)
 
 
 class OrderSerializer(serializers.ModelSerializer):

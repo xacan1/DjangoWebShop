@@ -145,19 +145,19 @@ class CartAdmin(admin.ModelAdmin):
 
 class StatusAdmin(admin.ModelAdmin):
     model = Status
-    list_display = ('name', 'repr', 'for_bot', 'use',)
+    list_display = ('name', 'external_code', 'for_bot', 'use',)
     list_filter = ('use', 'for_bot',)
 
 
 class PaymentTypeAdmin(admin.ModelAdmin):
     model = Status
-    list_display = ('name', 'repr', 'for_bot', 'use',)
+    list_display = ('name', 'external_code', 'for_bot', 'use',)
     list_filter = ('use', 'for_bot',)
 
 
 class DeliveryTypeAdmin(admin.ModelAdmin):
     model = Status
-    list_display = ('name', 'repr', 'for_bot', 'use',)
+    list_display = ('name', 'external_code', 'for_bot', 'use',)
     list_filter = ('use', 'for_bot',)
 
 

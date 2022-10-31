@@ -1,6 +1,3 @@
-from colorsys import ONE_THIRD
-from email.policy import default
-from tabnanny import verbose
 from django.db import models
 from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
@@ -379,14 +376,14 @@ class Cart(models.Model):
 # for_bot - что бы любой бот знал что ему надо выбирать в заказе
 class Status(models.Model):
     name = models.CharField(max_length=50, verbose_name='Статус заказа')
-    repr = models.CharField(max_length=50,
-                            verbose_name='Представление статуса')
+    external_code = models.CharField(max_length=11,
+                                     unique=True, verbose_name='Внешний код')
     for_bot = models.BooleanField(default=False,
                                   verbose_name='Для бота магазина')
     use = models.BooleanField(default=True, verbose_name='Использовать')
 
     def __str__(self) -> str:
-        return f'Статус заказа: {self.repr}'
+        return f'Статус заказа: {self.name}'
 
     class Meta:
         verbose_name = 'Статус заказа'
@@ -395,14 +392,14 @@ class Status(models.Model):
 
 class PaymentType(models.Model):
     name = models.CharField(max_length=50, verbose_name='Вид оплаты')
-    repr = models.CharField(max_length=50,
-                            verbose_name='Представление вида оплаты')
+    external_code = models.CharField(max_length=11,
+                                     unique=True, verbose_name='Внешний код')
     for_bot = models.BooleanField(default=False,
                                   verbose_name='Для бота магазина')
     use = models.BooleanField(default=True, verbose_name='Использовать')
 
     def __str__(self) -> str:
-        return f'Вид оплаты: {self.repr}'
+        return f'Вид оплаты: {self.name}'
 
     class Meta:
         verbose_name = 'Вид оплаты'
@@ -411,14 +408,14 @@ class PaymentType(models.Model):
 
 class DeliveryType(models.Model):
     name = models.CharField(max_length=50, verbose_name='Способ получения')
-    repr = models.CharField(max_length=50,
-                            verbose_name='Представление способа получения')
+    external_code = models.CharField(max_length=11,
+                                     unique=True, verbose_name='Внешний код')
     for_bot = models.BooleanField(default=False,
                                   verbose_name='Для бота магазина')
     use = models.BooleanField(default=True, verbose_name='Использовать')
 
     def __str__(self) -> str:
-        return f'Способ получения: {self.repr}'
+        return f'Способ получения: {self.name}'
 
     class Meta:
         verbose_name = 'Способ получения'

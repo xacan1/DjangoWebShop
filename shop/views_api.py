@@ -519,6 +519,29 @@ class StatusesAPIList(generics.ListAPIView):
         return queryset
 
 
+class StatusesAPICreate(generics.CreateAPIView):
+    serializer_class = StatusSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class StatusesAPIRetrieve(generics.RetrieveAPIView):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class StatusesAPIUpdate(generics.UpdateAPIView):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class StatusesAPIDelete(generics.DestroyAPIView):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    permission_classes = (IsAdminUser,)
+
+
 class PaymentTypesAPIList(generics.ListAPIView):
     serializer_class = PaymentTypeSerializer
     permission_classes = (IsAuthenticated,)
@@ -530,6 +553,29 @@ class PaymentTypesAPIList(generics.ListAPIView):
         return queryset
 
 
+class PaymentTypesAPICreate(generics.CreateAPIView):
+    serializer_class = PaymentTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class PaymentTypesAPIRetrieve(generics.RetrieveAPIView):
+    queryset = PaymentType.objects.all()
+    serializer_class = PaymentTypeSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class PaymentTypesAPIUpdate(generics.UpdateAPIView):
+    queryset = PaymentType.objects.all()
+    serializer_class = PaymentTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class PaymentTypesAPIDelete(generics.DestroyAPIView):
+    queryset = PaymentType.objects.all()
+    serializer_class = PaymentTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
 class DeliveryTypesAPIList(generics.ListAPIView):
     serializer_class = DeliveryTypeSerializer
     permission_classes = (IsAuthenticated,)
@@ -539,6 +585,29 @@ class DeliveryTypesAPIList(generics.ListAPIView):
         get_params = {param: get_params[param] for param in get_params}
         queryset = DeliveryType.objects.filter(**get_params)
         return queryset
+
+
+class DeliveryTypesAPICreate(generics.CreateAPIView):
+    serializer_class = DeliveryTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class DeliveryTypesAPIRetrieve(generics.RetrieveAPIView):
+    queryset = DeliveryType.objects.all()
+    serializer_class = DeliveryTypeSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class DeliveryTypesAPIUpdate(generics.UpdateAPIView):
+    queryset = DeliveryType.objects.all()
+    serializer_class = DeliveryTypeSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class DeliveryTypesAPIDelete(generics.DestroyAPIView):
+    queryset = DeliveryType.objects.all()
+    serializer_class = DeliveryTypeSerializer
+    permission_classes = (IsAdminUser,)
 
 
 class OrdersAPIList(generics.ListAPIView):
