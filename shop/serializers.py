@@ -87,7 +87,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attribute
-        fields = ('pk', 'name', 'category', 'external_code',)
+        fields = ('pk', 'name', 'category', 'photo', 'external_code',)
 
 
 class AttributeValuesSerializer(serializers.ModelSerializer):
