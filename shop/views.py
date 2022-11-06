@@ -1,9 +1,10 @@
 from django.views.generic import FormView, ListView, DetailView, CreateView
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
-from .forms import *
-from .models import *
-from .mixins import DataMixin
+from shop.forms import *
+from shop import services
+from shop.models import *
+from shop.mixins import DataMixin
 
 
 class IndexView(DataMixin, FormView):
@@ -111,15 +112,38 @@ class FaqView(DataMixin, FormView):
         return {**context, **c_def}
 
 
-class ProductListView(DataMixin, ListView):
-    model = Product
-    template_name = 'shop/product-list.html'
+class CategoryProductListView(DataMixin, FormView):
+    form_class = SimpleForm
     slug_url_kwarg = 'category_slug'
-    # pk_url_kwarg = 'category_id'
+
+    def get_template_names(self) -> list[str]:
+        template_names = []
+        slug = self.kwargs.get('category_slug', '')
+        products = services.get_products_for_category(slug)
+
+        if products:
+            template_names.append('shop/product-list.html')
+        else:
+            template_names.append('shop/category-grids.html')
+
+        return template_names
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Список товаров')
+        slug = self.kwargs.get('category_slug', '')
+        products = services.get_products_for_category(slug)
+
+        if products:
+            c_def = self.get_user_context(
+                title='Список товаров', products=products)
+        else:
+            parents = services.get_parents_category(slug, [])
+            slug, name, nested_categories = services.get_nested_categories(slug)
+            c_def = self.get_user_context(title='Список категорий',
+                                          current_cat_name=name,
+                                          nested_categories=nested_categories,
+                                          parents=parents)
+
         return {**context, **c_def}
 
 

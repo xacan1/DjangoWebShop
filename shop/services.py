@@ -33,7 +33,7 @@ def get_default_payment_type() -> int:
     return payment_type_pk
 
 
-# Возвращает все категории с подкатегориями в виде списка кортежей с slug, name и списокм подкатегорий если он есть
+# Возвращает рекурсивно все категории с подкатегориями в виде списка кортежей с slug, name и списокм подкатегорий если он есть
 # categories = [(slug, name, []),]
 def get_categories(parent_id) -> list:
     categories = []
@@ -44,6 +44,47 @@ def get_categories(parent_id) -> list:
         categories.append(category)
 
     return categories
+
+
+# Возвращает список из всех родителей категории, в конце списка сама категория, а в начале корневой каталог
+def get_parents_category(category_slug: str, parents: list) -> list[tuple[str, str]]:
+    queryset = Category.objects.filter(slug=category_slug)
+
+    if queryset.exists():
+        cat = queryset[0]
+        category = (cat.slug, cat.name)
+        parents.append(category)
+
+        if cat.parent is not None:
+            get_parents_category(cat.parent.slug, parents)
+
+    return parents[::-1]
+
+
+# Возвращает все товары входящие непосредственно в данную категорию или пустой список
+def get_products_for_category(category_slug: str) -> models.QuerySet:
+    products = models.QuerySet()
+    categories = Category.objects.filter(slug=category_slug)
+
+    if categories.exists():
+        category = categories[0]
+        products = category.get_products.all()
+
+    return products
+
+
+# Возвращает вложенные категории в корневую категорию
+def get_nested_categories(category_slug: str) -> tuple[str, str, models.QuerySet]:
+    nested_categories = models.QuerySet()
+    categories = Category.objects.filter(slug=category_slug)
+
+    if categories.exists():
+        root_category = categories[0]
+        nested_categories = root_category.nested_category.all()
+    else:
+        return ('', '', nested_categories)
+
+    return (root_category.slug, root_category.name, nested_categories)
 
 
 # находит отсортированные по дате неоплаченные(по умолчанию) заказы для всей корзины или только для конкретного id_messenger

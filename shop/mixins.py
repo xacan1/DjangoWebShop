@@ -1,4 +1,4 @@
-from . import services
+from shop import services
 
 user_menu = {'Войти': 'login',
              'Регистрация': 'registration', 'Выйти': 'logout'}

@@ -32,7 +32,7 @@ class CustomUserAdmin(UserAdmin):
 
 class CategoryAdmin(admin.ModelAdmin):
     model = Category
-    list_display = ('parent', 'name', 'external_code',)
+    list_display = ('parent', 'name', 'photo', 'external_code',)
     list_display_links = ('name',)
     search_fields = ('name', 'external_code',)
     prepopulated_fields = {'slug': ('name',)}

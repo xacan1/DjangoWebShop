@@ -1,6 +1,6 @@
 from rest_framework import generics
 from rest_framework.views import Response, Request, APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
 from .models import *
 from .serializers import *
 from . import services
