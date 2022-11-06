@@ -71,7 +71,8 @@ class StockProductCreateSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('pk', 'name', 'external_code', 'parent', 'nested_category',)
+        fields = ('pk', 'name', 'external_code',
+                  'photo', 'parent', 'nested_category',)
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -87,7 +88,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attribute
-        fields = ('pk', 'name', 'category', 'photo', 'external_code',)
+        fields = ('pk', 'name', 'category', 'external_code',)
 
 
 class AttributeValuesSerializer(serializers.ModelSerializer):
