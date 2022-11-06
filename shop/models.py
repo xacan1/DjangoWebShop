@@ -106,8 +106,8 @@ class Product(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     description = models.TextField(default='', blank=True,
                                    verbose_name='Описание')
-    photo = models.ImageField(upload_to=product_image_path,
-                              verbose_name='Изображение')
+    photo = models.ImageField(upload_to=product_image_path, null=True,
+                              blank=True, verbose_name='Изображение')
     time_create = models.DateTimeField(auto_now_add=True,
                                        verbose_name='Создан')
     time_update = models.DateTimeField(auto_now=True, verbose_name='Изменен')
