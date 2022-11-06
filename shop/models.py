@@ -79,8 +79,8 @@ class Category(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     external_code = models.CharField(max_length=11, unique=True,
                                      verbose_name='Внешний код')
-    photo = models.ImageField(upload_to=product_image_path,
-                              verbose_name='Изображение')
+    photo = models.ImageField(upload_to=product_image_path, null=True,
+                              blank=True, verbose_name='Изображение')
     parent = models.ForeignKey('self', on_delete=models.PROTECT, default=None,
                                null=True, blank=True, related_name='nested_category',
                                verbose_name='Родитель')
