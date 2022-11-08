@@ -38,23 +38,27 @@
                             <div class="row">
                                 {% if nested_categories %}
                                 {% for category in nested_categories %}
-                                <div class="col-lg-4 col-md-6 col-12">
+                                <div class="col-lg-4 col-md-8 col-12">
                                     <!-- Start Single Category -->
-                                    <div class="single-product">
-                                        <div class="product-image">
-                                            {% if category.photo %}
-                                            <img src="{{ category.photo.url }}" alt="placeholder">
-                                            {% else %}
-                                            <img src="https://via.placeholder.com/150x150" alt="placeholder">
-                                            {% endif %}
+                                    <!-- <div class="single-product2">
+                                        <div class="product-image2"> -->
+                                    <a class="subcategory__item" href="{% url 'productlist' category.slug %}">
+                                        <div class="subcategory__content">
+                                            <div class="subcategory__image">
+                                                <picture>
+                                                    {% if category.photo %}
+                                                    <img src="{{ category.photo.url }}" alt="#">
+                                                    {% else %}
+                                                    <img src="https://via.placeholder.com/150x150" alt="#">
+                                                    {% endif %}
+                                                </picture>
+                                            </div>
+                                            <span class="subcategory__title">{{ category.name }}</span>
                                         </div>
-                                        <div class="product-info">
-                                            <span class="category">{{ category.name }}</span>
-                                            <h4 class="title">
-                                                <a href="{% url 'productlist' category.slug %}">{{ category.name }}</a>
-                                            </h4>
-                                        </div>
-                                    </div>
+                                    </a>
+                                    <!-- </div> -->
+
+                                    <!-- </div> -->
                                     <!-- End Single Category -->
                                 </div>
                                 {% endfor %}
