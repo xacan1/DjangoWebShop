@@ -137,12 +137,12 @@ class CategoryProductListView(DataMixin, FormView):
             c_def = self.get_user_context(
                 title='Список товаров', products=products)
         else:
-            parents = services.get_parents_category(slug, [])
-            slug, name, nested_categories = services.get_nested_categories(slug)
+            parent_categories = services.get_parents_category(slug, [])
+            category, nested_categories = services.get_nested_categories(slug)
             c_def = self.get_user_context(title='Список категорий',
-                                          current_cat_name=name,
+                                          current_category=category,
                                           nested_categories=nested_categories,
-                                          parents=parents)
+                                          parent_categories=parent_categories)
 
         return {**context, **c_def}
 

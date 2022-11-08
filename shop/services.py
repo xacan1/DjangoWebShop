@@ -47,16 +47,15 @@ def get_categories(parent_id) -> list:
 
 
 # Возвращает список из всех родителей категории, в конце списка сама категория, а в начале корневой каталог
-def get_parents_category(category_slug: str, parents: list) -> list[tuple[str, str]]:
+def get_parents_category(category_slug: str, parents: list) -> list[models.Model]:
     queryset = Category.objects.filter(slug=category_slug)
 
     if queryset.exists():
-        cat = queryset[0]
-        category = (cat.slug, cat.name)
+        category = queryset[0]
         parents.append(category)
 
-        if cat.parent is not None:
-            get_parents_category(cat.parent.slug, parents)
+        if category.parent is not None:
+            get_parents_category(category.parent.slug, parents)
 
     return parents[::-1]
 
@@ -73,8 +72,8 @@ def get_products_for_category(category_slug: str) -> models.QuerySet:
     return products
 
 
-# Возвращает вложенные категории в корневую категорию
-def get_nested_categories(category_slug: str) -> tuple[str, str, models.QuerySet]:
+# Возвращает вложенные категории в корневую категорию и саму категорию
+def get_nested_categories(category_slug: str) -> tuple[models.Model, models.QuerySet]:
     nested_categories = models.QuerySet()
     categories = Category.objects.filter(slug=category_slug)
 
@@ -82,9 +81,9 @@ def get_nested_categories(category_slug: str) -> tuple[str, str, models.QuerySet
         root_category = categories[0]
         nested_categories = root_category.nested_category.all()
     else:
-        return ('', '', nested_categories)
+        return (None, nested_categories)
 
-    return (root_category.slug, root_category.name, nested_categories)
+    return (root_category, nested_categories)
 
 
 # находит отсортированные по дате неоплаченные(по умолчанию) заказы для всей корзины или только для конкретного id_messenger
