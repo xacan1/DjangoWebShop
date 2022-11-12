@@ -1,5 +1,6 @@
 from django.views.generic import FormView, ListView, DetailView, CreateView
 from django.contrib.auth import views as auth_views
+from django.core.paginator import Paginator
 from django.urls import reverse_lazy
 from shop.forms import *
 from shop import services
@@ -118,10 +119,8 @@ class CategoryProductListView(DataMixin, FormView):
 
     def get_template_names(self) -> list[str]:
         template_names = []
-        slug = self.kwargs.get('category_slug', '')
-        products = services.get_products_for_category(slug)
 
-        if products:
+        if hasattr(self, 'products') and self.products:
             template_names.append('shop/product-list.html')
         else:
             template_names.append('shop/category-grids.html')
@@ -131,19 +130,35 @@ class CategoryProductListView(DataMixin, FormView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('category_slug', '')
-        products = services.get_products_for_category(slug)
+        self.products = services.get_products_for_category(slug)
 
-        if products:
-            c_def = self.get_user_context(
-                title='Список товаров', products=products)
+        if self.products:
+            paginator = Paginator(self.products, 6)
+            page_number = self.request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            # for p in page_obj:
+            #     print(p)
+            c_def = self.get_user_context(title='Список товаров',
+                                          products=page_obj)
         else:
-            parent_categories = services.get_parents_category(slug, [])
             category, nested_categories = services.get_nested_categories(slug)
+            parent_categories = services.get_parents_category(slug, [])
             c_def = self.get_user_context(title='Список категорий',
                                           current_category=category,
                                           nested_categories=nested_categories,
                                           parent_categories=parent_categories)
 
+        return {**context, **c_def}
+
+
+class ProductListView(DataMixin, DetailView):
+    model = Product
+    template_name = 'shop/product-details.html'
+    slug_url_kwarg = 'product_slug'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Карточка товара')
         return {**context, **c_def}
 
 
