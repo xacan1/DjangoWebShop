@@ -60,13 +60,11 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
     return parents[::-1]
 
 
-# Возвращает все товары входящие непосредственно в данную категорию или пустой список с ценами по умолчанию
-def get_products_for_category(category_slug: str) -> models.QuerySet:
-    products = Prices.objects.filter(product__category__slug=category_slug, price_type__default=True).values(
-        'product__name', 'product__slug', 'product__photo', 'product__category__name', 'price', 'currency__sign')
-    # products = Prices.objects.filter(product__category__slug=category_slug, price_type__default=True).values('product')
+# Возвращает все цены товаров входящих непосредственно в данную категорию с ценами по умолчанию или пустой список
+def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
+    price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(product__category__slug=category_slug, price_type__default=True)
 
-    return products
+    return price_products
 
 
 # Возвращает вложенные категории в корневую категорию и саму категорию

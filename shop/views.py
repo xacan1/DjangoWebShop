@@ -120,7 +120,7 @@ class CategoryProductListView(DataMixin, FormView):
     def get_template_names(self) -> list[str]:
         template_names = []
 
-        if hasattr(self, 'products') and self.products:
+        if hasattr(self, 'price_products') and self.price_products:
             template_names.append('shop/product-list.html')
         else:
             template_names.append('shop/category-grids.html')
@@ -130,16 +130,14 @@ class CategoryProductListView(DataMixin, FormView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('category_slug', '')
-        self.products = services.get_products_for_category(slug)
+        self.price_products = services.get_products_prices_for_category(slug)
 
-        if self.products:
-            paginator = Paginator(self.products, 6)
+        if self.price_products:
+            paginator = Paginator(self.price_products, 6)
             page_number = self.request.GET.get('page')
             page_obj = paginator.get_page(page_number)
-            # for p in page_obj:
-            #     print(p)
             c_def = self.get_user_context(title='Список товаров',
-                                          products=page_obj)
+                                          price_products=page_obj)
         else:
             category, nested_categories = services.get_nested_categories(slug)
             parent_categories = services.get_parents_category(slug, [])

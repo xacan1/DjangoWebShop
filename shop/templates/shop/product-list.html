@@ -268,15 +268,15 @@
                             aria-labelledby="nav-list-tab">
                             <!-- Область list -->
                             <div class="row">
-                                {% for product in products %}
+                                {% for product_info in price_products %}
                                 <div class="col-lg-12 col-md-12 col-12">
                                     <!-- Start Single Product -->
                                     <div class="single-product">
                                         <div class="row align-items-center">
                                             <div class="col-lg-4 col-md-4 col-12">
                                                 <div class="product-image">
-                                                    {% if product.product__photo %}
-                                                    <img src="{{ product.product__photo }}" alt="#">
+                                                    {% if product_info.product.photo %}
+                                                    <img src="{{ product_info.product.photo.url }}" alt="#">
                                                     {% else %}
                                                     <img src="https://via.placeholder.com/335x335" alt="#">
                                                     {% endif %}
@@ -288,9 +288,9 @@
                                             </div>
                                             <div class="col-lg-8 col-md-8 col-12">
                                                 <div class="product-info">
-                                                    <span class="category">{{ product.product__category__name }}</span>
+                                                    <span class="category">{{ product_info.product.category.name }}</span>
                                                     <h4 class="title">
-                                                        <a href="{% url 'productdetails' product.product__slug %}">{{ product.product__name }}</a>
+                                                        <a href="{% url 'productdetails' product_info.product.slug %}">{{ product_info.product.name }}</a>
                                                     </h4>
                                                     <!-- <ul class="review">
                                                         <li><i class="lni lni-star-filled"></i></li>
@@ -301,7 +301,7 @@
                                                         <li><span>4.0 Review(s)</span></li>
                                                     </ul> -->
                                                     <div class="price">
-                                                        <span>{{ product.currency__sign }}{{ product.price }}</span>
+                                                        <span>{{ product_info.currency.sign }}{{ product_info.price }}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -315,18 +315,18 @@
                                     <!-- Pagination -->
                                     <div class="pagination center">
                                         <ul class="pagination-list">
-                                            {% if products.has_previous %}
-                                            <li><a href="?page={{ products.previous_page_number }}"><i class="lni lni-chevron-left"></i></a></li>
+                                            {% if price_products.has_previous %}
+                                            <li><a href="?page={{ price_products.previous_page_number }}"><i class="lni lni-chevron-left"></i></a></li>
                                             {% endif %}
-                                            {% for p in products.paginator.page_range %}
-                                            {% if p == products.number %}
+                                            {% for p in price_products.paginator.page_range %}
+                                            {% if p == price_products.number %}
                                             <li class="active"><a href="?page={{ p }}">{{ p }}</a></li>
-                                            {% elif p >= products.number|add:-2 and p <= products.number|add:2 %}
+                                            {% elif p >= price_products.number|add:-2 and p <= price_products.number|add:2 %}
                                             <li><a href="?page={{ p }}">{{ p }}</a></li>
                                             {% endif %}
                                             {% endfor %}
-                                            {% if products.has_next %}
-                                            <li><a href="?page={{ products.next_page_number }}"><i class="lni lni-chevron-right"></i></a></li>
+                                            {% if price_products.has_next %}
+                                            <li><a href="?page={{ price_products.next_page_number }}"><i class="lni lni-chevron-right"></i></a></li>
                                             {% endif %}
                                         </ul>
                                     </div>
