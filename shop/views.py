@@ -133,10 +133,12 @@ class CategoryProductListView(DataMixin, FormView):
         self.price_products = services.get_products_prices_for_category(slug)
 
         if self.price_products:
-            paginator = Paginator(self.price_products, 6)
+            total_show_product = 10
+            paginator = Paginator(self.price_products, total_show_product)
             page_number = self.request.GET.get('page')
             page_obj = paginator.get_page(page_number)
             c_def = self.get_user_context(title='Список товаров',
+                                          total_show_product=total_show_product,
                                           price_products=page_obj)
         else:
             category, nested_categories = services.get_nested_categories(slug)
