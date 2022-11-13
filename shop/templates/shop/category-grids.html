@@ -15,7 +15,6 @@
             <div class="col-lg-6 col-md-6 col-12">
                 <ul class="breadcrumb-nav">
                     <li><a href="{% url 'home' %}"><i class="lni lni-home"></i> Главная</a></li>
-                    <li><a href="{% url 'home' %}">Магазин</a></li>
                     {% for parent in parent_categories %}
                     <li><a href="{% url 'productlist' parent.slug %}">{{ parent.name }}</a></li>
                     {% endfor %}

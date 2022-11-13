@@ -130,6 +130,7 @@ class CategoryProductListView(DataMixin, FormView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('category_slug', '')
+        parent_categories = services.get_parents_category(slug, [])
         self.price_products = services.get_products_prices_for_category(slug)
 
         if self.price_products:
@@ -139,10 +140,10 @@ class CategoryProductListView(DataMixin, FormView):
             page_obj = paginator.get_page(page_number)
             c_def = self.get_user_context(title='Список товаров',
                                           total_show_product=total_show_product,
+                                          parent_categories=parent_categories,
                                           price_products=page_obj)
         else:
             category, nested_categories = services.get_nested_categories(slug)
-            parent_categories = services.get_parents_category(slug, [])
             c_def = self.get_user_context(title='Список категорий',
                                           current_category=category,
                                           nested_categories=nested_categories,
@@ -151,14 +152,18 @@ class CategoryProductListView(DataMixin, FormView):
         return {**context, **c_def}
 
 
-class ProductListView(DataMixin, DetailView):
+class ProductDetailView(DataMixin, DetailView):
     model = Product
     template_name = 'shop/product-details.html'
     slug_url_kwarg = 'product_slug'
+    context_object_name = 'product_data'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Карточка товара')
+        slug = kwargs['object'].category.slug
+        parent_categories = services.get_parents_category(slug, [])
+        c_def = self.get_user_context(title='Карточка товара',
+                                      parent_categories=parent_categories)
         return {**context, **c_def}
 
 
