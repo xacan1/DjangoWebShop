@@ -85,6 +85,12 @@ class ProductSerializer(serializers.ModelSerializer):
                   'time_create', 'get_prices', 'get_stock_product', 'description',)
 
 
+class ImageProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImageProduct
+        fields = ('pk', 'product', 'photo', 'description', 'default',)
+
+
 class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attribute

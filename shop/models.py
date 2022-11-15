@@ -137,6 +137,23 @@ class Product(models.Model):
         )
 
 
+class ImageProduct(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                related_name='get_images', verbose_name='Товар')
+    photo = models.ImageField(upload_to=product_image_path,
+                              verbose_name='Изображение')
+    description = models.CharField(max_length=100, verbose_name='Описание')
+    default = models.BooleanField(default=False, blank=True,
+                                  verbose_name='Основное')
+
+    def __str__(self) -> str:
+        return f'Изображение {self.product.name} - {self.photo}'
+
+    class Meta:
+        verbose_name = 'Изображение товара'
+        verbose_name_plural = 'Изображения товаров'
+
+
 # таблица для избранных товаров как в разрезе пользовтаелей сайта так и в разрезе ID телеграмма
 class FavoriteProduct(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -375,6 +392,41 @@ class Cart(models.Model):
         verbose_name_plural = 'Корзины'
 
 
+# Контрагент всегда привязан к пользователю, пользователь может существовать сам по себе, а один или несколько контрагентов всегда привязаны к пользователю
+class Contractor(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Наименование')
+    full_name = models.CharField(max_length=512, default='', blank=True,
+                                 verbose_name='Официальное наименование')
+    inn = models.CharField(max_length=12, verbose_name='ИНН')
+    kpp = models.CharField(max_length=9, default='', blank=True,
+                           verbose_name='КПП')
+    registered_address = models.CharField(max_length=1024, default='',
+                                          blank=True, verbose_name='Юридический адрес')
+    actual_address = models.CharField(max_length=1024, default='', blank=True,
+                                      verbose_name='Фактический адрес')
+
+    def __str__(self) -> str:
+        return f'Контрагент: {self.name}'
+
+    class Meta:
+        verbose_name = 'Контрагент'
+        verbose_name_plural = 'Контрагенты'
+
+
+class ContractorUser(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='get_contractors', verbose_name='Покупатель')
+    contractor = models.ForeignKey(Contractor, on_delete=models.CASCADE,
+                                   verbose_name='Контрагент')
+
+    def __str__(self) -> str:
+        return f'Контрагент: {self.contractor.name} пользователя: {self.user.email}'
+
+    class Meta:
+        verbose_name = 'Контрагент пользователя'
+        verbose_name_plural = 'Контрагенты пользователей'
+
+
 # for_bot - что бы любой бот знал что ему надо выбирать в заказе
 class Status(models.Model):
     name = models.CharField(max_length=50, verbose_name='Статус заказа')
@@ -465,6 +517,7 @@ class Order(models.Model):
                              related_name='get_orders', verbose_name='Покупатель')
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
+
     phone = models.CharField(max_length=15, verbose_name='Телефон')
     id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')

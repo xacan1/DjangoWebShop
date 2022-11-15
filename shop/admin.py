@@ -48,6 +48,14 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+class ImageProductAdmin(admin.ModelAdmin):
+    model = ImageProduct
+    list_display = ('product', 'photo', 'description', 'default',)
+    list_filter = ('default',)
+    search_fields = ('product__name', 'product__external_code',)
+    list_editable = ('default',)
+
+
 class FavoriteProductAdmin(admin.ModelAdmin):
     model = FavoriteProduct
     list_display = ('user', 'product', 'id_messenger',)
@@ -87,14 +95,16 @@ class AttributeAdmin(admin.ModelAdmin):
 
 class AttributeValuesAdmin(admin.ModelAdmin):
     model = AttributeValues
-    list_display = ('attribute', 'string_value', 'numeric_value', 'external_code',)
+    list_display = ('attribute', 'string_value',
+                    'numeric_value', 'external_code',)
     search_fields = ('attribute__name', 'external_code',)
 
 
 class AttributeProductValuesAdmin(admin.ModelAdmin):
     model = AttributeProductValues
     list_display = ('product', 'attribute', 'value',)
-    search_fields = ('product__name','attribute__name', 'value__string_value',)
+    search_fields = ('product__name', 'attribute__name',
+                     'value__string_value',)
     autocomplete_fields = ('attribute',)
 
     # def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -104,7 +114,7 @@ class AttributeProductValuesAdmin(admin.ModelAdmin):
     #     return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     # def formfield_for_dbfield(self, db_field, request, **kwargs):
-        
+
     #     if db_field.name == 'attribute':
     #         qs = Attribute.objects.filter(pk=1)
     #         return forms.ModelChoiceField(queryset=qs, **kwargs)
@@ -143,6 +153,22 @@ class CartAdmin(admin.ModelAdmin):
     search_fields = ('user__email',)
 
 
+class ContractorAdmin(admin.ModelAdmin):
+    model = Contractor
+    list_display = ('name', 'full_name', 'inn', 'kpp', 'registered_address',)
+    list_display_links = ('name', 'full_name', 'inn',)
+    search_fields = ('name', 'full_name', 'inn', 'kpp', 'registered_address',)
+
+
+class ContractorUserAdmin(admin.ModelAdmin):
+    model = ContractorUser
+    list_display = ('user', 'contractor',)
+    list_display_links = ('user', 'contractor',)
+    search_fields = ('user__email', 'contractor__name',
+                     'contractor__full_name', 'contractor__inn',
+                     'contractor__kpp', 'contractor__registered_address',)
+
+
 class StatusAdmin(admin.ModelAdmin):
     model = Status
     list_display = ('name', 'external_code', 'for_bot', 'use',)
@@ -174,6 +200,7 @@ class OrderAdmin(admin.ModelAdmin):
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
+admin.site.register(ImageProduct, ImageProductAdmin)
 admin.site.register(FavoriteProduct, FavoriteProductAdmin)
 admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(AttributeValues, AttributeValuesAdmin)
@@ -185,6 +212,8 @@ admin.site.register(Warehouse, WarehouseAdmin)
 admin.site.register(StockProducts, StockProductsAdmin)
 admin.site.register(CartProduct, CartProductAdmin)
 admin.site.register(Cart, CartAdmin)
+admin.site.register(Contractor, ContractorAdmin)
+admin.site.register(ContractorUser, ContractorUserAdmin)
 admin.site.register(Status, StatusAdmin)
 admin.site.register(PaymentType, PaymentTypeAdmin)
 admin.site.register(DeliveryType, DeliveryTypeAdmin)
