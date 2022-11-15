@@ -73,6 +73,10 @@ def product_image_path(instance, filename):
     return f'photos/{instance.slug}/{filename}'
 
 
+def get_path_to_image(instance, filename):
+    return f'photos/{instance.product.slug}/{filename}'
+
+
 # Категории - это корневые папки справочника Номенклатура в 1С
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='Имя категории')
@@ -140,7 +144,7 @@ class Product(models.Model):
 class ImageProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
                                 related_name='get_images', verbose_name='Товар')
-    photo = models.ImageField(upload_to=product_image_path,
+    photo = models.ImageField(upload_to=get_path_to_image,
                               verbose_name='Изображение')
     description = models.CharField(max_length=100, verbose_name='Описание')
     default = models.BooleanField(default=False, blank=True,
