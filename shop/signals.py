@@ -4,7 +4,7 @@ from .services import *
 
 def set_default_photo_product(sender, **kwargs) -> None:
     photo_product = kwargs['instance']
-    product = Product.objects.get(pk=photo_product.product)
+    product = Product.objects.get(pk=photo_product.product.pk)
 
     if photo_product.default:
         product.photo = photo_product.photo
