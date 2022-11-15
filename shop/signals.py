@@ -2,17 +2,26 @@ from django.db.models.signals import pre_save, post_save, post_delete
 from .services import *
 
 
-def set_default_currency(sender, **kwars) -> None:
+def set_default_photo_product(sender, **kwargs) -> None:
+    photo_product = kwargs['instance']
+    product = Product.objects.get(pk=photo_product.product)
+
+    if photo_product.default:
+        product.photo = photo_product.photo
+        product.save()
+
+
+def set_default_currency(sender, **kwargs) -> None:
     queryset = Currency.objects.filter(default=True)
-    currency = kwars['instance']
+    currency = kwargs['instance']
 
     if not queryset.exists() or (queryset.count() == 1 and queryset.first().digital_code == currency.digital_code):
         currency.default = True
 
 
-def set_default_price_type(sender, **kwars) -> None:
+def set_default_price_type(sender, **kwargs) -> None:
     queryset = PriceType.objects.filter(default=True)
-    price_type = kwars['instance']
+    price_type = kwargs['instance']
 
     if not queryset.exists() or (queryset.count() == 1 and queryset.first().external_code == price_type.external_code):
         price_type.default = True
@@ -20,8 +29,8 @@ def set_default_price_type(sender, **kwars) -> None:
 
 # стандартно расчитывает суммы в строке Корзины или Заказа, данные строки передаются в виде словаря
 # ВНИМАНИЕ! Цена не проверяется, может быть хоть нулевой
-def calculate_product_cart_table_row(sender, **kwars) -> None:
-    product_row = kwars['instance']
+def calculate_product_cart_table_row(sender, **kwargs) -> None:
+    product_row = kwargs['instance']
 
     if product_row.quantity < 0:
         product_row.quantity = 0
@@ -33,8 +42,8 @@ def calculate_product_cart_table_row(sender, **kwars) -> None:
 
 
 # после записи или удаления CartProduct пересчитаем Cart
-def update_cart_product_signal(sender, **kwars) -> None:
-    product_row = kwars['instance']
+def update_cart_product_signal(sender, **kwargs) -> None:
+    product_row = kwargs['instance']
     cart_user = product_row.user.get_user_cart
 
     if cart_user:

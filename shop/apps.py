@@ -13,4 +13,5 @@ class ShopConfig(AppConfig):
         signals.pre_save.connect(signals.calculate_product_cart_table_row, self.get_model('CartProduct'))
         signals.pre_save.connect(signals.set_default_currency, self.get_model('Currency'))
         signals.pre_save.connect(signals.set_default_price_type, self.get_model('PriceType'))
+        signals.post_save.connect(signals.set_default_photo_product, self.get_model('ImageProduct'))
         return super().ready()
