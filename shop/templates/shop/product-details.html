@@ -34,29 +34,38 @@
                     <div class="product-images">
                         <main id="gallery">
                             <div class="main-img">
+                                {% if product_data.photo %}
+                                <img src="{{ product_data.photo.url }}" id="current" alt="photo product">
+                                {% else %}
                                 <img src="https://via.placeholder.com/1000x670" id="current" alt="#">
+                                {% endif %}
                             </div>
                             <div class="images">
-                                <img src="https://via.placeholder.com/1000x670" class="img" alt="#">
-                                <img src="https://via.placeholder.com/1000x670" class="img" alt="#">
-                                <img src="https://via.placeholder.com/1000x670" class="img" alt="#">
-                                <img src="https://via.placeholder.com/1000x670" class="img" alt="#">
-                                <img src="https://via.placeholder.com/1000x670" class="img" alt="#">
+                                {% for image in product_images %}
+                                <img src="{{ image.photo.url }}" class="img" alt="#">
+                                {% endfor %}
                             </div>
                         </main>
+                        <label>Код товара: {{ product_data.external_code }}</label>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-12 col-12">
                     <div class="product-info">
-                        <h2 class="title">GoPro Karma Camera Drone</h2>
-                        <p class="category"><i class="lni lni-tag"></i> Drones:<a href="javascript:void(0)">Action
-                                cameras</a></p>
-                        <h3 class="price">$850<span>$945</span></h3>
-                        <p class="info-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-                            tempor incididunt
-                            ut labore et dolore magna aliqua.</p>
+                        <h2 class="title">{{ product_data.name }}</h2>
+                        <p class="category"><i class="lni lni-tag"></i> {{ product_data.category.name }}</p>
+                        {% if product_prices %}
+                        {% for product_price in product_prices %}
+                        {% if product_price.price_type.default %}
+                        <h3 class="price">{{ product_price.currency.sign }}{{ product_price.price }}<span>{{ product_price.currency.sign }}{{ product_price.price|add:1000|floatformat:2 }}</span></h3>
+                        {% endif %}
+                        {% endfor %}
+                        {% else %}
+                        <h3 class="price">0.00<span>0.00</span></h3>
+                        {% endif %}
+                        <p class="info-text"></p>
                         <div class="row">
-                            <div class="col-lg-4 col-md-4 col-12">
+                            <!-- ТУТ ОПЦИИ ВЫБОРА ЦВЕТА -->
+                            <!-- <div class="col-lg-4 col-md-4 col-12">
                                 <div class="form-group color-option">
                                     <label class="title-label" for="size">Choose color</label>
                                     <div class="single-checkbox checkbox-style-1">
@@ -76,10 +85,10 @@
                                         <label for="checkbox-4"><span></span></label>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-4 col-md-4 col-12">
+                            </div> -->
+                            <!-- <div class="col-lg-4 col-md-4 col-12">
                                 <div class="form-group">
-                                    <label for="color">Battery capacity</label>
+                                    <label for="color">Ёмкость батареи</label>
                                     <select class="form-control" id="color">
                                         <option>5100 mAh</option>
                                         <option>6200 mAh</option>
@@ -89,7 +98,7 @@
                             </div>
                             <div class="col-lg-4 col-md-4 col-12">
                                 <div class="form-group quantity">
-                                    <label for="color">Quantity</label>
+                                    <label for="color">Количество</label>
                                     <select class="form-control">
                                         <option>1</option>
                                         <option>2</option>
@@ -98,23 +107,23 @@
                                         <option>5</option>
                                     </select>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="bottom-content">
                             <div class="row align-items-end">
                                 <div class="col-lg-4 col-md-4 col-12">
                                     <div class="button cart-button">
-                                        <button class="btn" style="width: 100%;">Add to Cart</button>
+                                        <button class="btn" style="width: 100%;">В корзину</button>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-12">
+                                <!-- <div class="col-lg-4 col-md-4 col-12">
                                     <div class="wish-button">
-                                        <button class="btn"><i class="lni lni-reload"></i> Compare</button>
+                                        <button class="btn"><i class="lni lni-reload"></i> Сравнить</button>
                                     </div>
-                                </div>
+                                </div> -->
                                 <div class="col-lg-4 col-md-4 col-12">
                                     <div class="wish-button">
-                                        <button class="btn"><i class="lni lni-heart"></i> To Wishlist</button>
+                                        <button class="btn"><i class="lni lni-heart"></i> В избранное</button>
                                     </div>
                                 </div>
                             </div>
@@ -128,49 +137,48 @@
                 <div class="row">
                     <div class="col-lg-6 col-12">
                         <div class="info-body custom-responsive-margin">
-                            <h4>Details</h4>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-                                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat.</p>
-                            <h4>Features</h4>
+                            <h4>Описание</h4>
+                            <p>{{ product_data.description }}</p>
+                            <!-- <h4>Features</h4>
                             <ul class="features">
                                 <li>Capture 4K30 Video and 12MP Photos</li>
                                 <li>Game-Style Controller with Touchscreen</li>
                                 <li>View Live Camera Feed</li>
                                 <li>Full Control of HERO6 Black</li>
                                 <li>Use App for Dedicated Camera Operation</li>
-                            </ul>
+                            </ul> -->
                         </div>
                     </div>
                     <div class="col-lg-6 col-12">
                         <div class="info-body">
-                            <h4>Specifications</h4>
+                            <h4>Характеристики</h4>
                             <ul class="normal-list">
-                                <li><span>Weight:</span> 35.5oz (1006g)</li>
-                                <li><span>Maximum Speed:</span> 35 mph (15 m/s)</li>
-                                <li><span>Maximum Distance:</span> Up to 9,840ft (3,000m)</li>
-                                <li><span>Operating Frequency:</span> 2.4GHz</li>
-                                <li><span>Manufacturer:</span> GoPro, USA</li>
+                                {% for product_attribute in product_attributes %}
+                                {% if value.numeric_value %}
+                                <li><span>{{ product_attribute.attribute.name }}:</span> {{ product_attribute.value.numeric_value }}</li>
+                                {% else %}
+                                <li><span>{{ product_attribute.attribute.name }}:</span> {{ product_attribute.value.string_value }}</li>
+                                {% endif %}
+                                {% endfor %}
                             </ul>
-                            <h4>Shipping Options:</h4>
+                            <!-- <h4>Вырианты доставки:</h4>
                             <ul class="normal-list">
-                                <li><span>Courier:</span> 2 - 4 days, $22.50</li>
+                                <li><span>Курьер:</span> 2 - 4 days, $22.50</li>
                                 <li><span>Local Shipping:</span> up to one week, $10.00</li>
                                 <li><span>UPS Ground Shipping:</span> 4 - 6 days, $18.00</li>
                                 <li><span>Unishop Global Export:</span> 3 - 4 days, $25.00</li>
-                            </ul>
+                            </ul> -->
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-4 col-12">
-                    <div class="single-block give-review">
-                        <h4>4.5 (Overall)</h4>
+            <!-- <div class="row"> -->
+                <!-- <div class="col-lg-4 col-12"> -->
+                    <!-- <div class="single-block give-review"> -->
+                        <!-- <h4>4.5 (Суммарно)</h4>
                         <ul>
                             <li>
-                                <span>5 stars - 38</span>
+                                <span>5 звезд - 38</span>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star-filled"></i>
@@ -178,7 +186,7 @@
                                 <i class="lni lni-star-filled"></i>
                             </li>
                             <li>
-                                <span>4 stars - 10</span>
+                                <span>4 звезды - 10</span>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star-filled"></i>
@@ -186,7 +194,7 @@
                                 <i class="lni lni-star"></i>
                             </li>
                             <li>
-                                <span>3 stars - 3</span>
+                                <span>3 звезды - 3</span>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star-filled"></i>
@@ -194,7 +202,7 @@
                                 <i class="lni lni-star"></i>
                             </li>
                             <li>
-                                <span>2 stars - 1</span>
+                                <span>2 звезды - 1</span>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star"></i>
@@ -202,27 +210,27 @@
                                 <i class="lni lni-star"></i>
                             </li>
                             <li>
-                                <span>1 star - 0</span>
+                                <span>1 звезда - 0</span>
                                 <i class="lni lni-star-filled"></i>
                                 <i class="lni lni-star"></i>
                                 <i class="lni lni-star"></i>
                                 <i class="lni lni-star"></i>
                                 <i class="lni lni-star"></i>
                             </li>
-                        </ul>
+                        </ul> -->
                         <!-- Button trigger modal -->
-                        <button type="button" class="btn review-btn" data-bs-toggle="modal"
+                        <!-- <button type="button" class="btn review-btn" data-bs-toggle="modal"
                             data-bs-target="#exampleModal">
-                            Leave a Review
-                        </button>
-                    </div>
-                </div>
-                <div class="col-lg-8 col-12">
-                    <div class="single-block">
-                        <div class="reviews">
-                            <h4 class="title">Latest Reviews</h4>
+                            Оставить отзыв
+                        </button> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+                <!-- <div class="col-lg-8 col-12"> -->
+                    <!-- <div class="single-block"> -->
+                        <!-- <div class="reviews"> -->
+                            <!-- <h4 class="title">Последние обзоры</h4> -->
                             <!-- Start Single Review -->
-                            <div class="single-review">
+                            <!-- <div class="single-review">
                                 <img src="https://via.placeholder.com/150x150" alt="#">
                                 <div class="review-info">
                                     <h4>Awesome quality for the price
@@ -239,10 +247,10 @@
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
                                         tempor...</p>
                                 </div>
-                            </div>
+                            </div> -->
                             <!-- End Single Review -->
                             <!-- Start Single Review -->
-                            <div class="single-review">
+                            <!-- <div class="single-review">
                                 <img src="https://via.placeholder.com/150x150" alt="#">
                                 <div class="review-info">
                                     <h4>My husband love his new...
@@ -259,10 +267,10 @@
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
                                         tempor...</p>
                                 </div>
-                            </div>
+                            </div> -->
                             <!-- End Single Review -->
                             <!-- Start Single Review -->
-                            <div class="single-review">
+                            <!-- <div class="single-review">
                                 <img src="https://via.placeholder.com/150x150" alt="#">
                                 <div class="review-info">
                                     <h4>I love the built quality...
@@ -279,12 +287,12 @@
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
                                         tempor...</p>
                                 </div>
-                            </div>
+                            </div> -->
                             <!-- End Single Review -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        <!-- </div> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+            <!-- </div> -->
         </div>
     </div>
 </section>
@@ -296,20 +304,20 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Leave a Review</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Оставить отзыв</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="form-group">
-                            <label for="review-name">Your Name</label>
+                            <label for="review-name">Ваше имя</label>
                             <input class="form-control" type="text" id="review-name" required>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
-                            <label for="review-email">Your Email</label>
+                            <label for="review-email">Ваш Email</label>
                             <input class="form-control" type="email" id="review-email" required>
                         </div>
                     </div>
@@ -317,30 +325,30 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="form-group">
-                            <label for="review-subject">Subject</label>
+                            <label for="review-subject">Тема</label>
                             <input class="form-control" type="text" id="review-subject" required>
                         </div>
                     </div>
                     <div class="col-sm-6">
                         <div class="form-group">
-                            <label for="review-rating">Rating</label>
+                            <label for="review-rating">Оценка</label>
                             <select class="form-control" id="review-rating">
-                                <option>5 Stars</option>
-                                <option>4 Stars</option>
-                                <option>3 Stars</option>
-                                <option>2 Stars</option>
-                                <option>1 Star</option>
+                                <option>5 Звезд</option>
+                                <option>4 Звезды</option>
+                                <option>3 Звезды</option>
+                                <option>2 Звезды</option>
+                                <option>1 Звезда</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="review-message">Review</label>
+                    <label for="review-message">Отзыв</label>
                     <textarea class="form-control" id="review-message" rows="8" required></textarea>
                 </div>
             </div>
             <div class="modal-footer button">
-                <button type="button" class="btn">Submit Review</button>
+                <button type="button" class="btn">Отправить отзыв</button>
             </div>
         </div>
     </div>

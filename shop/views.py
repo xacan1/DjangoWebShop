@@ -161,9 +161,15 @@ class ProductDetailView(DataMixin, DetailView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         slug = kwargs['object'].category.slug
+        images = kwargs['object'].get_images.all()
+        prices = kwargs['object'].get_prices.all() # пока нет выбора типов цен
+        attributes = services.get_attributes_product(kwargs['object'].pk)
         parent_categories = services.get_parents_category(slug, [])
         c_def = self.get_user_context(title='Карточка товара',
-                                      parent_categories=parent_categories)
+                                      parent_categories=parent_categories,
+                                      product_images=images,
+                                      product_prices=prices,
+                                      product_attributes=attributes)
         return {**context, **c_def}
 
 

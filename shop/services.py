@@ -67,6 +67,12 @@ def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
     return price_products
 
 
+def get_attributes_product(product_pk: int) -> models.QuerySet:
+    product_attributes = AttributeProductValues.objects.select_related('attribute', 'value').filter(product=product_pk)
+
+    return product_attributes
+
+
 # Возвращает вложенные категории в корневую категорию и саму категорию
 def get_nested_categories(category_slug: str) -> tuple[models.Model, models.QuerySet]:
     nested_categories = models.QuerySet()
