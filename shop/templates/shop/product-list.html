@@ -208,7 +208,7 @@
                         <div class="tab-pane fade" id="nav-grid" role="tabpanel" aria-labelledby="nav-grid-tab">
                             <!-- Область grids -->
                             <div class="row">
-                                {% for product_info in price_products %}
+                                {% for product_info in page_obj %}
                                 <div class="col-lg-4 col-md-6 col-12">
                                     <!-- Start Single Product -->
                                     <div class="single-product">
@@ -250,18 +250,18 @@
                                     <!-- Pagination -->
                                     <div class="pagination center">
                                         <ul class="pagination-list">
-                                            {% if price_products.has_previous %}
-                                            <li><a href="?page={{ price_products.previous_page_number }}"><i class="lni lni-chevron-left"></i></a></li>
+                                            {% if page_obj.has_previous %}
+                                            <li><a href="?page={{ page_obj.previous_page_number }}&q={{ search_text }}"><i class="lni lni-chevron-left"></i></a></li>
                                             {% endif %}
-                                            {% for p in price_products.paginator.page_range %}
-                                            {% if p == price_products.number %}
-                                            <li class="active"><a href="?page={{ p }}">{{ p }}</a></li>
-                                            {% elif p >= price_products.number|add:-2 and p <= price_products.number|add:2 %}
-                                            <li><a href="?page={{ p }}">{{ p }}</a></li>
+                                            {% for p in page_obj.paginator.page_range %}
+                                            {% if p == page_obj.number %}
+                                            <li class="active"><a href="?page={{ p }}&q={{ search_text }}">{{ p }}</a></li>
+                                            {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                                            <li><a href="?page={{ p }}&q={{ search_text }}">{{ p }}</a></li>
                                             {% endif %}
                                             {% endfor %}
-                                            {% if price_products.has_next %}
-                                            <li><a href="?page={{ price_products.next_page_number }}"><i class="lni lni-chevron-right"></i></a></li>
+                                            {% if page_obj.has_next %}
+                                            <li><a href="?page={{ page_obj.next_page_number }}&q={{ search_text }}"><i class="lni lni-chevron-right"></i></a></li>
                                             {% endif %}
                                         </ul>
                                     </div>
@@ -273,7 +273,7 @@
                             aria-labelledby="nav-list-tab">
                             <!-- Область list -->
                             <div class="row">
-                                {% for product_info in price_products %}
+                                {% for product_info in page_obj %}
                                 <div class="col-lg-12 col-md-12 col-12">
                                     <!-- Start Single Product -->
                                     <div class="single-product">
@@ -297,14 +297,6 @@
                                                     <h4 class="title">
                                                         <a href="{% url 'productdetails' product_info.product.slug %}">{{ product_info.product.name }}</a>
                                                     </h4>
-                                                    <!-- <ul class="review">
-                                                        <li><i class="lni lni-star-filled"></i></li>
-                                                        <li><i class="lni lni-star-filled"></i></li>
-                                                        <li><i class="lni lni-star-filled"></i></li>
-                                                        <li><i class="lni lni-star-filled"></i></li>
-                                                        <li><i class="lni lni-star"></i></li>
-                                                        <li><span>4.0 Review(s)</span></li>
-                                                    </ul> -->
                                                     <div class="price">
                                                         <span>{{ product_info.currency.sign }}{{ product_info.price }}</span>
                                                     </div>
@@ -320,18 +312,18 @@
                                     <!-- Pagination -->
                                     <div class="pagination center">
                                         <ul class="pagination-list">
-                                            {% if price_products.has_previous %}
-                                            <li><a href="?page={{ price_products.previous_page_number }}"><i class="lni lni-chevron-left"></i></a></li>
+                                            {% if page_obj.has_previous %}
+                                            <li><a href="?page={{ page_obj.previous_page_number }}&q={{ search_text }}"><i class="lni lni-chevron-left"></i></a></li>
                                             {% endif %}
-                                            {% for p in price_products.paginator.page_range %}
-                                            {% if p == price_products.number %}
-                                            <li class="active"><a href="?page={{ p }}">{{ p }}</a></li>
-                                            {% elif p >= price_products.number|add:-2 and p <= price_products.number|add:2 %}
-                                            <li><a href="?page={{ p }}">{{ p }}</a></li>
+                                            {% for p in page_obj.paginator.page_range %}
+                                            {% if p == page_obj.number %}
+                                            <li class="active"><a href="?page={{ p }}&q={{ search_text }}">{{ p }}</a></li>
+                                            {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                                            <li><a href="?page={{ p }}&q={{ search_text }}">{{ p }}</a></li>
                                             {% endif %}
                                             {% endfor %}
-                                            {% if price_products.has_next %}
-                                            <li><a href="?page={{ price_products.next_page_number }}"><i class="lni lni-chevron-right"></i></a></li>
+                                            {% if page_obj.has_next %}
+                                            <li><a href="?page={{ page_obj.next_page_number }}&q={{ search_text }}"><i class="lni lni-chevron-right"></i></a></li>
                                             {% endif %}
                                         </ul>
                                     </div>

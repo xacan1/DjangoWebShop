@@ -113,6 +113,7 @@ class FaqView(DataMixin, FormView):
         return {**context, **c_def}
 
 
+# выводит либо список категорий либо список номенклатуры если в категории больше нет подкатегорий
 class CategoryProductListView(DataMixin, FormView):
     form_class = SimpleForm
     slug_url_kwarg = 'category_slug'
@@ -141,13 +142,32 @@ class CategoryProductListView(DataMixin, FormView):
             c_def = self.get_user_context(title='Список товаров',
                                           total_show_product=total_show_product,
                                           parent_categories=parent_categories,
-                                          price_products=page_obj)
+                                          page_obj=page_obj)
         else:
             category, nested_categories = services.get_nested_categories(slug)
             c_def = self.get_user_context(title='Список категорий',
                                           current_category=category,
                                           nested_categories=nested_categories,
                                           parent_categories=parent_categories)
+
+        return {**context, **c_def}
+
+
+class SearchView(DataMixin, ListView):
+    template_name = 'shop/product-list.html'
+    paginate_by = 10
+
+    def get_queryset(self) -> models.QuerySet[Product]:
+        q = self.request.GET.get('q')
+        queryset = services.search_products(q)
+        return queryset
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        q = self.request.GET.get('q')
+        c_def = self.get_user_context(title=q,
+                                      search_text=q,
+                                      total_show_product=self.paginate_by)
 
         return {**context, **c_def}
 
@@ -162,7 +182,7 @@ class ProductDetailView(DataMixin, DetailView):
         context = super().get_context_data(**kwargs)
         slug = kwargs['object'].category.slug
         images = kwargs['object'].get_images.all()
-        prices = kwargs['object'].get_prices.all() # пока нет выбора типов цен
+        prices = kwargs['object'].get_prices.all()  # пока нет выбора типов цен
         attributes = services.get_attributes_product(kwargs['object'].pk)
         parent_categories = services.get_parents_category(slug, [])
         c_def = self.get_user_context(title='Карточка товара',

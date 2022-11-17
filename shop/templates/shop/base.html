@@ -134,14 +134,16 @@
                         <!-- Start Main Menu Search -->
                         <div class="main-menu-search">
                             <!-- navbar search start -->
-                            <div class="navbar-search search-style-5">
-                                <div class="search-input">
-                                    <input type="text" placeholder="Поиск">
+                            <form action="{% url 'search' %}" method="GET">
+                                <div class="navbar-search search-style-5">
+                                    <div class="search-input">
+                                        <input type="text" name="q" value="{{ search_text }}" placeholder="Поиск">
+                                    </div>
+                                    <div class="search-btn">
+                                        <button class="submit"><i class="lni lni-search-alt"></i></button>
+                                    </div>
                                 </div>
-                                <div class="search-btn">
-                                    <button><i class="lni lni-search-alt"></i></button>
-                                </div>
-                            </div>
+                            </form>
                             <!-- navbar search Ends -->
                         </div>
                         <!-- End Main Menu Search -->
@@ -222,14 +224,16 @@
                         <!-- Start Main Menu Search -->
                         <div class="main-menu-search">
                             <!-- navbar search start -->
-                            <div class="navbar-search search-style-5">
-                                <div class="search-input">
-                                    <input type="text" placeholder="Поиск">
+                            <form action="{% url 'search' %}" method="GET">
+                                <div class="navbar-search search-style-5">
+                                    <div class="search-input">
+                                        <input type="text" name="q" value="{{ search_text }}" placeholder="Поиск">
+                                    </div>
+                                    <div class="search-btn">
+                                        <button class="submit"><i class="lni lni-search-alt"></i></button>
+                                    </div>
                                 </div>
-                                <div class="search-btn">
-                                    <button><i class="lni lni-search-alt"></i></button>
-                                </div>
-                            </div>
+                            </form>
                             <!-- navbar search Ends -->
                         </div>
                         <!-- End Main Menu Search -->

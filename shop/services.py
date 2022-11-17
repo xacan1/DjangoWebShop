@@ -67,6 +67,13 @@ def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
     return price_products
 
 
+# Возвращает всю необходимую информацию для списка товаров исходя из поиска по наименованию
+def search_products(search_text: str):
+    price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(product__name__icontains=search_text, price_type__default=True)
+
+    return price_products
+
+
 def get_attributes_product(product_pk: int) -> models.QuerySet:
     product_attributes = AttributeProductValues.objects.select_related('attribute', 'value').filter(product=product_pk)
 
