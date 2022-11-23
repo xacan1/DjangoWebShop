@@ -72,11 +72,12 @@ class RegisterUserSuccessView(DataMixin, FormView):
 
 
 class CartView(DataMixin, ListView):
-    model = Cart
+    model = CartProduct
     template_name = 'shop/cart.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+        # cart_info = services.get_cart_full_info(self.request.user)
         c_def = self.get_user_context(title='Корзина')
         return {**context, **c_def}
 
@@ -89,7 +90,6 @@ class CheckoutView(DataMixin, FormView):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(
             title='Оформление заказа', form_login=LoginUserForm)
-        # c_def = {'title': 'Оформление заказа'}
         return {**context, **c_def}
 
 
@@ -180,14 +180,18 @@ class ProductDetailView(DataMixin, DetailView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
+        product_pk = kwargs['object'].pk
         slug = kwargs['object'].category.slug
         images = kwargs['object'].get_images.all()
+        stocks = kwargs['object'].get_stock_product.all()
+
         prices = kwargs['object'].get_prices.all()  # пока нет выбора типов цен
-        attributes = services.get_attributes_product(kwargs['object'].pk)
+        attributes = services.get_attributes_product(product_pk)
         parent_categories = services.get_parents_category(slug, [])
         c_def = self.get_user_context(title='Карточка товара',
                                       parent_categories=parent_categories,
                                       product_images=images,
+                                      product_stocks=stocks,
                                       product_prices=prices,
                                       product_attributes=attributes)
         return {**context, **c_def}

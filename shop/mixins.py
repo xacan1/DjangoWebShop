@@ -11,6 +11,10 @@ class DataMixin:
         context = kwargs
         context_main_menu = main_menu.copy()
         context_user_menu = user_menu.copy()
+        cart_info = {}
+
+        # if self.request.user:
+        #     cart_info = services.get_cart_full_info(self.request.user)
 
         if not self.request.user.is_authenticated:
             context_main_menu.pop('Обратная связь')
@@ -26,5 +30,6 @@ class DataMixin:
 
         context['user_menu'] = context_user_menu
         context['main_menu'] = context_main_menu
+        # context['cart'] = cart_info
         context['categories'] = services.get_categories(None)
         return context

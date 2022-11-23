@@ -8181,3 +8181,13 @@ blockquote span {
     display: none;
   }
 }
+
+/* Счетчик строк псевдотаблицы на div'ах в корзине и заказе */
+/* body {
+    counter-reset: row;
+}
+
+.count-input:before {
+    counter-increment: row;
+    content: "row" counter(row) ".";
+} */

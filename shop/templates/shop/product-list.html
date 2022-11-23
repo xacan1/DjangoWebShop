@@ -273,6 +273,7 @@
                             aria-labelledby="nav-list-tab">
                             <!-- Область list -->
                             <div class="row">
+                                {% if page_obj %}
                                 {% for product_info in page_obj %}
                                 <div class="col-lg-12 col-md-12 col-12">
                                     <!-- Start Single Product -->
@@ -307,6 +308,15 @@
                                     <!-- End Single Product -->
                                 </div>
                                 {% endfor %}
+                                {% else %}
+                                <div class="col-lg-12 col-md-12 col-12">
+                                    <div class="single-product">
+                                        <div class="row">
+                                            <p>НИЧЕГО НЕ НАЙДЕНО</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
                             <div class="row">
                                 <div class="col-12">
                                     <!-- Pagination -->

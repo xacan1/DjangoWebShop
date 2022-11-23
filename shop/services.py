@@ -81,8 +81,8 @@ def get_attributes_product(product_pk: int) -> models.QuerySet:
 
 
 # Возвращает вложенные категории в корневую категорию и саму категорию
-def get_nested_categories(category_slug: str) -> tuple[models.Model, models.QuerySet]:
-    nested_categories = models.QuerySet()
+def get_nested_categories(category_slug: str) -> tuple[models.Model, models.QuerySet[Category]]:
+    nested_categories = models.QuerySet(Category)
     categories = Category.objects.filter(slug=category_slug)
 
     if categories.exists():
@@ -123,16 +123,18 @@ def create_new_cart(new_cart_info: dict) -> dict:
 # получает или создает Корзину пользователя по ID пользователя в виде словаря
 def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool = False) -> dict:
     cart_info = {}
-    cartset = Cart.objects.filter(user=user_pk).values()
 
-    if cartset.exists():
-        cart_info = cartset[0]
-    else:
-        new_cart_info = {
-            'user': user_pk,
-            'for_anonymous_user': for_anonymous_user
-        }
-        cart_info = create_new_cart(new_cart_info)
+    if user_pk:
+        cartset = Cart.objects.filter(user=user_pk).values()
+
+        if cartset.exists():
+            cart_info = cartset[0]
+        else:
+            new_cart_info = {
+                'user': user_pk,
+                'for_anonymous_user': for_anonymous_user
+            }
+            cart_info = create_new_cart(new_cart_info)
 
     return cart_info
 
@@ -182,6 +184,7 @@ def get_cart_order_products(cart_order_pk: int, id_messenger: int = 0, for_order
     return products_cart_order
 
 
+# Получает строго остаток по товару на складе
 def get_stock_product(product_pk: int, warehouse_pk: int) -> Decimal:
     stock = Decimal(0)
     params = {'product': product_pk, 'warehouse': warehouse_pk}
@@ -447,12 +450,15 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
     return order_info
 
 
-# получает полную информацию о Корзине с товарами
-def get_cart_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
+# получает полную информацию о Корзине с товарами с обновленными ценами
+def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}) -> dict:
     cart_info = {}
     products = []
-
     user_pk = user.pk
+
+    if not user_pk:
+        return cart_info
+
     for_anonymous_user = get_params.get('for_anonymous_user', False)
     id_messenger = get_params.get('id_messenger', '0')
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
@@ -485,7 +491,7 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
 
         cart_info['products'] = products
         cart_info.pop('get_cart_products')
-    else:
+    elif user_pk:
         new_cart_info = {
             'user': user_pk,
             'for_anonymous_user': for_anonymous_user

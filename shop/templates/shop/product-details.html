@@ -56,64 +56,33 @@
                         {% if product_prices %}
                         {% for product_price in product_prices %}
                         {% if product_price.price_type.default %}
-                        <h3 class="price">{{ product_price.currency.sign }}{{ product_price.price }}<span>{{ product_price.currency.sign }}{{ product_price.price|add:1000|floatformat:2 }}</span></h3>
+                        <h3 class="price">{{ product_price.currency.sign }}{{ product_price.price|floatformat:'2g' }}<span>{{ product_price.currency.sign }}{{ product_price.price|add:1000|floatformat:'2g' }}</span></h3>
                         {% endif %}
                         {% endfor %}
                         {% else %}
                         <h3 class="price">0.00<span>0.00</span></h3>
                         {% endif %}
                         <p class="info-text"></p>
-                        <div class="row">
-                            <!-- ТУТ ОПЦИИ ВЫБОРА ЦВЕТА -->
-                            <!-- <div class="col-lg-4 col-md-4 col-12">
-                                <div class="form-group color-option">
-                                    <label class="title-label" for="size">Choose color</label>
-                                    <div class="single-checkbox checkbox-style-1">
-                                        <input type="checkbox" id="checkbox-1" checked>
-                                        <label for="checkbox-1"><span></span></label>
-                                    </div>
-                                    <div class="single-checkbox checkbox-style-2">
-                                        <input type="checkbox" id="checkbox-2">
-                                        <label for="checkbox-2"><span></span></label>
-                                    </div>
-                                    <div class="single-checkbox checkbox-style-3">
-                                        <input type="checkbox" id="checkbox-3">
-                                        <label for="checkbox-3"><span></span></label>
-                                    </div>
-                                    <div class="single-checkbox checkbox-style-4">
-                                        <input type="checkbox" id="checkbox-4">
-                                        <label for="checkbox-4"><span></span></label>
-                                    </div>
-                                </div>
-                            </div> -->
-                            <!-- <div class="col-lg-4 col-md-4 col-12">
-                                <div class="form-group">
-                                    <label for="color">Ёмкость батареи</label>
-                                    <select class="form-control" id="color">
-                                        <option>5100 mAh</option>
-                                        <option>6200 mAh</option>
-                                        <option>8000 mAh</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-4 col-12">
-                                <div class="form-group quantity">
-                                    <label for="color">Количество</label>
-                                    <select class="form-control">
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                    </select>
-                                </div>
-                            </div> -->
-                        </div>
                         <div class="bottom-content">
                             <div class="row align-items-end">
                                 <div class="col-lg-4 col-md-4 col-12">
+                                    <div class="warehouses py-3">
+                                        {% if product_stocks %}
+                                        <p class="py-1">Выберите склад:</p>
+                                        {% for stock in product_stocks %}
+                                        <input type="radio" name="warehouse" value="{{ stock.warehouse.pk }}" id="choice{{ stock.warehouse.pk }}">
+                                        <label for="choice{{ stock.warehouse.pk }}">{{ stock.warehouse.name }}</label>
+                                        {% endfor %}
+                                        {% else %}
+                                        <p class="py-1">Нет в наличии</p>
+                                        {% endif %}
+                                    </div>
                                     <div class="button cart-button">
-                                        <button class="btn" style="width: 100%;">В корзину</button>
+                                        {% if product_stocks %}
+                                        <button class="btn" onclick="add_product_to_cart(this);" data-shop-product-pk="{{ product_data.pk }}" style="width: 100%;">Купить</button>
+                                        {% else %}
+                                        <button class="btn" onclick="add_product_to_cart(this);" data-shop-product-pk="{{ product_data.pk }}" style="width: 100%;" disabled>Купить</button>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <!-- <div class="col-lg-4 col-md-4 col-12">
@@ -172,127 +141,6 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="row"> -->
-                <!-- <div class="col-lg-4 col-12"> -->
-                    <!-- <div class="single-block give-review"> -->
-                        <!-- <h4>4.5 (Суммарно)</h4>
-                        <ul>
-                            <li>
-                                <span>5 звезд - 38</span>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                            </li>
-                            <li>
-                                <span>4 звезды - 10</span>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star"></i>
-                            </li>
-                            <li>
-                                <span>3 звезды - 3</span>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star"></i>
-                                <i class="lni lni-star"></i>
-                            </li>
-                            <li>
-                                <span>2 звезды - 1</span>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star"></i>
-                                <i class="lni lni-star"></i>
-                                <i class="lni lni-star"></i>
-                            </li>
-                            <li>
-                                <span>1 звезда - 0</span>
-                                <i class="lni lni-star-filled"></i>
-                                <i class="lni lni-star"></i>
-                                <i class="lni lni-star"></i>
-                                <i class="lni lni-star"></i>
-                                <i class="lni lni-star"></i>
-                            </li>
-                        </ul> -->
-                        <!-- Button trigger modal -->
-                        <!-- <button type="button" class="btn review-btn" data-bs-toggle="modal"
-                            data-bs-target="#exampleModal">
-                            Оставить отзыв
-                        </button> -->
-                    <!-- </div> -->
-                <!-- </div> -->
-                <!-- <div class="col-lg-8 col-12"> -->
-                    <!-- <div class="single-block"> -->
-                        <!-- <div class="reviews"> -->
-                            <!-- <h4 class="title">Последние обзоры</h4> -->
-                            <!-- Start Single Review -->
-                            <!-- <div class="single-review">
-                                <img src="https://via.placeholder.com/150x150" alt="#">
-                                <div class="review-info">
-                                    <h4>Awesome quality for the price
-                                        <span>Jacob Hammond
-                                        </span>
-                                    </h4>
-                                    <ul class="stars">
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                    </ul>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-                                        tempor...</p>
-                                </div>
-                            </div> -->
-                            <!-- End Single Review -->
-                            <!-- Start Single Review -->
-                            <!-- <div class="single-review">
-                                <img src="https://via.placeholder.com/150x150" alt="#">
-                                <div class="review-info">
-                                    <h4>My husband love his new...
-                                        <span>Alex Jaza
-                                        </span>
-                                    </h4>
-                                    <ul class="stars">
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star"></i></li>
-                                    </ul>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-                                        tempor...</p>
-                                </div>
-                            </div> -->
-                            <!-- End Single Review -->
-                            <!-- Start Single Review -->
-                            <!-- <div class="single-review">
-                                <img src="https://via.placeholder.com/150x150" alt="#">
-                                <div class="review-info">
-                                    <h4>I love the built quality...
-                                        <span>Jacob Hammond
-                                        </span>
-                                    </h4>
-                                    <ul class="stars">
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                        <li><i class="lni lni-star-filled"></i></li>
-                                    </ul>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-                                        tempor...</p>
-                                </div>
-                            </div> -->
-                            <!-- End Single Review -->
-                        <!-- </div> -->
-                    <!-- </div> -->
-                <!-- </div> -->
-            <!-- </div> -->
         </div>
     </div>
 </section>
