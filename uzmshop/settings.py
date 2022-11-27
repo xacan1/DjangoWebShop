@@ -146,3 +146,5 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
+
+SESSION_COOKIE_AGE = 24 * 60 * 60

@@ -139,10 +139,10 @@ class StockProductsAdmin(admin.ModelAdmin):
 
 class CartProductAdmin(admin.ModelAdmin):
     model = CartProduct
-    list_display = ('user', 'cart', 'order', 'product', 'quantity', 'price', 'discount',
+    list_display = ('cart', 'order', 'product', 'quantity', 'price', 'discount',
                     'discount_percentage', 'amount', 'warehouse', 'phone', 'id_messenger',)
-    list_display_links = ('user', 'order',)
-    search_fields = ('phone', 'id_messenger', 'amount', 'user__email',)
+    list_display_links = ('cart', 'order',)
+    search_fields = ('phone', 'id_messenger', 'amount',)
 
 
 class CartAdmin(admin.ModelAdmin):

@@ -335,15 +335,15 @@ class StockProducts(models.Model):
 # что бы отделить товар одного покупателя от другого в общей корзине телеграм бота
 # phone - заполняется когда строка корзины превращается в строку заказа
 class CartProduct(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             verbose_name='Покупатель')
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,
+    #                          verbose_name='Покупатель')
+    cart = models.ForeignKey('Cart', on_delete=models.CASCADE,
+                             related_name='get_cart_products', null=True,
+                             blank=True, verbose_name='Корзина')
     id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')
     phone = models.CharField(max_length=15, default='', blank=True,
                              verbose_name='Телефон')
-    cart = models.ForeignKey('Cart', on_delete=models.CASCADE,
-                             related_name='get_cart_products', null=True,
-                             blank=True, verbose_name='Корзина')
     order = models.ForeignKey('Order', on_delete=models.CASCADE,
                               related_name='get_order_products', null=True,
                               blank=True, verbose_name='Заказ')
@@ -376,9 +376,13 @@ class CartProduct(models.Model):
 # нужно по ID пользователей из месседжера.
 # for_anonymous_user - признак что этот пользователь сайта является общим пользователем для АПИ и его корзина
 # общая для всех покупателей заказывающих через него
+# Корзина может быть не связана с пользователем (анонимная), но тогда она привязана к ID сессии, как только пользователь
+# залогинится на сайт, сама корзина и товары из корзины сессии удалятся и перейдут в корзину пользователя
 class Cart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE,
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True,
                                 related_name='get_user_cart', verbose_name='Покупатель')
+    sessionid = models.CharField(max_length=40, default='', blank=True,
+                                 verbose_name='Ключ сессии')
     quantity = models.DecimalField(max_digits=15, decimal_places=3, blank=True,
                                    default=0, verbose_name='Общее количество')
     amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True,
@@ -389,7 +393,7 @@ class Cart(models.Model):
                                              verbose_name='Анонимный покупатель')
 
     def __str__(self) -> str:
-        return f'Корзина пользователя {self.user.email}'
+        return f'Корзина {self.user.email if self.user else self.sessionid}'
 
     class Meta:
         verbose_name = 'Корзина'

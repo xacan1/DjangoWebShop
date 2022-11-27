@@ -1,6 +1,6 @@
 from rest_framework import generics
 from rest_framework.views import Response, Request, APIView
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, AllowAny
 from .models import *
 from .serializers import *
 from . import services
@@ -515,7 +515,7 @@ class CartProductAPIUpdate(generics.UpdateAPIView):
 class CartProductAPIDelete(generics.DestroyAPIView):
     queryset = CartProduct.objects.all()
     serializer_class = CartProductSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
 
 class CartAPICreate(generics.CreateAPIView):
@@ -693,11 +693,11 @@ class OrderAPIDelete(generics.DestroyAPIView):
 
 
 class APIUpdateProductToCart(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def post(self, request: Request) -> Response:
         data_response = services.add_delete_update_product_to_cart(
-            request.user, request.data)
+            request.user, request.data, self.request.session.session_key)
         return Response(data_response)
 
 
@@ -741,10 +741,17 @@ class APIGetOrderInfo(APIView):
 
 
 class APIGetCartInfo(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request: Request) -> Response:
         get_params = request.query_params
         get_params = {param: get_params[param] for param in get_params}
-        cart_info = services.get_cart_full_info(request.user, get_params)
+        session_key = self.request.session.session_key
+        old_session_key = self.request.session.get('sessionid', '')
+
+        # сессия изменилась из-за логина, надо сделать слияние анонимной корзины с пользовательской
+        if session_key != old_session_key and request.user.is_authenticated:
+            services.merging_two_shopping_carts(request.user, old_session_key)
+
+        cart_info = services.get_cart_full_info(request.user, get_params=get_params, session_key=session_key)
         return Response(cart_info)

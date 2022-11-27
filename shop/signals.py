@@ -1,4 +1,5 @@
-from django.db.models.signals import pre_save, post_save, post_delete
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from .services import *
 
 
@@ -44,28 +45,35 @@ def calculate_product_cart_table_row(sender, **kwargs) -> None:
 # после записи или удаления CartProduct пересчитаем Cart
 def update_cart_product_signal(sender, **kwargs) -> None:
     product_row = kwargs['instance']
-    cart_user = product_row.user.get_user_cart
 
-    if cart_user:
-        cart_pk = cart_user.pk
-    else:
+    try:
+        cart = product_row.cart
+    except ObjectDoesNotExist:
         return
 
-    # в любом случае пересчитаю общие суммы Корзины
-    cart_sum = CartProduct.objects.filter(cart=cart_pk, order=None).aggregate(
-        sum_quantity=models.Sum('quantity'),
-        sum_amount=models.Sum('amount'),
-        sum_discount=models.Sum('discount')
-    )
+    # try:
+    #     order = product_row.order
+    # except ObjectDoesNotExist:
+    #     return
 
-    queryset = Cart.objects.filter(pk=cart_pk)
+    if cart:
+        cart_pk = product_row.cart.pk
 
-    if queryset.exists():
-        cart = queryset[0]
-        cart.quantity = cart_sum['sum_quantity'] if cart_sum['sum_quantity'] else 0
-        cart.amount = cart_sum['sum_amount'] if cart_sum['sum_amount'] else 0
-        cart.discount = cart_sum['sum_discount'] if cart_sum['sum_discount'] else 0
-        cart.save()
+        # в любом случае пересчитаю общие суммы Корзины
+        cart_sum = CartProduct.objects.filter(cart=cart_pk, order=None).aggregate(
+            sum_quantity=models.Sum('quantity'),
+            sum_amount=models.Sum('amount'),
+            sum_discount=models.Sum('discount')
+        )
+
+        queryset = Cart.objects.filter(pk=cart_pk)
+
+        if queryset.exists():
+            cart = queryset[0]
+            cart.quantity = cart_sum['sum_quantity'] if cart_sum['sum_quantity'] else 0
+            cart.amount = cart_sum['sum_amount'] if cart_sum['sum_amount'] else 0
+            cart.discount = cart_sum['sum_discount'] if cart_sum['sum_discount'] else 0
+            cart.save()
 
     # если есть Заказ, то пересчитаю его общие суммы и сменю статус
     if product_row.order:

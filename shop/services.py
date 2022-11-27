@@ -139,6 +139,24 @@ def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool = False) -> dict:
     return cart_info
 
 
+def get_cart_by_sessionid(session_key: str, for_anonymous_user: bool = False) -> dict:
+    cart_info = {}
+
+    if session_key:
+        cartset = Cart.objects.filter(sessionid=session_key).values()
+
+        if cartset.exists():
+            cart_info = cartset[0]
+        else:
+            new_cart_info = {
+                'sessionid': session_key,
+                'for_anonymous_user': for_anonymous_user
+            }
+            cart_info = create_new_cart(new_cart_info)
+
+    return cart_info
+
+
 # получает одну строку товара из Корзины или Заказа в виде объекта строки product_cart и в виде словаря product_cart_info
 def get_cart_order_product(cart_order_pk: int, product_pk: int, id_messenger: int = 0, for_order: bool = False) -> tuple[CartProduct, dict]:
     product_cart = None
@@ -232,7 +250,7 @@ def get_last_price(product_pk: int) -> dict:
 
 # Добавляет товар в корзину(создает её при необходимости) или изменяет количество товара как в большую так и меньшую сторону
 # Если количество товара опускается до нуля, то строка удаляется
-def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict) -> dict:
+def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict, session_key: str = '') -> dict:
     user_pk = user.pk
     product_pk = request_data.get('product_pk', 0)
     warehouse_pk = request_data.get('warehouse_pk', 0)
@@ -243,9 +261,17 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
         data_response = {'error': 'product_pk or warehouse_pk is undefined'}
         return data_response
 
-    cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
+    if user_pk:
+        cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
+    elif session_key:
+        cart_info = get_cart_by_sessionid(session_key, for_anonymous_user)
+    else:
+        data_response = {'error': 'user_pk and session_key is undefined'}
+        return data_response
+
     cart_pk = cart_info.get('id', 0)
 
+    # получим актуальные цены
     price_info = get_last_price(product_pk)
 
     if not price_info:
@@ -254,7 +280,6 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
 
     # Теперь заполним данные о новой строке товара в корзине
     new_cart_product = {
-        'user': user_pk,
         'cart': cart_pk,
         'id_messenger': id_messenger,
         'quantity': Decimal(request_data['quantity']),
@@ -450,26 +475,55 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
     return order_info
 
 
+def delete_cart_by_session_key(session_key: str) -> None:
+    queryset = Cart.objects.filter(sessionid=session_key)
+
+    if queryset.exists():
+        cart = queryset[0]
+        cart.delete()
+
+
+def merging_two_shopping_carts(user: AbstractBaseUser, session_key: str) -> None:
+    anonymous_cart_products = CartProduct.objects.filter(cart__sessionid = session_key).values()
+    new_product_cart = {}
+
+    for product_cart in anonymous_cart_products:
+        new_product_cart['product_pk'] = product_cart.get('product_id')
+        new_product_cart['warehouse_pk'] = product_cart.get('warehouse_id')
+        new_product_cart['id_messenger'] = product_cart.get('id_messenger')
+        new_product_cart['quantity'] = product_cart.get('quantity')
+        add_delete_update_product_to_cart(user, new_product_cart, session_key)
+
+    delete_cart_by_session_key(session_key)
+
+
 # получает полную информацию о Корзине с товарами с обновленными ценами
-def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}) -> dict:
-    cart_info = {}
+def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_key: str = '') -> dict:
     products = []
+    cart_info = {'quantity': 0, 'amount': 0, 'products': products}
     user_pk = user.pk
 
-    if not user_pk:
+    if not user_pk and not session_key:
         return cart_info
 
     for_anonymous_user = get_params.get('for_anonymous_user', False)
     id_messenger = get_params.get('id_messenger', '0')
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
 
-    cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
+    if user_pk:
+        cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
+    else:
+        cart_info = get_cart_by_sessionid(session_key, for_anonymous_user)
+
     cart_pk = cart_info.get('id', 0)
 
     # надо обновить строки и корзину если цены не совпадают
     update_price_in_cart_order(cart_pk, id_messenger, False)
 
-    cartset = Cart.objects.filter(user=user_pk)
+    if user_pk:
+        cartset = Cart.objects.filter(user=user_pk)
+    else:
+        cartset = Cart.objects.filter(sessionid=session_key)
 
     if cartset.exists():
         serializer_cart = CartSerializer(cartset[0])
@@ -494,6 +548,12 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}) -> dict:
     elif user_pk:
         new_cart_info = {
             'user': user_pk,
+            'for_anonymous_user': for_anonymous_user
+        }
+        cart_info = create_new_cart(new_cart_info)
+    elif session_key:
+        new_cart_info = {
+            'sessionid': session_key,
             'for_anonymous_user': for_anonymous_user
         }
         cart_info = create_new_cart(new_cart_info)
