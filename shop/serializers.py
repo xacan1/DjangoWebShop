@@ -74,14 +74,26 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('pk', 'name', 'external_code',
                   'photo', 'parent', 'nested_category',)
 
-
+# тут нужен slug для фронтэнда , где он используется для формирования поля
 class ProductSerializer(serializers.ModelSerializer):
+    get_prices = PriceSerializer(many=True, read_only=True)
+    get_stock_product = StockProductSerializer(many=True, read_only=True)
+    slug = serializers.SlugField(required=False)
+
+    class Meta:
+        model = Product
+        fields = ('pk', 'name', 'slug', 'external_code', 'category', 'photo',
+                  'time_create', 'get_prices', 'get_stock_product', 'description',)
+
+
+# тут нас не нужен slug так как он формируется автоматически при записи товара
+class ProductCreateSerializer(serializers.ModelSerializer):
     get_prices = PriceSerializer(many=True, read_only=True)
     get_stock_product = StockProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
-        fields = ('pk', 'name', 'slug', 'external_code', 'category', 'photo',
+        fields = ('pk', 'name', 'external_code', 'category', 'photo',
                   'time_create', 'get_prices', 'get_stock_product', 'description',)
 
 
