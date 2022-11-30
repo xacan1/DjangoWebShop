@@ -67,6 +67,7 @@
                             <div class="row align-items-end">
                                 <div class="col-lg-4 col-md-4 col-12">
                                     <div class="warehouses py-3">
+                                        <!-- Выбор склада нужно перенести в оформление заказа а в корзине оставить лишь скрытый контроль остатков по всем складам -->
                                         {% if product_stocks %}
                                         <p class="py-1">Выберите склад:</p>
                                         {% for stock in product_stocks %}

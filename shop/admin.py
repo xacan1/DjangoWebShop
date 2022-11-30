@@ -147,7 +147,7 @@ class CartProductAdmin(admin.ModelAdmin):
 
 class CartAdmin(admin.ModelAdmin):
     model = Cart
-    list_display = ('user', 'quantity', 'amount',
+    list_display = ('user', 'sessionid', 'quantity', 'amount',
                     'discount', 'for_anonymous_user',)
     list_filter = ('for_anonymous_user',)
     search_fields = ('user__email',)
@@ -190,11 +190,11 @@ class DeliveryTypeAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     model = Order
     list_display = ('pk', 'user', 'phone', 'status', 'delivery_date', 'delivery_type',
-                    'paid', 'quantity', 'amount', 'discount', 'number', 'time_create',)
+                    'paid', 'quantity', 'amount', 'discount', 'number', 'warehouse', 'time_create',)
     list_display_links = ('pk', 'user', 'phone', 'status',)
-    list_filter = ('status', 'delivery_type',
-                   'payment_type', 'paid', 'time_create',)
-    search_fields = ('user', 'phone', 'number',)
+    list_filter = ('status', 'delivery_type', 'payment_type', 'paid',
+                   'time_create',)
+    search_fields = ('user', 'phone', 'number', 'warehouse__name',)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)

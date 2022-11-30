@@ -67,6 +67,28 @@ def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
     return price_products
 
 
+# НЕИСПОЛЬЗУЕТСЯ УДАЛИТЬ Получает словарь товаров со списокм складов и остатков по ним
+def get_products_stocks_for_category(category_slug: str) -> dict[list[dict]]:
+    price_products = Prices.objects.select_related('product', 'product__category').filter(product__category__slug=category_slug, price_type__default=True)
+    stock_products = StockProducts.objects.select_related('product', 'warehouse').filter(product__pk__in=price_products.values('product__pk'))
+
+    stocks = {}
+
+    for product_info in stock_products:
+        current_product_pk = product_info.product.pk
+        warehouses_products = []
+
+        for product_info2 in stock_products:
+            if product_info2.product.pk == current_product_pk:
+                warehouses_products.append({'warehouse_pk': product_info2.warehouse.pk})
+                warehouses_products.append({'warehouse_name': product_info2.warehouse.name})
+                warehouses_products.append({'stock': product_info2.stock})
+
+        stocks[product_info.product] = warehouses_products
+
+    return stocks
+
+
 # Возвращает всю необходимую информацию для списка товаров исходя из поиска по наименованию
 def search_products(search_text: str):
     price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(product__name__icontains=search_text, price_type__default=True)

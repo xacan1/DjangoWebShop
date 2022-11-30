@@ -334,6 +334,7 @@ class StockProducts(models.Model):
 # id_anonymous - по сути специальный разрез учета по номеру телефона для подкорзины телеграм бота,
 # что бы отделить товар одного покупателя от другого в общей корзине телеграм бота
 # phone - заполняется когда строка корзины превращается в строку заказа
+# warehouse - не обязательное поле, нужно для учета в 1С, но можно и обойтись для ЗаказаПокупателя
 class CartProduct(models.Model):
     # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,
     #                          verbose_name='Покупатель')
@@ -350,7 +351,7 @@ class CartProduct(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
                                 verbose_name='Товар')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE,
-                                  verbose_name='Склад')
+                                  null=True, blank=True, verbose_name='Склад (магазин)')
     quantity = models.DecimalField(max_digits=15, decimal_places=3,
                                    default=1, verbose_name='Количество')
     price = models.DecimalField(max_digits=15, decimal_places=2,
@@ -488,6 +489,7 @@ class DeliveryType(models.Model):
 # например из телеграм бота, где пользолватель не имея учетки на сайте сам вводит свои данные в заказе
 # phone при анонимном заказе заполняется при получении телефона ботом, иначе из учетки на сайте
 # в 1С заказ будет загружаться и в документе будет сохраняться pk заказа
+# warehouse - не обязательное поле так как ЗаказПокупателя может быть сформирован и без него
 class Order(models.Model):
     # STATUS_NEW = 'new'
     # STATUS_IN_PROGRESS = 'in_progress'
@@ -530,7 +532,9 @@ class Order(models.Model):
     id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')
     address = models.CharField(max_length=1024, default='', blank=True,
-                               verbose_name='Адрес')
+                               verbose_name='Адрес доставки')
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE,
+                                  null=True, blank=True, verbose_name='Склад (магазин) отгрузки')
     time_create = models.DateTimeField(auto_now_add=True,
                                        verbose_name='Дата создания')
     time_update = models.DateTimeField(auto_now=True,

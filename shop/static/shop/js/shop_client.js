@@ -141,23 +141,32 @@ async function delete_cart_product(btn) {
     await update_cart_header();
 }
 
-async function add_product_to_cart(btn) {
-    const product_pk = btn.getAttribute('data-shop-product-pk');
+// Возможно не пригодится функция , так как подобные вещи можно сделать через Django Forms и Messages
+function get_selected_warehouse() {
+    const selected_warehouse = 0;
     const radiobutton_checked = document.querySelector('input[name="warehouse"]:checked');
 
     // Если ни одна радио кнопка не выбрана, то подсветим выбор всех складов красным цветом
     if (!radiobutton_checked) {
         let warehouses = document.getElementsByClassName('warehouses')[0];
-        warehouses.setAttribute('style', 'color: red');
-        return;
+
+        if (warehouses) {
+            warehouses.setAttribute('style', 'color: red');
+            return selected_warehouse;
+        }
     }
 
-    const selected = radiobutton_checked.value;
+    selected_warehouse = radiobutton_checked.value;
+
+    return selected_warehouse;
+}
+
+async function add_product_to_cart(btn) {
+    const product_pk = btn.getAttribute('data-shop-product-pk');
 
     let data_product = {
         product_pk: product_pk,
-        quantity: 1,
-        warehouse_pk: selected
+        quantity: 1
     };
 
     let options = {
