@@ -224,10 +224,23 @@ def get_cart_order_products(cart_order_pk: int, id_messenger: int = 0, for_order
     return products_cart_order
 
 
-# Получает строго остаток по товару на складе
+# Получает остаток товара на одном складе
 def get_stock_product(product_pk: int, warehouse_pk: int) -> Decimal:
     stock = Decimal(0)
     params = {'product': product_pk, 'warehouse': warehouse_pk}
+
+    queryset = StockProducts.objects.filter(**params)
+
+    if queryset.exists():
+        stock = Decimal(queryset[0].stock)
+
+    return stock
+
+
+# Получает остаток товара по всем складам
+def get_all_stock_product(product_pk: int) -> Decimal:
+    stock = Decimal(0)
+    params = {'product': product_pk}
 
     queryset = StockProducts.objects.filter(**params)
 
@@ -275,12 +288,18 @@ def get_last_price(product_pk: int) -> dict:
 def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict, session_key: str = '') -> dict:
     user_pk = user.pk
     product_pk = request_data.get('product_pk', 0)
-    warehouse_pk = request_data.get('warehouse_pk', 0)
+    warehouse_pk = request_data.get('warehouse_pk', None)
     id_messenger = request_data.get('id_messenger', 0)
     for_anonymous_user = request_data.get('for_anonymous_user', False)
 
-    if not product_pk or not warehouse_pk:
-        data_response = {'error': 'product_pk or warehouse_pk is undefined'}
+    if not product_pk:
+        data_response = {'error': 'product_pk is undefined'}
+        return data_response
+
+    all_stock = get_all_stock_product(product_pk)
+
+    if not all_stock:
+        data_response = {'error': 'product is out of stock'}
         return data_response
 
     if user_pk:
@@ -314,6 +333,11 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
     # Строка товара для корзины готова, теперь попробуем найти строку с этим товаром в Корзине
     product_cart, product_cart_info = get_cart_order_product(
         cart_pk, product_pk, id_messenger)
+
+    # проверим не превышает ли количествов корзине/заказе общий остаток
+    if product_cart and product_cart.quantity >= all_stock:
+        data_response = {'error': 'Excess balance of goods'}
+        return data_response
 
     # если нашли строку в корзине с этим же товаром, пересчитаем количество и сумму, если нет, добавим новую строку или вообще не добавим ничего
     if product_cart:

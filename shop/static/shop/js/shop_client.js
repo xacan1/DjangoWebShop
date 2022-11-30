@@ -182,7 +182,7 @@ async function add_product_to_cart(btn) {
         console.log('Ошибка HTTP: ' + response.status);
         return;
     }
-
+  
     clear_cart_header();
     await update_cart_header();
 }

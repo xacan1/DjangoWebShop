@@ -219,8 +219,7 @@
                                             <img src="https://via.placeholder.com/335x335" alt="#">
                                             {% endif %}
                                             <div class="button">
-                                                <a href="#" class="btn" onclick="add_product_to_cart(this);" data-shop-product-pk="{{ product_info.product.pk }}><i class="lni lni-cart"></i>
-                                                    В корзину</a>
+                                                <button class="btn" style="width: 100%;" onclick="add_product_to_cart(this);" data-shop-product-pk="{{ product_info.product.pk }}">В корзину</button>
                                             </div>
                                         </div>
                                         <div class="product-info">
@@ -287,7 +286,7 @@
                                                     <img src="https://via.placeholder.com/335x335" alt="#">
                                                     {% endif %}
                                                     <div class="button">
-                                                        <button class="btn" style="width: 100%;" onclick="add_product_to_cart(this);">В корзину</button>
+                                                        <button class="btn" style="width: 100%;" onclick="add_product_to_cart(this);" data-shop-product-pk="{{ product_info.product.pk }}">В корзину</button>
                                                     </div>
                                                 </div>
                                             </div>
