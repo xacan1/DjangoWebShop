@@ -3,7 +3,13 @@
 const formatter = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const formatter0 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-window.addEventListener("load", update_cart_header());
+window.addEventListener('load', update_cart_header());
+
+let modal = document.getElementById('successAddProductToCartModal');
+modal.addEventListener('show.bs.modal', function(event) {
+    handlerAddProductToCart(event);
+});
+
 
 function getCookie(name) {
     let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
@@ -161,6 +167,36 @@ function get_selected_warehouse() {
     return selected_warehouse;
 }
 
+async function handlerAddProductToCart(event) {
+    // Кнопка, запускающая модальное окно
+    let button = event.relatedTarget;
+    // При необходимости вы можете инициировать запрос AJAX здесь
+    // а затем выполните обновление в обратном вызове.
+    let result = await add_product_to_cart(button);
+
+    // Обновите содержимое модального окна.
+    let modalCheckSuccess = document.getElementById('shopCheckSuccess');
+    let modalCheckPart1 = document.getElementById('shop-check-part-1');
+    let modalCheckPart2 = document.getElementById('shop-check-part-2');
+    let modalCheckDecliane = document.getElementById('shopCheckDecliane');
+    let modalBody = modal.querySelector('.modal-body>h6');
+
+    if ('error' in result) {
+        modalBody.textContent = 'Товар закончился на складе';
+        modalCheckSuccess.className = '';
+        modalCheckPart1.className = '';
+        modalCheckPart2.className = '';
+        modalCheckDecliane.className = 'shop-check-decline';
+    }
+    else {
+        modalBody.textContent = 'Товар добавлен в корзину';
+        modalCheckSuccess.className = 'shop-check-success';
+        modalCheckPart1.className = 'shop-check-sign-success';
+        modalCheckPart2.className = 'shop-check-sign-success';
+        modalCheckDecliane.className = '';
+    }
+}
+
 async function add_product_to_cart(btn) {
     const product_pk = btn.getAttribute('data-shop-product-pk');
 
@@ -182,9 +218,13 @@ async function add_product_to_cart(btn) {
         console.log('Ошибка HTTP: ' + response.status);
         return;
     }
-  
+
+    let result = await response.json();
+
     clear_cart_header();
     await update_cart_header();
+
+    return result;
 }
 
 // КОНЕЦ БЛОКА РАБОТЫ С КОРЗИНОЙ ШАПКИ САЙТА

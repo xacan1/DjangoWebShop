@@ -335,7 +335,7 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
         cart_pk, product_pk, id_messenger)
 
     # проверим не превышает ли количествов корзине/заказе общий остаток
-    if product_cart and product_cart.quantity >= all_stock:
+    if product_cart is not None and product_cart.quantity >= all_stock:
         data_response = {'error': 'Excess balance of goods'}
         return data_response
 

@@ -286,7 +286,7 @@
                                                     <img src="https://via.placeholder.com/335x335" alt="#">
                                                     {% endif %}
                                                     <div class="button">
-                                                        <button class="btn" style="width: 100%;" onclick="add_product_to_cart(this);" data-shop-product-pk="{{ product_info.product.pk }}">В корзину</button>
+                                                        <button class="btn" style="width: 100%;" data-shop-product-pk="{{ product_info.product.pk }}" data-bs-toggle="modal" data-bs-target="#successAddProductToCartModal">В корзину</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -346,5 +346,29 @@
     </div>
 </section>
 <!-- End Product Grids -->
-
+<!-- Modal add product to cart success -->
+<div class="modal fade" id="successAddProductToCartModal" tabindex="-1" aria-labelledby="successAddProductToCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <p class="modal-title" id="successAddProductToCartModalLabel">Добавление товара в корзину</p> -->
+                <div id="shopCheckSuccess" class="shop-check-success">
+                    <div id="shop-check-part-1" class="shop-check-sign-success"></div>
+                    <div id="shop-check-part-2" class="shop-check-sign-success"></div>
+                </div>
+                <div id="shopCheckDecliane" class="shop-check-decline"></div>
+                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6> </h6>
+            </div>
+            <div class="modal-footer">
+                <div class="button">
+                    <button class="btn" data-bs-dismiss="modal">Продолжить покупки</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Modal -->
 {% endblock content %}

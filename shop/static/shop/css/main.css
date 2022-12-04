@@ -8191,3 +8191,46 @@ blockquote span {
     counter-increment: row;
     content: "row" counter(row) ".";
 } */
+
+/* модальное окно добавления товара в корзину */
+.shop-check-success {
+    position: relative;
+    margin-top: 1rem;
+    margin-left: 6rem;
+    margin-right: 6rem;
+}
+
+.shop-check-sign-success {
+    position: relative;
+    background: green;
+}
+
+.shop-check-sign-decline {
+    position: relative;
+    background: red;
+}
+
+#shop-check-part-1 {
+    width: 25px;
+    height: 10px;
+    transform:rotate(45deg);
+}
+
+#shop-check-part-2 {
+    width: 50px;
+    height: 10px;
+    transform: rotate(-45deg);
+    left: 8px;
+    top: -19px;
+}
+
+.shop-check-decline {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    width: 3rem;
+    height: 3rem;
+    background-color: red;
+    clip-path: polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);
+}
+/* КОНЕЦ модальное окно добавления товара в корзину */
