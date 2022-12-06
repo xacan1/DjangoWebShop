@@ -158,32 +158,28 @@
                             </div>
                             <div class="navbar-cart">
                                 <div class="wishlist">
-                                    <a href="javascript:void(0)">
+                                    {%  if user.is_authenticated %}
+                                    <a href="{% url 'wishlist' %}">
+                                        <i class="lni lni-heart"></i>
+                                        <span class="total-items" id="shop-total-wishlist">0</span>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'login' %}">
                                         <i class="lni lni-heart"></i>
                                         <span class="total-items">0</span>
                                     </a>
+                                    {% endif %}
                                 </div>
                                 <div class="cart-items" id="shop-cart-header">
-                                    {%  if user.is_authenticated %}
                                     <a href="{% url 'cart' %}" class="main-btn">
                                         <i class="lni lni-cart"></i>
                                         <span id="shop-total-items" class="total-items"></span>
                                     </a>
-                                    {% else %}
-                                    <a href="{% url 'login' %}" class="main-btn">
-                                        <i class="lni lni-cart"></i>
-                                        <span id="shop-total-items" class="total-items"></span>
-                                    </a>
-                                    {% endif %}
                                     <!-- Корзина на главной странице -->
                                     <div class="shopping-item">
                                         <div class="dropdown-cart-header">
                                             <span id="shop-total-quantity-cart"></span>
-                                            {%  if user.is_authenticated %}
                                             <a href="{% url 'cart' %}">Посмотреть корзину</a>
-                                            {% else %}
-                                            <a href="{% url 'login' %}">Посмотреть корзину</a>
-                                            {% endif %}
                                         </div>
                                         <ul class="shopping-list">
                                             <!-- % if cart.products %

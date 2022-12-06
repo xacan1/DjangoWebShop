@@ -101,4 +101,6 @@ urlpatterns = [
     path('api/v1/check_stock_for_order', APICheckStockForOrder.as_view()),
     path('api/v1/get_cart_info', APIGetCartInfo.as_view()),
     path('api/v1/get_order_info', APIGetOrderInfo.as_view()),
+    path('api/v1/get_favorite_products_info', APIGetFavoriteProductsInfo.as_view()),
+    path('api/v1/add_favorite_product', APIAddFavoriteProduct.as_view()),
 ]

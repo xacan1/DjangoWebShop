@@ -92,9 +92,11 @@
                                     </div>
                                 </div> -->
                                 <div class="col-lg-4 col-md-4 col-12">
+                                    {% if user.is_authenticated %}
                                     <div class="wish-button">
-                                        <button class="btn"><i class="lni lni-heart"></i> В избранное</button>
+                                        <button class="btn" onclick="add_favorite_product(this);" data-shop-product-pk="{{ product_data.pk }}"><i class="lni lni-heart"></i> В избранное</button>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

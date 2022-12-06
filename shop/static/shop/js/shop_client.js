@@ -4,16 +4,23 @@ const formatter = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, max
 const formatter0 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
 window.addEventListener('load', update_cart_header());
-
-let modal = document.getElementById('successAddProductToCartModal');
-modal.addEventListener('show.bs.modal', function(event) {
-    handlerAddProductToCart(event);
-});
+window.addEventListener('load', update_wishlist_header());
+window.addEventListener('load', setEventListener());
 
 
 function getCookie(name) {
     let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
     return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function setEventListener() {
+    let modal = document.getElementById('successAddProductToCartModal');
+
+    if (modal) {
+        modal.addEventListener('show.bs.modal', function(event) {
+            handlerAddProductToCart(event);
+        });
+    }
 }
 
 async function get_cart_info() {
@@ -179,7 +186,7 @@ async function handlerAddProductToCart(event) {
     let modalCheckPart1 = document.getElementById('shop-check-part-1');
     let modalCheckPart2 = document.getElementById('shop-check-part-2');
     let modalCheckDecliane = document.getElementById('shopCheckDecliane');
-    let modalBody = modal.querySelector('.modal-body>h6');
+    let modalBody = document.querySelector('.modal-body>h6');
 
     if ('error' in result) {
         modalBody.textContent = 'Товар закончился на складе';
@@ -245,20 +252,24 @@ function clear_cart() {
 async function after_change_quantity(input) {
     // let price = row_price.textContent.replace(/[^\d.,]/g, '');
     const row = input.parentElement.parentElement.parentElement;
-    const product_cart_pk = row.getAttribute('data-shop-product_cart-pk');
+    // const product_cart_pk = row.getAttribute('data-shop-product_cart-pk');
+    const product_pk = row.getAttribute('data-shop-product-pk');
 
     let data_cart_product = {
-        quantity: parseFloat(input.value)
+        product_pk: product_pk,
+        quantity: parseFloat(input.value),
+        set_new_quantity: true
     };
 
     let options = {
-        method: 'PATCH',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json;charset=utf-8', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
         credentials: 'same-origin',
         body: JSON.stringify(data_cart_product)
     }
 
-    let response = await fetch(`/api/v1/carts/product_to_cart_update/${product_cart_pk}`, options);
+    // let response = await fetch(`/api/v1/carts/product_to_cart_update/${product_cart_pk}`, options);
+    let response = await fetch('/api/v1/update_product_to_cart', options);
 
     if (!response.ok) {
         console.log('Ошибка HTTP: ' + response.status);
@@ -309,7 +320,7 @@ function update_cart(cart_info) {
         let path_product = '/productdetails/' + row.product.slug;
         let row_cart_order = document.createElement('div');
         row_cart_order.className = 'cart-single-list shop-for-del';
-        row_cart_order.innerHTML = `<div class="row align-items-center shop-row-cart-order" data-shop-product_cart-pk="${row.id}" data-shop-price="${row.price}">\
+        row_cart_order.innerHTML = `<div class="row align-items-center shop-row-cart-order" data-shop-product_cart-pk="${row.id}" data-shop-product-pk="${row.product.pk}" data-shop-price="${row.price}">\
             <div class="col-lg-1 col-md-1 col-12">\
                 <a href="${path_product}"><img src="${row.product.photo ? row.product.photo : 'https://via.placeholder.com/220x200'}" alt="#"></a>\
             </div>\
@@ -357,4 +368,88 @@ function update_cart(cart_info) {
             element.setAttribute('hidden', '');
         }
     }
+}
+
+
+// Получим общее количество избранных товаров
+async function get_wishlist_info() {
+    let wishlist_info = {
+        'count': 0,
+        'products': []
+    };
+
+    let options = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json;charset=utf-8', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+        credentials: 'same-origin'
+    }
+
+    let response = await fetch('/api/v1/get_favorite_products_info', options);
+
+    if (!response.ok && response.status != 401) {
+        console.log('Ошибка HTTP: ' + response.status);
+        return wishlist_info;
+    }
+    
+    wishlist_info = await response.json();
+
+    return wishlist_info;
+}
+
+async function update_wishlist_header() {
+    let wishlist_header = document.querySelector('#shop-total-wishlist');
+    let wishlist_info = await get_wishlist_info();
+    wishlist_header.textContent = formatter0.format(wishlist_info.count);
+}
+
+
+async function add_favorite_product(btn) {
+    const product_pk = btn.getAttribute('data-shop-product-pk');
+
+    let data_favorite_product = {
+        product: product_pk
+    };
+
+    let options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json;charset=utf-8', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+        credentials: 'same-origin',
+        body: JSON.stringify(data_favorite_product)
+    };
+
+    let response = await fetch('/api/v1/add_favorite_product', options);
+
+    if (!response.ok) {
+        console.log('Ошибка HTTP addFavoriteProduct: ' + response.status);
+        return;
+    }
+
+    update_wishlist_header();
+}
+
+
+async function delete_favorite_product(btn) {
+    const favorite_product_pk = btn.getAttribute('data-shop-favorite_product-pk');
+
+    let options = {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json;charset=utf-8', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+        credentials: 'same-origin'
+    };
+
+    let response = await fetch(`/api/v1/products/favorites_delete/${favorite_product_pk}`, options);
+
+    if (!response.ok) {
+        console.log('Ошибка HTTP: ' + response.status);
+        return;
+    }
+
+    // теперь удалим строку твоара на странице
+    let row_favorite_product = document.querySelector(`div[data-shop-favorite_product-pk="${favorite_product_pk}"]`);
+
+    if (row_favorite_product) {
+        row_favorite_product.remove();
+    }
+
+    update_wishlist_header();
 }

@@ -755,3 +755,19 @@ class APIGetCartInfo(APIView):
 
         cart_info = services.get_cart_full_info(request.user, get_params=get_params, session_key=session_key)
         return Response(cart_info)
+
+
+class APIGetFavoriteProductsInfo(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request: Request) -> Response:
+        wishlist_info = services.get_favorite_products_info(request.user)
+        return Response(wishlist_info)
+
+
+class APIAddFavoriteProduct(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request: Request) -> Response:
+        data_response = services.add_favorite_product(request.user, request.data)
+        return Response(data_response)

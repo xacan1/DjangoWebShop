@@ -33,6 +33,17 @@ def get_default_payment_type() -> int:
     return payment_type_pk
 
 
+def get_default_price_type() -> int:
+    price_type_pk = 0
+
+    queryset = PriceType.objects.filter(default=True)
+
+    if queryset.exists():
+        price_type_pk = queryset[0].pk
+
+    return price_type_pk
+
+
 # Возвращает рекурсивно все категории с подкатегориями в виде списка кортежей с slug, name и списокм подкатегорий если он есть
 # categories = [(slug, name, []),]
 def get_categories(parent_id) -> list:
@@ -62,15 +73,18 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
 
 # Возвращает все цены товаров входящих непосредственно в данную категорию с ценами по умолчанию или пустой список
 def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
-    price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(product__category__slug=category_slug, price_type__default=True)
+    price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
+        product__category__slug=category_slug, price_type__default=True)
 
     return price_products
 
 
 # НЕИСПОЛЬЗУЕТСЯ УДАЛИТЬ Получает словарь товаров со списокм складов и остатков по ним
 def get_products_stocks_for_category(category_slug: str) -> dict[list[dict]]:
-    price_products = Prices.objects.select_related('product', 'product__category').filter(product__category__slug=category_slug, price_type__default=True)
-    stock_products = StockProducts.objects.select_related('product', 'warehouse').filter(product__pk__in=price_products.values('product__pk'))
+    price_products = Prices.objects.select_related('product', 'product__category').filter(
+        product__category__slug=category_slug, price_type__default=True)
+    stock_products = StockProducts.objects.select_related('product', 'warehouse').filter(
+        product__pk__in=price_products.values('product__pk'))
 
     stocks = {}
 
@@ -80,8 +94,10 @@ def get_products_stocks_for_category(category_slug: str) -> dict[list[dict]]:
 
         for product_info2 in stock_products:
             if product_info2.product.pk == current_product_pk:
-                warehouses_products.append({'warehouse_pk': product_info2.warehouse.pk})
-                warehouses_products.append({'warehouse_name': product_info2.warehouse.name})
+                warehouses_products.append(
+                    {'warehouse_pk': product_info2.warehouse.pk})
+                warehouses_products.append(
+                    {'warehouse_name': product_info2.warehouse.name})
                 warehouses_products.append({'stock': product_info2.stock})
 
         stocks[product_info.product] = warehouses_products
@@ -91,13 +107,15 @@ def get_products_stocks_for_category(category_slug: str) -> dict[list[dict]]:
 
 # Возвращает всю необходимую информацию для списка товаров исходя из поиска по наименованию
 def search_products(search_text: str):
-    price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(product__name__icontains=search_text, price_type__default=True)
+    price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
+        product__name__icontains=search_text, price_type__default=True)
 
     return price_products
 
 
 def get_attributes_product(product_pk: int) -> models.QuerySet:
-    product_attributes = AttributeProductValues.objects.select_related('attribute', 'value').filter(product=product_pk)
+    product_attributes = AttributeProductValues.objects.select_related(
+        'attribute', 'value').filter(product=product_pk)
 
     return product_attributes
 
@@ -271,10 +289,14 @@ def check_stock_in_order(order_pk: int) -> dict:
     return result
 
 
-# получает последнюю ценую и скидку
-def get_last_price(product_pk: int) -> dict:
+# возвращает последнюю цену и скидку
+def get_last_price(product_pk: int, price_type_pk: int = 0) -> dict:
     price_info = {}
-    priceset = Prices.objects.filter(product=product_pk).order_by(
+
+    if not price_type_pk:
+        price_type_pk = get_default_price_type()
+
+    priceset = Prices.objects.filter(product=product_pk, price_type=price_type_pk).order_by(
         '-date_update').values('price', 'discount_percentage')
 
     if priceset.exists():
@@ -284,13 +306,16 @@ def get_last_price(product_pk: int) -> dict:
 
 
 # Добавляет товар в корзину(создает её при необходимости) или изменяет количество товара как в большую так и меньшую сторону
-# Если количество товара опускается до нуля, то строка удаляется
+# Если количество товара опускается до нуля, то строка удаляется, так же получает актуальные цены
+# Более умная функция нежели функция REST product_to_cart_update
 def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict, session_key: str = '') -> dict:
     user_pk = user.pk
     product_pk = request_data.get('product_pk', 0)
     warehouse_pk = request_data.get('warehouse_pk', None)
     id_messenger = request_data.get('id_messenger', 0)
     for_anonymous_user = request_data.get('for_anonymous_user', False)
+    # Признак того что в AJAX запросе идет не увеличение/уменьшение количества товара, а установка нового количества
+    set_new_quantity = request_data.get('set_new_quantity', False)
 
     if not product_pk:
         data_response = {'error': 'product_pk is undefined'}
@@ -313,7 +338,8 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
     cart_pk = cart_info.get('id', 0)
 
     # получим актуальные цены
-    price_info = get_last_price(product_pk)
+    price_type_pk = user.price_type
+    price_info = get_last_price(product_pk, price_type_pk)
 
     if not price_info:
         data_response = {'error': 'Price not found'}
@@ -334,24 +360,28 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
     product_cart, product_cart_info = get_cart_order_product(
         cart_pk, product_pk, id_messenger)
 
-    # проверим не превышает ли количествов корзине/заказе общий остаток
-    if product_cart is not None and product_cart.quantity >= all_stock:
+    new_quantity = new_cart_product['quantity']
+
+    # если это не установка нового количества, то прибавим его к текущему в строке корзины
+    if product_cart and not set_new_quantity:
+        new_quantity = product_cart.quantity + new_cart_product['quantity']
+
+    # проверим не превышает ли количество в корзине/заказе общий остаток
+    if new_quantity > all_stock:
         data_response = {'error': 'Excess balance of goods'}
         return data_response
 
     # если нашли строку в корзине с этим же товаром, пересчитаем количество и сумму, если нет, добавим новую строку или вообще не добавим ничего
     if product_cart:
-        quantity = new_cart_product['quantity'] + product_cart.quantity
-
-        if quantity <= 0:
+        if new_quantity <= 0:
             product_cart.delete()
             data_response = {'delete': 'Product delete from cart'}
         else:
-            product_cart.quantity = quantity
+            product_cart.quantity = new_quantity
             product_cart.save()
             data_response = product_cart_info
     # если создаём новую строку, то количество должно быть больше нуля
-    elif new_cart_product['quantity'] > 0:
+    elif new_quantity > 0:
         serializer = CartProductCreateSerializer(data=new_cart_product)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -407,9 +437,11 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
     for_anonymous_user = order_info.get('for_anonymous_user', False)
     order_info['status'] = order_info.get('status_pk', get_default_status())
     order_info['delivery_type'] = order_info.get(
-        'delivery_type_pk', get_default_delivery_type())
+        'delivery_type_pk', get_default_delivery_type()
+    )
     order_info['payment_type'] = order_info.get(
-        'payment_type_pk', get_default_payment_type())
+        'payment_type_pk', get_default_payment_type()
+    )
 
     if not order_info['status']:
         return {'error': 'Status not found'}
@@ -485,8 +517,8 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
     id_messenger = get_params.get('id_messenger', '0')
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
     paid = get_params.get('paid', None)
-
-    update_price_in_cart_order(order_pk, id_messenger, True)
+    price_type_pk = user.price_type.pk
+    update_price_in_cart_order(order_pk, id_messenger, True, price_type_pk)
 
     params = {'user': user_pk, 'pk': order_pk}
 
@@ -530,7 +562,8 @@ def delete_cart_by_session_key(session_key: str) -> None:
 
 
 def merging_two_shopping_carts(user: AbstractBaseUser, session_key: str) -> None:
-    anonymous_cart_products = CartProduct.objects.filter(cart__sessionid = session_key).values()
+    anonymous_cart_products = CartProduct.objects.filter(
+        cart__sessionid=session_key).values()
     new_product_cart = {}
 
     for product_cart in anonymous_cart_products:
@@ -564,7 +597,8 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_ke
     cart_pk = cart_info.get('id', 0)
 
     # надо обновить строки и корзину если цены не совпадают
-    update_price_in_cart_order(cart_pk, id_messenger, False)
+    price_type_pk = user.price_type.pk
+    update_price_in_cart_order(cart_pk, id_messenger, False, price_type_pk)
 
     if user_pk:
         cartset = Cart.objects.filter(user=user_pk)
@@ -607,22 +641,21 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_ke
     return cart_info
 
 
-# проверяет актуальность цен в строках Заказа(Корзины) и обновляет данные строк и Заказа(Корзины) перед отправкой пользовтаелю
-def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_order: bool = False) -> None:
+# проверяет актуальность цен в строках Заказа(Корзины) и обновляет данные строк и Заказа(Корзины) перед отправкой пользователю
+def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_order: bool = False, price_type_pk: int = 0) -> None:
     # проверю оплату Заказа, в оплаченных Заказах не нужно менять цены
     if for_order:
         orderset = Order.objects.filter(pk=cart_order_pk)
 
-        if orderset.exists():
-            if orderset[0].paid:
-                return
+        if orderset.exists() and orderset[0].paid:
+            return
 
     cart_products = get_cart_order_products(
         cart_order_pk, id_messenger, for_order)
 
     for product_row in cart_products:
         product_pk = product_row.product.pk
-        price_info = get_last_price(product_pk)
+        price_info = get_last_price(product_pk, price_type_pk)
         current_price = price_info.get('price', 0)
         current_discount_percentage = price_info.get('discount_percentage', 0)
 
@@ -632,3 +665,59 @@ def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_or
         product_row.price = current_price
         product_row.discount_percentage = current_discount_percentage
         product_row.save()
+
+
+def get_favorite_products_info(user: AbstractBaseUser) -> dict:
+    products = []
+    wishlist = {'count': 0, 'there_discounts': False, 'products': products}
+    user_pk = user.pk
+
+    if not user_pk:
+        user_pk = 0
+
+    favorite_products = FavoriteProduct.objects.select_related(
+        'product').filter(user=user_pk)
+
+    # тут лучше вручную сериализовать данные
+    for favorite_product in favorite_products:
+        price_info = get_last_price(favorite_product.product.pk)
+
+        if price_info['discount_percentage']:
+            wishlist['there_discounts'] = True # зафиксирую что в наборе товаров есть хоть одна скидка
+
+        row_product = {}
+        row_product['pk'] = favorite_product.pk
+        row_product['name'] = favorite_product.product.name
+        row_product['price'] = price_info['price']
+        row_product['discount_percentage'] = price_info['discount_percentage']
+        row_product['slug'] = favorite_product.product.slug
+        row_product['photo'] = favorite_product.product.photo.url
+        products.append(row_product)
+
+    wishlist['count'] = favorite_products.count()
+    wishlist['products'] = products
+
+    return wishlist
+
+
+def add_favorite_product(user: AbstractBaseUser, favorite_product: dict) -> dict:
+    user_pk = user.pk
+
+    if not user_pk:
+        return {'error': 'User not found'}
+
+    favorite_product['user'] = user_pk
+
+    # определим, есть ли уже этот товар в списке желаемых
+    queryset = FavoriteProduct.objects.filter(**favorite_product)
+
+    if queryset.exists():
+        return favorite_product
+
+    # усли нет, то добавим новую строку
+    serializer_order = FavoriteProductCreateSerializer(data=favorite_product)
+    serializer_order.is_valid(raise_exception=True)
+    serializer_order.save()
+    favorite_product = serializer_order.data
+
+    return favorite_product

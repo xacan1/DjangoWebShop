@@ -9,13 +9,13 @@
         <div class="row align-items-center">
             <div class="col-lg-6 col-md-6 col-12">
                 <div class="breadcrumbs-content">
-                    <h1 class="page-title">Корзина</h1>
+                    <h1 class="page-title">Избранные товары</h1>
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-12">
                 <ul class="breadcrumb-nav">
                     <li><a href="{% url 'home' %}"><i class="lni lni-home"></i> Главная</a></li>
-                    <li>Корзина</li>
+                    <li>Избранные товары</li>
                 </ul>
             </div>
         </div>
@@ -26,7 +26,7 @@
 <!-- Shopping Cart -->
 <div class="shopping-cart section">
     <div class="container">
-        {% if cart.products %}
+        {% if wishlist %}
         <div class="cart-list-head">
             <!-- Cart List Title -->
             <div class="cart-list-title">
@@ -38,14 +38,11 @@
                         <p>Товар</p>
                     </div>
                     <div class="col-lg-2 col-md-2 col-12">
-                        <p>Количество</p>
+                        <p>Цена</p>
                     </div>
+                    {% if wishlist.there_discounts %}
                     <div class="col-lg-2 col-md-2 col-12">
-                        <p>Сумма</p>
-                    </div>
-                    {% if row_product.discount > 0 %}
-                    <div class="col-lg-2 col-md-2 col-12">
-                        <p>Скидка</p>
+                        <p>% Скидки</p>
                     </div>
                     {% endif %}
                     <div class="col-lg-1 col-md-2 col-12">
@@ -54,21 +51,21 @@
                 </div>
             </div>
             <!-- End Cart List Title -->
-            {% for row_product in cart.products %}
+            {% for row_product in wishlist.products %}
             <!-- Cart Single List list -->
             <div class="cart-single-list">
-                <div class="row align-items-center shop-row-cart-order" data-shop-product_cart-pk="{{ row_product.id }}" data-shop-price="{{ row_product.price }}">
+                <div class="row align-items-center shop-row-cart-order" data-shop-favorite_product-pk="{{ row_product.pk }}">
                     <div class="col-lg-1 col-md-1 col-12">
-                        {% if row_product.product.photo %}
-                        <a href="{% url 'productdetails' row_product.product.slug %}"><img src="{{ row_product.product.photo }}" alt="#"></a>
+                        {% if row_product.photo %}
+                        <a href="{% url 'productdetails' row_product.slug %}"><img src="{{ row_product.photo }}" alt="#"></a>
                         {% else %}
-                        <a href="{% url 'productdetails' row_product.product.slug %}"><img src="https://via.placeholder.com/220x200" alt="#"></a>
+                        <a href="{% url 'productdetails' row_product.slug %}"><img src="https://via.placeholder.com/220x200" alt="#"></a>
                         {% endif %}
                     </div>
                     <div class="col-lg-4 col-md-3 col-12">
                         <h5 class="product-name">
-                            <a href="{% url 'productdetails' row_product.product.slug %}">
-                            {{ row_product.product.name }}</a>
+                            <a href="{% url 'productdetails' row_product.slug %}">
+                            {{ row_product.name }}</a>
                         </h5>
                         <!-- <p class="product-des">
                             <span><em>Тип:</em> Mirrorless</span>
@@ -76,21 +73,15 @@
                         </p> -->
                     </div>
                     <div class="col-lg-2 col-md-2 col-12">
-                        <div class="count-input">
-                            <input class="form-control" type="number" name="quantity" step="1" min="1" value="{{ row_product.quantity|floatformat }}" onclick="after_change_quantity(this);">
-                        </div>
+                        <p class="shop-price">{{ row_product.price|floatformat:'2g' }}</p>
                     </div>
+                    {% if row_product.discount_percentage > 0 %}
                     <div class="col-lg-2 col-md-2 col-12">
-                        <p class="shop-amount">{{ row_product.amount|floatformat:'2g' }}</p>
-                    </div>
-                    {% if row_product.discount > 0 %}
-                    <div class="col-lg-2 col-md-2 col-12">
-                        <p class="shop-discount">{{ row_product.discount }}</p>
+                        <p class="shop-discount">{{ row_product.discount_percentage }}</p>
                     </div>
                     {% endif %}
                     <div class="col-lg-1 col-md-2 col-12">
-                        <!-- <a class="remove-item" href="javascript:void(0)"><i class="lni lni-close"></i></a> -->
-                        <button class="btn" onclick="delete_cart_product(this);"><i class="remove-item lni lni-close"></i></button>
+                        <button class="btn" onclick="delete_favorite_product(this);" data-shop-favorite_product-pk="{{ row_product.pk }}"><i class="remove-item lni lni-close"></i></button>
                     </div>
                 </div>
             </div>
@@ -115,20 +106,7 @@
                             </div> -->
                         </div>
                         <div class="col-lg-4 col-md-6 col-12">
-                            <div class="right">
-                                <ul>
-                                    <li>Сумма товаров в корзине<span>{{ cart.amount }}</span></li>
-                                    <li>Доставка<span>Бесплатно</span></li>
-                                    {% if cart.discount > 0 %}
-                                    <li>Скидка<span>{{ cart.discount }}</span></li>
-                                    {% endif %}
-                                    <li class="last">К оплате<span>{{ cart.amount }}</span></li>
-                                </ul>
-                                <div class="button">
-                                    <a href="{% url 'checkout' %}" class="btn">Оформить заказ</a>
-                                    <a href="{% url 'home' %}" class="btn btn-alt">Продолжить покупки</a>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -137,11 +115,10 @@
         </div>
         {% else %}
         <div>
-            <p>Корзина пуста, но это легко исправить ;)</p>
+            <p>Ещё ничего не выбрали? Самое время ознакомиться с нашим каталогом!</p>
         </div>
         {% endif %}
     </div>
 </div>
 <!--/ End Shopping Cart -->
-
 {% endblock content %}

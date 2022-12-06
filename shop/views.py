@@ -71,14 +71,24 @@ class RegisterUserSuccessView(DataMixin, FormView):
     template_name = 'shop/registration-success.html'
 
 
-class CartView(DataMixin, ListView):
-    model = CartProduct
+class CartView(DataMixin, FormView):
+    form_class = SimpleForm
     template_name = 'shop/cart.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        # cart_info = services.get_cart_full_info(self.request.user)
         c_def = self.get_user_context(title='Корзина')
+        return {**context, **c_def}
+
+
+class WishlistView(DataMixin, FormView):
+    form_class = SimpleForm
+    template_name = 'shop/wishlist.html'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        wishlist = services.get_favorite_products_info(self.request.user)
+        c_def = self.get_user_context(title='Избранные товары', wishlist=wishlist)
         return {**context, **c_def}
 
 
