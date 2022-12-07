@@ -6,6 +6,7 @@ from shop.models import *
 from shop.mixins import DataMixin
 
 
+
 class IndexView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/index.html'

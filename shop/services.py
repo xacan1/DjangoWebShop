@@ -4,6 +4,7 @@ from shop.serializers import *
 from shop.models import *
 
 
+
 def get_default_status() -> int:
     status_pk = 0
     queryset = Status.objects.filter(for_bot=True)

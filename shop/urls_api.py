@@ -104,3 +104,4 @@ urlpatterns = [
     path('api/v1/get_favorite_products_info', APIGetFavoriteProductsInfo.as_view()),
     path('api/v1/add_favorite_product', APIAddFavoriteProduct.as_view()),
 ]
+

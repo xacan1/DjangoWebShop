@@ -4,6 +4,7 @@ from shop.models import *
 from shop import services
 
 
+
 def set_default_photo_product(sender, **kwargs) -> None:
     photo_product = kwargs['instance']
 

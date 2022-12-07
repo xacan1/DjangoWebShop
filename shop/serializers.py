@@ -2,6 +2,7 @@ from rest_framework import serializers
 from shop.models import *
 
 
+
 class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token

@@ -6,6 +6,7 @@ from shop.serializers import *
 from shop import services
 
 
+
 class TokensAPIList(generics.ListAPIView):
     serializer_class = TokenSerializer
     permission_classes = (IsAuthenticated,)

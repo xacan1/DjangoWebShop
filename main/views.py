@@ -6,6 +6,7 @@ from main.forms import *
 from shop.mixins import DataMixin
 
 
+
 class PageNotFound(FormView):
     form_class = SimpleForm
     template_name = 'main/page404.html'

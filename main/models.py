@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
+
 class CustomUserManager(BaseUserManager):
 
     # Диспетчер пользовательских моделей, в котором email используется для аутентификации вместо username.

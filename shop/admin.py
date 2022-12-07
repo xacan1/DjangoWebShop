@@ -3,6 +3,7 @@ from rest_framework.authtoken.admin import TokenAdmin
 from shop.models import *
 
 
+
 TokenAdmin.raw_id_fields = ['user']
 
 
