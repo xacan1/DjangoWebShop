@@ -4,7 +4,7 @@ from django.apps import AppConfig
 class ShopConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'shop'
-    verbose_name = 'Магазин UZM'
+    verbose_name = 'Интернет магазин'
 
     def ready(self) -> None:
         from shop import signals

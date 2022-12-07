@@ -1,9 +1,9 @@
 from rest_framework import generics
 from rest_framework.views import Response, Request, APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, AllowAny
-from .models import *
-from .serializers import *
-from . import services
+from shop.models import *
+from shop.serializers import *
+from shop import services
 
 
 class TokensAPIList(generics.ListAPIView):
@@ -711,7 +711,7 @@ class APIDeleteProductFromCart(APIView):
 
 
 class APICreateUpdateOrder(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def post(self, request: Request) -> Response:
         data_response = services.create_or_update_order(
@@ -720,7 +720,7 @@ class APICreateUpdateOrder(APIView):
 
 
 class APICheckStockForOrder(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get(self, request: Request) -> Response:
         get_params = request.query_params
@@ -741,7 +741,7 @@ class APIGetOrderInfo(APIView):
 
 
 class APIGetCartInfo(APIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
     def get(self, request: Request) -> Response:
         get_params = request.query_params
@@ -758,7 +758,7 @@ class APIGetCartInfo(APIView):
 
 
 class APIGetFavoriteProductsInfo(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request: Request) -> Response:
         wishlist_info = services.get_favorite_products_info(request.user)

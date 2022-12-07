@@ -1,6 +1,7 @@
 from decimal import Decimal
-from .serializers import *
-from .models import *
+from django.contrib.auth.models import AbstractBaseUser
+from shop.serializers import *
+from shop.models import *
 
 
 def get_default_status() -> int:
@@ -33,16 +34,26 @@ def get_default_payment_type() -> int:
     return payment_type_pk
 
 
-def get_default_price_type() -> int:
-    price_type_pk = 0
+def get_default_price_type() -> PriceType | None:
+    price_type = None
 
     queryset = PriceType.objects.filter(default=True)
 
     if queryset.exists():
-        price_type_pk = queryset[0].pk
+        price_type = queryset[0]
 
-    return price_type_pk
+    return price_type
 
+
+def get_default_currency() -> Currency | None:
+    currency = None
+
+    queryset = Currency.objects.filter(default=True)
+
+    if queryset.exists():
+        currency = queryset[0]
+
+    return currency
 
 # Возвращает рекурсивно все категории с подкатегориями в виде списка кортежей с slug, name и списокм подкатегорий если он есть
 # categories = [(slug, name, []),]
@@ -141,6 +152,19 @@ def get_orders_for_user(user_pk: int, id_messenger: int = 0, paid: bool = False)
 
     if id_messenger:
         params['id_messenger'] = id_messenger
+
+    orderset = Order.objects.filter(**params).order_by('-time_update')
+
+    if orderset.exists():
+        orders = orderset
+
+    return orders
+
+
+# находит отсортированные по дате неоплаченные(по умолчанию) заказы по сессии
+def get_orders_for_session(sessionid: str, paid: bool = False) -> models.QuerySet:
+    orders = []
+    params = {'sessionid': sessionid, 'paid': paid}
 
     orderset = Order.objects.filter(**params).order_by('-time_update')
 
@@ -305,11 +329,49 @@ def get_last_price(product_pk: int, price_type_pk: int = 0) -> dict:
     return price_info
 
 
+# создает новую Настройку пользователя если её ещё нет
+def create_new_settings(new_settings_info: dict) -> UserSettings:
+    settings = UserSettings(**new_settings_info)
+    settings.save()
+    return settings
+
+
+# Получает или создает настройки пользователя
+def get_settings_user(user: AbstractBaseUser) -> dict:
+    settings_info = {}
+
+    if not user.is_authenticated:
+        settings_info = {
+            'currency' : get_default_currency(),
+            'price_type': get_default_price_type()
+        }
+        return settings_info
+
+    cartset = UserSettings.objects.filter(user=user.pk)
+
+    if cartset.exists():
+        settings = cartset[0]
+    else:
+        settings_info = {
+            'user': user,
+            'currency' : get_default_currency(),
+            'price_type': get_default_price_type()
+        }
+        settings = create_new_settings(settings_info)
+    
+    if not settings.currency:
+        settings_info['currency'] = get_default_currency()
+
+    if not settings.price_type:
+        settings_info['price_type'] = get_default_price_type()
+
+    return settings_info
+
+
 # Добавляет товар в корзину(создает её при необходимости) или изменяет количество товара как в большую так и меньшую сторону
 # Если количество товара опускается до нуля, то строка удаляется, так же получает актуальные цены
 # Более умная функция нежели функция REST product_to_cart_update
 def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict, session_key: str = '') -> dict:
-    user_pk = user.pk
     product_pk = request_data.get('product_pk', 0)
     warehouse_pk = request_data.get('warehouse_pk', None)
     id_messenger = request_data.get('id_messenger', 0)
@@ -327,7 +389,8 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
         data_response = {'error': 'product is out of stock'}
         return data_response
 
-    if user_pk:
+    if user.is_authenticated:
+        user_pk = user.pk
         cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
     elif session_key:
         cart_info = get_cart_by_sessionid(session_key, for_anonymous_user)
@@ -338,7 +401,8 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
     cart_pk = cart_info.get('id', 0)
 
     # получим актуальные цены
-    price_type_pk = user.price_type
+    settings_user = get_settings_user(user)
+    price_type_pk = settings_user.get('price_type', 0)
     price_info = get_last_price(product_pk, price_type_pk)
 
     if not price_info:
@@ -394,7 +458,6 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
 
 # удаляет сразу весь товар из Корзины или Заказа, независимо от количества
 def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict) -> dict:
-    user_pk = user.pk
     product_pk = request_data.get('product_pk', 0)
     id_messenger = request_data.get('id_messenger', 0)
     order_pk = request_data.get('order_pk', 0)
@@ -407,6 +470,7 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
         product_cart, _ = get_cart_order_product(
             order_pk, product_pk, id_messenger, True)
     else:
+        user_pk = user.pk
         for_anonymous_user = request_data.get('for_anonymous_user', False)
         cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
         cart_pk = cart_info.get('id', 0)
@@ -431,7 +495,6 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
 #   "id_messenger": 827503364, <- опционально, если это Телеграм магазин
 # }
 def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
-    user_pk = user.pk
     id_messenger = order_info.get('id_messenger', 0)
     phone = order_info.get('phone', '')
     for_anonymous_user = order_info.get('for_anonymous_user', False)
@@ -452,6 +515,7 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
     elif not phone:
         return {'error': 'Phone not found'}
 
+    user_pk = user.pk if user.is_authenticated else 0
     order_info['user'] = user_pk
 
     # найду последний неоплаченный заказ, что бы добавить в него новые товары из корзины или создам новый
@@ -505,22 +569,31 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
 
 
 # получает полную информацию о Заказе с товарами
-def get_order_full_info(user: AbstractBaseUser, get_params: dict) -> dict:
+def get_order_full_info(user: AbstractBaseUser, get_params: dict = {}, session_key: str = '') -> dict:
     order_info = {}
     products = []
 
-    if not get_params:
+    if not get_params or (not user.is_authenticated and not session_key):
         return order_info
 
-    user_pk = user.pk
     order_pk = get_params.get('order_pk', 0)
     id_messenger = get_params.get('id_messenger', '0')
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
     paid = get_params.get('paid', None)
-    price_type_pk = user.price_type.pk
+
+    user_pk = user.pk if user.is_authenticated else 0
+    settings_user = get_settings_user(user)
+    price_type_pk = settings_user.get('price_type', 0)
+
     update_price_in_cart_order(order_pk, id_messenger, True, price_type_pk)
 
-    params = {'user': user_pk, 'pk': order_pk}
+    params = {'pk': order_pk}
+
+    if user_pk:
+        params['user'] = user_pk
+
+    if session_key:
+        params['sessionid'] = session_key
 
     if paid is not None:
         params['paid'] = True if paid != '0' else False
@@ -580,30 +653,28 @@ def merging_two_shopping_carts(user: AbstractBaseUser, session_key: str) -> None
 def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_key: str = '') -> dict:
     products = []
     cart_info = {'quantity': 0, 'amount': 0, 'products': products}
-    user_pk = user.pk
 
-    if not user_pk and not session_key:
+    if not user.is_authenticated and not session_key:
         return cart_info
 
+    user_pk = user.pk if user.is_authenticated else 0
     for_anonymous_user = get_params.get('for_anonymous_user', False)
     id_messenger = get_params.get('id_messenger', '0')
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
 
     if user_pk:
         cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
-    else:
-        cart_info = get_cart_by_sessionid(session_key, for_anonymous_user)
-
-    cart_pk = cart_info.get('id', 0)
-
-    # надо обновить строки и корзину если цены не совпадают
-    price_type_pk = user.price_type.pk
-    update_price_in_cart_order(cart_pk, id_messenger, False, price_type_pk)
-
-    if user_pk:
         cartset = Cart.objects.filter(user=user_pk)
     else:
+        cart_info = get_cart_by_sessionid(session_key, for_anonymous_user)
         cartset = Cart.objects.filter(sessionid=session_key)
+
+    cart_pk = cart_info.get('id', 0)
+    settings_user = get_settings_user(user)
+    price_type_pk = settings_user.get('price_type', 0)
+
+    # надо обновить строки и корзину если цены не совпадают
+    update_price_in_cart_order(cart_pk, id_messenger, False, price_type_pk)
 
     if cartset.exists():
         serializer_cart = CartSerializer(cartset[0])
@@ -670,10 +741,11 @@ def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_or
 def get_favorite_products_info(user: AbstractBaseUser) -> dict:
     products = []
     wishlist = {'count': 0, 'there_discounts': False, 'products': products}
-    user_pk = user.pk
 
-    if not user_pk:
-        user_pk = 0
+    if not user.is_authenticated:
+        return wishlist
+
+    user_pk = user.pk
 
     favorite_products = FavoriteProduct.objects.select_related(
         'product').filter(user=user_pk)
@@ -683,7 +755,8 @@ def get_favorite_products_info(user: AbstractBaseUser) -> dict:
         price_info = get_last_price(favorite_product.product.pk)
 
         if price_info['discount_percentage']:
-            wishlist['there_discounts'] = True # зафиксирую что в наборе товаров есть хоть одна скидка
+            # зафиксирую что в наборе товаров есть хоть одна скидка
+            wishlist['there_discounts'] = True
 
         row_product = {}
         row_product['pk'] = favorite_product.pk
@@ -701,11 +774,10 @@ def get_favorite_products_info(user: AbstractBaseUser) -> dict:
 
 
 def add_favorite_product(user: AbstractBaseUser, favorite_product: dict) -> dict:
-    user_pk = user.pk
-
-    if not user_pk:
+    if not user.is_authenticated:
         return {'error': 'User not found'}
 
+    user_pk = user.pk
     favorite_product['user'] = user_pk
 
     # определим, есть ли уже этот товар в списке желаемых

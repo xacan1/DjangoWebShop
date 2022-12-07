@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
-from .services import *
+from shop.models import *
+from shop import services
 
 
 def set_default_photo_product(sender, **kwargs) -> None:
@@ -92,5 +93,5 @@ def update_cart_product_signal(sender, **kwargs) -> None:
             order.quantity = order_sum['sum_quantity'] if order_sum['sum_quantity'] else 0
             order.amount = order_sum['sum_amount'] if order_sum['sum_amount'] else 0
             order.discount = order_sum['sum_discount'] if order_sum['sum_discount'] else 0
-            order.status_id = 5 if order.quantity == 0 or order.amount == 0 else get_default_status()
+            order.status_id = 5 if order.quantity == 0 or order.amount == 0 else services.get_default_status()
             order.save()

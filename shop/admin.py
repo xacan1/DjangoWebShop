@@ -1,33 +1,9 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
 from rest_framework.authtoken.admin import TokenAdmin
-from django import forms
-from .models import *
+from shop.models import *
+
 
 TokenAdmin.raw_id_fields = ['user']
-
-
-class CustomUserAdmin(UserAdmin):
-    model = CustomUser
-    list_display = ('email', 'phone', 'last_name', 'first_name', 'currency',
-                    'price_type', 'last_login', 'is_staff', 'is_active',)
-    list_filter = ('is_staff', 'is_active',)
-    list_editable = ('is_staff', 'is_active',)
-    list_display_links = ('email', 'phone', 'last_name', 'first_name',)
-    fieldsets = (
-        (None, {'fields': ('email', 'password', 'phone', 'first_name',
-                           'last_name', 'currency', 'price_type',)}),
-        ('Permissions', {'fields': ('is_staff', 'is_active',)}),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'phone', 'first_name', 'last_name',
-                       'is_staff', 'is_active', 'currency', 'price_type',)}
-         ),
-    )
-    search_fields = ('email', 'phone', 'last_name',)
-    ordering = ('email',)
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -176,28 +152,40 @@ class StatusAdmin(admin.ModelAdmin):
 
 
 class PaymentTypeAdmin(admin.ModelAdmin):
-    model = Status
+    model = PaymentType
     list_display = ('name', 'external_code', 'for_bot', 'use',)
     list_filter = ('use', 'for_bot',)
 
 
 class DeliveryTypeAdmin(admin.ModelAdmin):
-    model = Status
+    model = DeliveryType
     list_display = ('name', 'external_code', 'for_bot', 'use',)
     list_filter = ('use', 'for_bot',)
 
 
+class UserSettingsAdmin(admin.ModelAdmin):
+    model = UserSettings
+    list_display = ('user', 'currency', 'price_type',)
+
+
+class CouponAdmin(admin.ModelAdmin):
+    model = Coupon
+    list_display = ('code', 'external_code', 'valid_from',
+                    'valid_to', 'discount_percentage', 'active',)
+    list_display_links = ('code', 'external_code',)
+    list_filter = ('active',)
+
+
 class OrderAdmin(admin.ModelAdmin):
     model = Order
-    list_display = ('pk', 'user', 'phone', 'status', 'delivery_date', 'delivery_type',
-                    'paid', 'quantity', 'amount', 'discount', 'number', 'warehouse', 'time_create',)
+    list_display = ('pk', 'user', 'phone', 'status', 'delivery_date', 'delivery_type', 'paid',
+                    'quantity', 'amount', 'discount', 'coupon', 'number', 'warehouse', 'time_create',)
     list_display_links = ('pk', 'user', 'phone', 'status',)
     list_filter = ('status', 'delivery_type', 'payment_type', 'paid',
                    'time_create',)
-    search_fields = ('user', 'phone', 'number', 'warehouse__name',)
+    search_fields = ('user__email', 'phone', 'number', 'warehouse__name',)
 
 
-admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ImageProduct, ImageProductAdmin)
@@ -217,4 +205,6 @@ admin.site.register(ContractorUser, ContractorUserAdmin)
 admin.site.register(Status, StatusAdmin)
 admin.site.register(PaymentType, PaymentTypeAdmin)
 admin.site.register(DeliveryType, DeliveryTypeAdmin)
+admin.site.register(UserSettings, UserSettingsAdmin)
+admin.site.register(Coupon, CouponAdmin)
 admin.site.register(Order, OrderAdmin)

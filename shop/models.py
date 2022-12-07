@@ -1,69 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, AbstractBaseUser
-from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth import get_user_model
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone, datetime_safe
-from rest_framework.authtoken.models import Token
-# from django.utils.text import slugify
+from django.core.validators import MinValueValidator, MaxValueValidator
 from .utils import unique_slugify
-
-
-class CustomUserManager(BaseUserManager):
-
-    # Диспетчер пользовательских моделей, в котором email используется для аутентификации вместо username.
-    # Создание и запись пользователя  и суперпользователя с email и password
-
-    def create_user(self, email, password, **extra_fields):
-        if not email:
-            raise ValueError(_('The Email must be set'))
-
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save()
-        return user
-
-    def create_superuser(self, email, password, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
-
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError(_('Superuser must have is_staff=True.'))
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError(_('Superuser must have is_superuser=True.'))
-
-        return self.create_user(email, password, **extra_fields)
-
-
-class CustomUser(AbstractUser):
-    username = None
-    email = models.EmailField(_('email address'), unique=True)
-    phone = models.CharField(max_length=15, unique=True,
-                             verbose_name='Телефон')
-    currency = models.ForeignKey('Currency', on_delete=models.PROTECT,
-                                 default=None, blank=True, null=True, verbose_name='Валюта')
-    price_type = models.ForeignKey('PriceType', on_delete=models.PROTECT,
-                                   default=None, blank=True, null=True, verbose_name='Тип цены')
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-
-    objects = CustomUserManager()
-
-    def __str__(self):
-        return self.email
-
-
-# Модель магазина:
-# Категория
-# Бренд
-# Товар(продукт)
-# Спецификации (несколько таблиц по типам данных: числа, строки, булево)
-# Строка товара в корзине
-# Корзина
-# Пользователь - стандартная модель User из Django
+from rest_framework.authtoken.models import Token
 
 
 User = get_user_model()
@@ -280,8 +220,8 @@ class Prices(models.Model):
                                    verbose_name='Тип цены')
     date_update = models.DateTimeField(auto_now_add=True,
                                        verbose_name='Дата установки цены')
-    discount_percentage = models.DecimalField(max_digits=3, decimal_places=0,
-                                              default=0, verbose_name='Скидка %')
+    discount_percentage = models.DecimalField(max_digits=3, decimal_places=0, default=0,
+                                              validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='Скидка %')
 
     def __str__(self) -> str:
         return f'Цена {self.product.name} = {self.price}'
@@ -327,6 +267,23 @@ class StockProducts(models.Model):
         verbose_name_plural = 'Остатки'
 
 
+# дополнительные значения для пользователей, которые не вошли в основную модель
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE,
+                                related_name='get_settings', verbose_name='Покупатель')
+    currency = models.ForeignKey(Currency, on_delete=models.PROTECT,
+                                 default=None, blank=True, null=True, verbose_name='Валюта')
+    price_type = models.ForeignKey(PriceType, on_delete=models.PROTECT,
+                                   default=None, blank=True, null=True, verbose_name='Тип цены')
+
+    def __str__(self) -> str:
+        return f'Настройки для {self.user.email}'
+
+    class Meta:
+        verbose_name = 'Настройка пользователя'
+        verbose_name_plural = 'Настройки пользователей'
+
+
 # Строка в корзине товаров, превращается в строку заказа когда строка прикрепляется к заказу,
 # изначально order=null, а затем становится cart=null, когда заказ появляется
 # discount - скидка в деньгах на всю строку, а не на штуку товара
@@ -341,13 +298,13 @@ class CartProduct(models.Model):
     cart = models.ForeignKey('Cart', on_delete=models.CASCADE,
                              related_name='get_cart_products', null=True,
                              blank=True, verbose_name='Корзина')
+    order = models.ForeignKey('Order', on_delete=models.CASCADE,
+                              related_name='get_order_products', null=True,
+                              blank=True, verbose_name='Заказ')
     id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')
     phone = models.CharField(max_length=15, default='', blank=True,
                              verbose_name='Телефон')
-    order = models.ForeignKey('Order', on_delete=models.CASCADE,
-                              related_name='get_order_products', null=True,
-                              blank=True, verbose_name='Заказ')
     product = models.ForeignKey(Product, on_delete=models.CASCADE,
                                 verbose_name='Товар')
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE,
@@ -358,8 +315,8 @@ class CartProduct(models.Model):
                                 default=0, verbose_name='Цена')
     discount = models.DecimalField(max_digits=15, decimal_places=2, default=0,
                                    blank=True, verbose_name='Скидка')
-    discount_percentage = models.DecimalField(max_digits=3, decimal_places=0,
-                                              default=0, blank=True, verbose_name='Скидка %')
+    discount_percentage = models.DecimalField(max_digits=3, decimal_places=0, default=0,
+                                              validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='Скидка %')
     amount = models.DecimalField(max_digits=15, decimal_places=2,
                                  default=0, verbose_name='Сумма')
 
@@ -485,8 +442,28 @@ class DeliveryType(models.Model):
         verbose_name_plural = 'Способы получения'
 
 
-# id_messenger необязательное поле, нужно только если заказ анонимный, по этому полю осуществляется связь строк корзины и анонимного заказа
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True,
+                            verbose_name='Номер купона')
+    valid_from = models.DateTimeField(verbose_name='Действует с')
+    valid_to = models.DateTimeField(verbose_name='Действует до')
+    discount_percentage = models.DecimalField(max_digits=3, decimal_places=0,
+                                              validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='Скидка %')
+    active = models.BooleanField(verbose_name='Активен')
+    external_code = models.CharField(max_length=11, default='', blank=True,
+                                     verbose_name='Внешний код')
+
+    def __str__(self) -> str:
+        return f'Купон {self.code} на {self.discount_percentage}%'
+
+    class Meta:
+        verbose_name = 'Купон'
+        verbose_name_plural = 'Купоны'
+
+
+# id_messenger необязательное поле, нужно только если заказ из мессенджера, по этому полю осуществляется связь строк корзины и заказа
 # например из телеграм бота, где пользолватель не имея учетки на сайте сам вводит свои данные в заказе
+# sessionid - необязательное поле, если заказ с сайта от анонимного пользователя
 # phone при анонимном заказе заполняется при получении телефона ботом, иначе из учетки на сайте
 # в 1С заказ будет загружаться и в документе будет сохраняться pk заказа
 # warehouse - не обязательное поле так как ЗаказПокупателя может быть сформирован и без него
@@ -523,11 +500,12 @@ class Order(models.Model):
     #     (DELIVERY_TYPE_DELIVERY, 'Доставка'),
     # )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             related_name='get_orders', verbose_name='Покупатель')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
+                             blank=True, related_name='get_orders', verbose_name='Покупатель')
+    sessionid = models.CharField(max_length=40, default='', blank=True,
+                                 verbose_name='Ключ сессии')
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
-
     phone = models.CharField(max_length=15, verbose_name='Телефон')
     id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')
@@ -556,6 +534,8 @@ class Order(models.Model):
     discount = models.DecimalField(max_digits=15, decimal_places=2, blank=True,
                                    default=0, verbose_name='Общая скидка')
     paid = models.BooleanField(default=False, verbose_name='Оплачен')
+    coupon = models.ForeignKey(Coupon, null=True, blank=True,
+                               on_delete=models.SET_NULL, verbose_name='Купон')
     # номер уникален в пределах 1 года как в 1С, заполняется когда 1С загрузит заказ и вернет назад свой код документа
     number = models.CharField(max_length=11, default='', blank=True,
                               verbose_name='Внешний номер заказа')

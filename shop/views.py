@@ -1,7 +1,5 @@
 from django.views.generic import FormView, ListView, DetailView, CreateView
-from django.contrib.auth import views as auth_views
 from django.core.paginator import Paginator
-from django.urls import reverse_lazy
 from shop.forms import *
 from shop import services
 from shop.models import *
@@ -18,16 +16,6 @@ class IndexView(DataMixin, FormView):
         return {**context, **c_def}
 
 
-class PageNotFound(FormView):
-    form_class = SimpleForm
-    template_name = 'shop/page404.html'
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        response.status_code = 404
-        return response
-
-
 class AboutAsView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/about-us.html'
@@ -36,39 +24,6 @@ class AboutAsView(DataMixin, FormView):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='О нас')
         return {**context, **c_def}
-
-
-class LoginUserView(DataMixin, auth_views.LoginView):
-    form_class = LoginUserForm
-    template_name = 'shop/login.html'
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Авторизация')
-        return {**context, **c_def}
-
-    def get_success_url(self):
-        return reverse_lazy('home')
-
-
-class LogoutUserView(auth_views.LogoutView):
-    next_page = 'home'
-
-
-class RegisterUserView(DataMixin, CreateView):
-    form_class = RegisterUserForm
-    template_name = 'shop/register.html'
-    success_url = reverse_lazy('registration-success')
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Регистрация')
-        return {**context, **c_def}
-
-
-class RegisterUserSuccessView(DataMixin, FormView):
-    form_class = SimpleForm
-    template_name = 'shop/registration-success.html'
 
 
 class CartView(DataMixin, FormView):
@@ -88,7 +43,8 @@ class WishlistView(DataMixin, FormView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         wishlist = services.get_favorite_products_info(self.request.user)
-        c_def = self.get_user_context(title='Избранные товары', wishlist=wishlist)
+        c_def = self.get_user_context(
+            title='Избранные товары', wishlist=wishlist)
         return {**context, **c_def}
 
 
@@ -98,8 +54,7 @@ class CheckoutView(DataMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(
-            title='Оформление заказа', form_login=LoginUserForm)
+        c_def = self.get_user_context(title='Оформление заказа')
         return {**context, **c_def}
 
 
@@ -206,14 +161,3 @@ class ProductDetailView(DataMixin, DetailView):
                                       product_attributes=attributes)
         return {**context, **c_def}
 
-
-class ProfileUserView(DataMixin, DetailView):
-    model = CustomUser
-    template_name = 'shop/index.html'
-    context_object_name = 'user_data'
-    pk_url_kwarg = 'user_id'
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Профиль пользователя')
-        return {**context, **c_def}
