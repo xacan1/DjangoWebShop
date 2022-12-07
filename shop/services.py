@@ -34,7 +34,7 @@ def get_default_payment_type() -> int:
     return payment_type_pk
 
 
-def get_default_price_type() -> PriceType | None:
+def get_default_price_type() -> PriceType:
     price_type = None
 
     queryset = PriceType.objects.filter(default=True)
@@ -45,7 +45,7 @@ def get_default_price_type() -> PriceType | None:
     return price_type
 
 
-def get_default_currency() -> Currency | None:
+def get_default_currency() -> Currency:
     currency = None
 
     queryset = Currency.objects.filter(default=True)
