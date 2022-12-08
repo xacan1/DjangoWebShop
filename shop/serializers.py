@@ -2,7 +2,6 @@ from rest_framework import serializers
 from shop.models import *
 
 
-
 class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Token
@@ -12,20 +11,21 @@ class TokenSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('pk', 'is_staff', 'is_active', 'currency', 'price_type',)
+        fields = ('pk', 'id', 'is_staff', 'is_active',
+                  'currency', 'price_type',)
 
 
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Currency
-        fields = ('pk', 'name', 'abbreviation',
+        fields = ('pk', 'id', 'name', 'abbreviation',
                   'digital_code', 'sign', 'default',)
 
 
 class PriceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceType
-        fields = ('pk', 'name', 'external_code', 'default',)
+        fields = ('pk', 'id', 'name', 'external_code', 'default',)
 
 
 class PriceSerializer(serializers.ModelSerializer):
@@ -34,7 +34,7 @@ class PriceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Prices
-        fields = ('pk', 'product', 'price', 'currency', 'price_type',
+        fields = ('pk', 'id', 'product', 'price', 'currency', 'price_type',
                   'date_update', 'discount_percentage',)
 
 
@@ -47,7 +47,7 @@ class PriceCreateSerializer(serializers.ModelSerializer):
 class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Warehouse
-        fields = ('pk', 'name', 'country', 'province',
+        fields = ('pk', 'id', 'name', 'country', 'province',
                   'city', 'address', 'external_code',)
 
 
@@ -57,7 +57,7 @@ class StockProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockProducts
-        fields = ('pk', 'product', 'warehouse', 'stock',)
+        fields = ('pk', 'id', 'product', 'warehouse', 'stock',)
 
 
 # для функции сохранения остатков
@@ -70,7 +70,7 @@ class StockProductCreateSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('pk', 'name', 'external_code',
+        fields = ('pk', 'id', 'name', 'external_code',
                   'photo', 'parent', 'nested_category',)
 
 
@@ -82,33 +82,33 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ('pk', 'name', 'slug', 'external_code', 'category', 'photo',
+        fields = ('pk', 'id', 'name', 'slug', 'external_code', 'category', 'photo',
                   'time_create', 'get_prices', 'get_stock_product', 'description',)
 
 
 class ImageProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImageProduct
-        fields = ('pk', 'product', 'photo', 'description', 'default',)
+        fields = ('pk', 'id', 'product', 'photo', 'description', 'default',)
 
 
 class AttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attribute
-        fields = ('pk', 'name', 'category', 'external_code',)
+        fields = ('pk', 'id', 'name', 'category', 'external_code',)
 
 
 class AttributeValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeValues
-        fields = ('pk', 'attribute', 'string_value',
+        fields = ('pk', 'id', 'attribute', 'string_value',
                   'numeric_value', 'external_code',)
 
 
 class AttributeProductValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeProductValues
-        fields = ('pk', 'product', 'attribute', 'value',)
+        fields = ('pk', 'id', 'product', 'attribute', 'value',)
 
 
 class FavoriteProductSerializer(serializers.ModelSerializer):
@@ -116,7 +116,7 @@ class FavoriteProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FavoriteProduct
-        fields = ('pk', 'user', 'product', 'id_messenger',)
+        fields = ('pk', 'id', 'user', 'product', 'id_messenger',)
 
 
 class FavoriteProductCreateSerializer(serializers.ModelSerializer):
@@ -147,26 +147,32 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ('pk', 'user', 'sessionid', 'get_cart_products', 'quantity',
+        fields = ('pk', 'id', 'user', 'sessionid', 'get_cart_products', 'quantity',
                   'amount', 'discount', 'for_anonymous_user',)
 
 
 class StatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
-        fields = ('pk', 'name', 'external_code', 'for_bot', 'use',)
+        fields = ('pk', 'id', 'name', 'external_code', 'for_bot', 'use',)
 
 
 class PaymentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentType
-        fields = ('pk', 'name', 'external_code', 'for_bot', 'use',)
+        fields = ('pk', 'id', 'name', 'external_code', 'for_bot', 'use',)
 
 
 class DeliveryTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryType
-        fields = ('pk', 'name', 'external_code', 'for_bot', 'use',)
+        fields = ('pk', 'id', 'name', 'external_code', 'for_bot', 'use',)
+
+
+class CouponSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = '__all__'
 
 
 class OrderSerializer(serializers.ModelSerializer):

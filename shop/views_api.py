@@ -6,7 +6,6 @@ from shop.serializers import *
 from shop import services
 
 
-
 class TokensAPIList(generics.ListAPIView):
     serializer_class = TokenSerializer
     permission_classes = (IsAuthenticated,)
@@ -645,6 +644,40 @@ class DeliveryTypesAPIDelete(generics.DestroyAPIView):
     permission_classes = (IsAdminUser,)
 
 
+class CouponsAPIList(generics.ListAPIView):
+    serializer_class = CouponSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = Coupon.objects.filter(**get_params)
+        return queryset
+
+
+class CouponsAPICreate(generics.CreateAPIView):
+    serializer_class = CouponSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class CouponsAPIRetrieve(generics.RetrieveAPIView):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = (IsAuthenticated,)
+
+
+class CouponsAPIUpdate(generics.UpdateAPIView):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class CouponsAPIDelete(generics.DestroyAPIView):
+    queryset = Coupon.objects.all()
+    serializer_class = CouponSerializer
+    permission_classes = (IsAdminUser,)
+
+
 class OrdersAPIList(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
@@ -754,7 +787,8 @@ class APIGetCartInfo(APIView):
         if session_key != old_session_key and request.user.is_authenticated:
             services.merging_two_shopping_carts(request.user, old_session_key)
 
-        cart_info = services.get_cart_full_info(request.user, get_params=get_params, session_key=session_key)
+        cart_info = services.get_cart_full_info(
+            request.user, get_params=get_params, session_key=session_key)
         return Response(cart_info)
 
 
@@ -770,5 +804,6 @@ class APIAddFavoriteProduct(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request: Request) -> Response:
-        data_response = services.add_favorite_product(request.user, request.data)
+        data_response = services.add_favorite_product(
+            request.user, request.data)
         return Response(data_response)
