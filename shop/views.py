@@ -6,7 +6,6 @@ from shop.models import *
 from shop.mixins import DataMixin
 
 
-
 class IndexView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/index.html'
@@ -55,7 +54,9 @@ class CheckoutView(DataMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Оформление заказа')
+        cart = services.get_cart_full_info(user=self.request.user,
+                                           session_key=self.request.session.session_key)
+        c_def = self.get_user_context(title='Оформление заказа', cart=cart)
         return {**context, **c_def}
 
 
@@ -161,4 +162,3 @@ class ProductDetailView(DataMixin, DetailView):
                                       product_prices=prices,
                                       product_attributes=attributes)
         return {**context, **c_def}
-

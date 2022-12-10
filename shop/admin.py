@@ -124,7 +124,7 @@ class CartProductAdmin(admin.ModelAdmin):
 
 class CartAdmin(admin.ModelAdmin):
     model = Cart
-    list_display = ('user', 'sessionid', 'quantity', 'amount',
+    list_display = ('user', 'currency', 'sessionid', 'quantity', 'amount',
                     'discount', 'for_anonymous_user',)
     list_filter = ('for_anonymous_user',)
     search_fields = ('user__email',)

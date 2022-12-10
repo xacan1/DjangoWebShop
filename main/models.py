@@ -33,15 +33,10 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractUser):
-    # from shop.models import Currency, PriceType
     username = None
     email = models.EmailField(_('email address'), unique=True)
     phone = models.CharField(max_length=15, unique=True,
                              verbose_name='Телефон')
-    # currency = models.ForeignKey(Currency, on_delete=models.PROTECT,
-    #                              default=None, blank=True, null=True, verbose_name='Валюта')
-    # price_type = models.ForeignKey(PriceType, on_delete=models.PROTECT,
-    #                                default=None, blank=True, null=True, verbose_name='Тип цены')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

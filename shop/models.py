@@ -6,7 +6,6 @@ from .utils import unique_slugify
 from rest_framework.authtoken.models import Token
 
 
-
 User = get_user_model()
 
 
@@ -340,6 +339,8 @@ class CartProduct(models.Model):
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True,
                                 related_name='get_user_cart', verbose_name='Покупатель')
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE,
+                                 verbose_name='Валюта корзины')
     sessionid = models.CharField(max_length=40, default='', blank=True,
                                  verbose_name='Ключ сессии')
     quantity = models.DecimalField(max_digits=15, decimal_places=3, blank=True,

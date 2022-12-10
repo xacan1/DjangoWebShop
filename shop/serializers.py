@@ -144,11 +144,12 @@ class CartProductCreateSerializer(serializers.ModelSerializer):
 
 class CartSerializer(serializers.ModelSerializer):
     get_cart_products = CartProductSerializer(many=True, read_only=True)
+    currency = CurrencySerializer(read_only=True)
 
     class Meta:
         model = Cart
-        fields = ('pk', 'id', 'user', 'sessionid', 'get_cart_products', 'quantity',
-                  'amount', 'discount', 'for_anonymous_user',)
+        fields = ('pk', 'id', 'user', 'currency', 'sessionid', 'get_cart_products',
+                  'quantity', 'amount', 'discount', 'for_anonymous_user',)
 
 
 class StatusSerializer(serializers.ModelSerializer):

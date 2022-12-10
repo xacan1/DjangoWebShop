@@ -4,7 +4,6 @@ from shop.serializers import *
 from shop.models import *
 
 
-
 def get_default_status() -> int:
     status_pk = 0
     queryset = Status.objects.filter(for_bot=True)
@@ -55,6 +54,7 @@ def get_default_currency() -> Currency:
         currency = queryset[0]
 
     return currency
+
 
 # Возвращает рекурсивно все категории с подкатегориями в виде списка кортежей с slug, name и списокм подкатегорий если он есть
 # categories = [(slug, name, []),]
@@ -177,6 +177,10 @@ def get_orders_for_session(sessionid: str, paid: bool = False) -> models.QuerySe
 
 # создает новую Корзину пользователя если ее ещё нет
 def create_new_cart(new_cart_info: dict) -> dict:
+    if 'currency' not in new_cart_info:
+        default_currency = get_default_currency()
+        new_cart_info['currency'] = default_currency.pk if default_currency is not None else 0
+
     serializer = CartSerializer(data=new_cart_info)
     serializer.is_valid(raise_exception=True)
     serializer.save()
@@ -330,7 +334,7 @@ def get_last_price(product_pk: int, price_type_pk: int = 0) -> dict:
     return price_info
 
 
-# создает новую Настройку пользователя если её ещё нет
+# создает новую Настройку пользователя
 def create_new_settings(new_settings_info: dict) -> UserSettings:
     settings = UserSettings(**new_settings_info)
     settings.save()
@@ -343,7 +347,7 @@ def get_settings_user(user: AbstractBaseUser) -> dict:
 
     if not user.is_authenticated:
         settings_info = {
-            'currency' : get_default_currency(),
+            'currency': get_default_currency(),
             'price_type': get_default_price_type()
         }
         return settings_info
@@ -355,11 +359,11 @@ def get_settings_user(user: AbstractBaseUser) -> dict:
     else:
         settings_info = {
             'user': user,
-            'currency' : get_default_currency(),
+            'currency': get_default_currency(),
             'price_type': get_default_price_type()
         }
         settings = create_new_settings(settings_info)
-    
+
     if not settings.currency:
         settings_info['currency'] = get_default_currency()
 
