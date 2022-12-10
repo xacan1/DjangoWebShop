@@ -181,11 +181,12 @@ def create_new_cart(new_cart_info: dict) -> dict:
         default_currency = get_default_currency()
         new_cart_info['currency'] = default_currency.pk if default_currency is not None else 0
 
-    serializer = CartSerializer(data=new_cart_info)
+    serializer = CartCreateSerializer(data=new_cart_info)
     serializer.is_valid(raise_exception=True)
     serializer.save()
     cart_info = serializer.data
     cart_info['products'] = []
+
     return cart_info
 
 

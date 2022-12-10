@@ -148,8 +148,13 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ('pk', 'id', 'user', 'currency', 'sessionid', 'get_cart_products',
-                  'quantity', 'amount', 'discount', 'for_anonymous_user',)
+        fields = '__all__'
+
+
+class CartCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'
 
 
 class StatusSerializer(serializers.ModelSerializer):
