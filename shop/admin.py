@@ -179,7 +179,7 @@ class CouponAdmin(admin.ModelAdmin):
 
 class OrderAdmin(admin.ModelAdmin):
     model = Order
-    list_display = ('pk', 'user', 'phone', 'status', 'delivery_date', 'delivery_type', 'paid',
+    list_display = ('pk', 'user', 'phone', 'email', 'status', 'delivery_date', 'delivery_type', 'paid',
                     'quantity', 'amount', 'discount', 'coupon', 'number', 'warehouse', 'time_create',)
     list_display_links = ('pk', 'user', 'phone', 'status',)
     list_filter = ('status', 'delivery_type', 'payment_type', 'paid',

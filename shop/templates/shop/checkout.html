@@ -30,238 +30,99 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="checkout-steps-form-style-1">
-                    <ul id="accordionExample">
-                        <li>
-                            <h6 class="title" data-bs-toggle="collapse" data-bs-target="#collapseThree"
-                                aria-expanded="true" aria-controls="collapseThree">Ваши данные</h6>
-                            <section class="checkout-steps-form-content collapse show" id="collapseThree"
-                                aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="single-form form-default">
-                                            <label>Имя пользователя</label>
-                                            <div class="row">
-                                                <div class="col-md-6 form-input form">
-                                                    <input type="text" placeholder="Имя">
-                                                </div>
-                                                <div class="col-md-6 form-input form">
-                                                    <input type="text" placeholder="Фамилия">
-                                                </div>
+                    <section class="checkout-steps-form-content">
+                        <form action="{% url 'checkout' %}" method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="single-form form-default">
+                                        <label>Имя пользователя</label>
+                                        <div class="row">
+                                            <div class="col-md-6 form-input form">
+                                                <input type="text" placeholder="Имя">
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Email</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Email">
+                                            <div class="col-md-6 form-input form">
+                                                <input type="text" placeholder="Фамилия">
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Телефон</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Телефон">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="single-form form-default">
-                                            <label>Почтовый адрес</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Почтовый адрес">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Населенный пункт</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Населенный пункт">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Почтовый индекс</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Почтовый индекс">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Страна</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Страна">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Область/Провинция</label>
-                                            <div class="select-items">
-                                                <select class="form-control">
-                                                    <option value="0">select</option>
-                                                    <option value="1">Башкортостан</option>
-                                                    <option value="2">Пермский край</option>
-                                                    <option value="3">Запорожская область</option>
-                                                    <option value="4">Херсонская область</option>
-                                                    <option value="5">Удмуртия</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="single-checkbox checkbox-style-3">
-                                            <input type="checkbox" id="checkbox-3">
-                                            <label for="checkbox-3"><span></span></label>
-                                            <p>Мои адреса доставки и почты совпадают.</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="single-form button">
-                                            <button class="btn" data-bs-toggle="collapse" data-bs-target="#collapseFour"
-                                                aria-expanded="false" aria-controls="collapseFour">Слудующий шаг</button>
                                         </div>
                                     </div>
                                 </div>
-                            </section>
-                        </li>
-                        <li>
-                            <h6 class="title collapsed" data-bs-toggle="collapse" data-bs-target="#collapseFour"
-                                aria-expanded="false" aria-controls="collapseFour">Адрес доставки</h6>
-                            <section class="checkout-steps-form-content collapse" id="collapseFour"
-                                aria-labelledby="headingFour" data-bs-parent="#accordionExample">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="single-form form-default">
-                                            <label>Имя пользователя</label>
-                                            <div class="row">
-                                                <div class="col-md-6 form-input form">
-                                                    <input type="text" placeholder="Имя">
-                                                </div>
-                                                <div class="col-md-6 form-input form">
-                                                    <input type="text" placeholder="Фамилия">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Email</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Email">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Телефон</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Телефон">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="single-form form-default">
-                                            <label>Почтовый адрес</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Почтовый адрес">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Населенный пункт</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Населенный пункт">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Почтовый индекс</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Почтовый индекс">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Страна</label>
-                                            <div class="form-input form">
-                                                <input type="text" placeholder="Страна">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="single-form form-default">
-                                            <label>Область/Провинция</label>
-                                            <div class="select-items">
-                                                <select class="form-control">
-                                                    <option value="0">select</option>
-                                                    <option value="1">Башкортостан</option>
-                                                    <option value="2">Пермский край</option>
-                                                    <option value="3">Запорожская область</option>
-                                                    <option value="4">Херсонская область</option>
-                                                    <option value="5">Удмуртия</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="checkout-payment-option">
-                                            <h6 class="heading-6 font-weight-400 payment-title">Выбрать доставку</h6>
-                                            <div class="payment-option-wrapper">
-                                                <div class="single-payment-option">
-                                                    <input type="radio" name="shipping" checked id="shipping-1">
-                                                    <label for="shipping-1">
-                                                        <img src="https://via.placeholder.com/60x32" alt="Sipping">
-                                                        <p>Standerd Shipping</p>
-                                                        <span class="price">$10.50</span>
-                                                    </label>
-                                                </div>
-                                                <div class="single-payment-option">
-                                                    <input type="radio" name="shipping" id="shipping-2">
-                                                    <label for="shipping-2">
-                                                        <img src="https://via.placeholder.com/60x32" alt="Sipping">
-                                                        <p>Standerd Shipping</p>
-                                                        <span class="price">$10.50</span>
-                                                    </label>
-                                                </div>
-                                                <div class="single-payment-option">
-                                                    <input type="radio" name="shipping" id="shipping-3">
-                                                    <label for="shipping-3">
-                                                        <img src="https://via.placeholder.com/60x32" alt="Sipping">
-                                                        <p>Standerd Shipping</p>
-                                                        <span class="price">$10.50</span>
-                                                    </label>
-                                                </div>
-                                                <div class="single-payment-option">
-                                                    <input type="radio" name="shipping" id="shipping-4">
-                                                    <label for="shipping-4">
-                                                        <img src="https://via.placeholder.com/60x32" alt="Sipping">
-                                                        <p>Standerd Shipping</p>
-                                                        <span class="price">$10.50</span>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <div class="steps-form-btn button">
-                                            <button class="btn" data-bs-toggle="collapse"
-                                                data-bs-target="#collapseThree" aria-expanded="false"
-                                                aria-controls="collapseThree">Назад</button>
-                                            <a href="javascript:void(0)" class="btn btn-alt">Продолжить</a>
+                                <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Email</label>
+                                        <div class="form-input form">
+                                            <input type="text" placeholder="Email">
                                         </div>
                                     </div>
                                 </div>
-                            </section>
-                        </li>
-                        <li>
+                                <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Телефон</label>
+                                        <div class="form-input form">
+                                            <input type="text" placeholder="Телефон">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="single-form form-default">
+                                        <label>Адрес доставки</label>
+                                        <div class="form-input form">
+                                            <input type="text" placeholder="Адрес доставки">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Населенный пункт</label>
+                                        <div class="form-input form">
+                                            <input type="text" placeholder="Населенный пункт">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Почтовый индекс</label>
+                                        <div class="form-input form">
+                                            <input type="text" placeholder="Почтовый индекс">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Страна</label>
+                                        <div class="form-input form">
+                                            <input type="text" placeholder="Страна">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Область/Провинция</label>
+                                        <div class="select-items">
+                                            <select class="form-control">
+                                                <option value="0">select</option>
+                                                <option value="1">Башкортостан</option>
+                                                <option value="2">Пермский край</option>
+                                                <option value="3">Запорожская область</option>
+                                                <option value="4">Херсонская область</option>
+                                                <option value="5">Удмуртия</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <div class="col-md-12">
+                                    <div class="steps-form-btn button">
+                                        <button class="btn" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseThree" aria-expanded="false"
+                                            aria-controls="collapseThree">Назад</button>
+                                        <a href="javascript:void(0)" class="btn btn-alt">Продолжить</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+                        
+                        <!-- <li>
                             <h6 class="title collapsed" data-bs-toggle="collapse" data-bs-target="#collapsefive"
                                 aria-expanded="false" aria-controls="collapsefive">Платежная информация</h6>
                             <section class="checkout-steps-form-content collapse" id="collapsefive"
@@ -310,8 +171,7 @@
                                     </div>
                                 </div>
                             </section>
-                        </li>
-                    </ul>
+                        </li> -->
                 </div>
             </div>
             <div class="col-lg-4">
@@ -330,38 +190,40 @@
                         </form>
                     </div>
                     <div class="checkout-sidebar-price-table mt-30">
-                        <h5 class="title">Цены</h5>
+                        <h5 class="title">Сумма заказа</h5>
 
                         <div class="sub-total-price">
                             <div class="total-price">
-                                <p class="value">Итоговая цена:</p>
-                                <p class="price">{{ cart.amount }}</p>
+                                <p class="value">Сумма:</p>
+                                <p class="price">{{ cart.currency.sign }}{{ cart.amount|floatformat:'2g' }}</p>
                             </div>
-                            <div class="total-price shipping">
+                            <!-- <div class="total-price shipping">
                                 <p class="value">Subotal Price:</p>
                                 <p class="price">10.50</p>
-                            </div>
+                            </div> -->
+                            {% if cart.discount > 0 %}
                             <div class="total-price discount">
-                                <p class="value">Subotal Price:</p>
-                                <p class="price">10.00</p>
+                                <p class="value">Скидка:</p>
+                                <p class="price">{{ cart.currency.sign }}{{ cart.discount|floatformat:'2g' }}</p>
                             </div>
+                            {% endif %}
                         </div>
 
                         <div class="total-payable">
                             <div class="payable-price">
-                                <p class="value">Subotal Price:</p>
-                                <p class="price">₽164.50</p>
+                                <p class="value">Итоговая сумма:</p>
+                                <p class="price">{{ cart.currency.sign }}{{ cart.amount|floatformat:'2g' }}</p>
                             </div>
                         </div>
                         <!-- <div class="price-table-btn button">
                             <a href="javascript:void(0)" class="btn btn-alt">Checkout</a>
                         </div> -->
                     </div>
-                    <div class="checkout-sidebar-banner mt-30">
+                    <!-- <div class="checkout-sidebar-banner mt-30">
                         <a href="product-grids.html">
                             <img src="https://via.placeholder.com/400x330" alt="#">
                         </a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

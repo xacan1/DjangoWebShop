@@ -509,6 +509,8 @@ class Order(models.Model):
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
     phone = models.CharField(max_length=15, verbose_name='Телефон')
+    email = models.EmailField(max_length=254, default='', blank=True,
+                              verbose_name='Email')
     id_messenger = models.IntegerField(default=0, blank=True,
                                        verbose_name='ID из мессенджера')
     address = models.CharField(max_length=1024, default='', blank=True,
@@ -544,6 +546,12 @@ class Order(models.Model):
 
     def __str__(self) -> str:
         return f'Заказ №{self.pk} от {self.time_update.strftime("%d.%m.%Y")}'
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.email and self.user:
+            self.email = self.user.email
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Заказ'

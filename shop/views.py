@@ -1,5 +1,6 @@
 from django.views.generic import FormView, ListView, DetailView, CreateView
 from django.core.paginator import Paginator
+from django.urls import reverse_lazy
 from shop.forms import *
 from shop import services
 from shop.models import *
@@ -45,18 +46,6 @@ class WishlistView(DataMixin, FormView):
         wishlist = services.get_favorite_products_info(self.request.user)
         c_def = self.get_user_context(
             title='Избранные товары', wishlist=wishlist)
-        return {**context, **c_def}
-
-
-class CheckoutView(DataMixin, FormView):
-    form_class = SimpleForm
-    template_name = 'shop/checkout.html'
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        cart = services.get_cart_full_info(user=self.request.user,
-                                           session_key=self.request.session.session_key)
-        c_def = self.get_user_context(title='Оформление заказа', cart=cart)
         return {**context, **c_def}
 
 
@@ -162,3 +151,38 @@ class ProductDetailView(DataMixin, DetailView):
                                       product_prices=prices,
                                       product_attributes=attributes)
         return {**context, **c_def}
+
+
+class CheckoutView(DataMixin, FormView):
+    form_class = SimpleForm
+    template_name = 'shop/checkout.html'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        cart = services.get_cart_full_info(user=self.request.user,
+                                           session_key=self.request.session.session_key)
+        c_def = self.get_user_context(title='Оформление заказа', cart=cart)
+        return {**context, **c_def}
+
+
+class AddOrderView(DataMixin, FormView):
+    form_class = SimpleForm
+    template_name = 'shop/checkout.html'
+    success_url = reverse_lazy('checkout')
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        form1 = AddOrderForm1()
+        cart = services.get_cart_full_info(user=self.request.user,
+                                           session_key=self.request.session.session_key)
+        c_def = self.get_user_context(title='Оформление заказа', cart=cart, form1=form1)
+        return {**context, **c_def}
+    
+    def post(self, request, *args: str, **kwargs):
+        request = super().post(request, *args, **kwargs)
+        form1 = AddOrderForm1(self.request.POST)
+
+        if form1.is_valid():
+            print(form1.cleaned_data)
+
+        return request
