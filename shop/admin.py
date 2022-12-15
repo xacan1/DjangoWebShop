@@ -3,7 +3,6 @@ from rest_framework.authtoken.admin import TokenAdmin
 from shop.models import *
 
 
-
 TokenAdmin.raw_id_fields = ['user']
 
 
@@ -180,7 +179,7 @@ class CouponAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     model = Order
     list_display = ('pk', 'user', 'phone', 'email', 'status', 'delivery_date', 'delivery_type', 'paid',
-                    'quantity', 'amount', 'discount', 'coupon', 'number', 'warehouse', 'time_create',)
+                    'quantity', 'amount', 'discount', 'coupon', 'number', 'warehouse', 'currency', 'time_create',)
     list_display_links = ('pk', 'user', 'phone', 'status',)
     list_filter = ('status', 'delivery_type', 'payment_type', 'paid',
                    'time_create',)

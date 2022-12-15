@@ -506,6 +506,8 @@ class Order(models.Model):
                              blank=True, related_name='get_orders', verbose_name='Покупатель')
     sessionid = models.CharField(max_length=40, default='', blank=True,
                                  verbose_name='Ключ сессии')
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE,
+                                 verbose_name='Валюта корзины')
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
     phone = models.CharField(max_length=15, verbose_name='Телефон')
@@ -546,12 +548,6 @@ class Order(models.Model):
 
     def __str__(self) -> str:
         return f'Заказ №{self.pk} от {self.time_update.strftime("%d.%m.%Y")}'
-
-    def save(self, *args, **kwargs) -> None:
-        if not self.email and self.user:
-            self.email = self.user.email
-
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Заказ'

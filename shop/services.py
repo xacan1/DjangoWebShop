@@ -4,14 +4,14 @@ from shop.serializers import *
 from shop.models import *
 
 
-def get_default_status() -> int:
-    status_pk = 0
+def get_default_status() -> Status:
+    status = 0
     queryset = Status.objects.filter(for_bot=True)
 
     if queryset.exists():
-        status_pk = queryset[0].pk
+        status = queryset[0]
 
-    return status_pk
+    return status
 
 
 def get_default_delivery_type() -> int:
@@ -188,6 +188,20 @@ def create_new_cart(new_cart_info: dict) -> dict:
     cart_info['products'] = []
 
     return cart_info
+
+
+def create_new_order(new_order_info: dict) -> tuple[Order, dict]:
+    if 'currency' not in new_order_info:
+        default_currency = get_default_currency()
+        new_order_info['currency'] = default_currency.pk if default_currency is not None else 0
+
+    serializer_order = OrderCreateSerializer(data=new_order_info)
+    serializer_order.is_valid(raise_exception=True)
+    serializer_order.save()
+    order_info = serializer_order.data
+    order_info['products'] = []
+
+    return serializer_order.instance, order_info
 
 
 # получает или создает Корзину пользователя по ID пользователя в виде словаря
@@ -492,27 +506,31 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
     return data_response
 
 
-# превращает строки Корзины в строки Заказа при оформлении Заказа из Корзины
-# или добавляет их к существующему неоплаченному Заказу, пример тела POST
+# Логика данной функции заточена под Телеграм магазин, так как если находит неоплаченный заказ,
+# то прибавляет к нему товары из корзины вместо создания нового заказа.
+# Превращает строки Корзины в строки Заказа при оформлении Заказа из Корзины
+# или добавляет их к существующему неоплаченному Заказу, пример тела POST:
 # {
 #   "first_name": "Иван",
 #   "last_name": "Иванов",
 #   "phone": "79377777777",
-#   "id_messenger": 827503364, <- опционально, если это Телеграм магазин
+#   "id_messenger": 827503364,
 # }
-def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
+def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dict) -> dict:
     id_messenger = order_info.get('id_messenger', 0)
     phone = order_info.get('phone', '')
-    for_anonymous_user = order_info.get('for_anonymous_user', False)
-    order_info['status'] = order_info.get('status_pk', get_default_status())
-    order_info['delivery_type'] = order_info.get(
-        'delivery_type_pk', get_default_delivery_type()
-    )
-    order_info['payment_type'] = order_info.get(
-        'payment_type_pk', get_default_payment_type()
-    )
+    for_messenger_user = order_info.get('for_anonymous_user', False)
+    settings_user = get_settings_user(user)
+    order_info['currency'] = settings_user['currency']
+    order_info['status'] = order_info.get('status_pk', get_default_status().pk)
+    order_info['delivery_type'] = order_info.get('delivery_type_pk',
+                                                 get_default_delivery_type())
+    order_info['payment_type'] = order_info.get('payment_type_pk',
+                                                get_default_payment_type())
 
-    if not order_info['status']:
+    if not order_info['currency']:
+        return {'error': 'Currency not found'}
+    elif not order_info['status']:
         return {'error': 'Status not found'}
     elif not order_info['delivery_type']:
         return {'error': 'DeliveryType not found'}
@@ -534,20 +552,16 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
         order_info['discount'] = order_instance.discount
         order_info['amount'] = order_instance.amount
     else:
-        serializer_order = OrderCreateSerializer(data=order_info)
-        serializer_order.is_valid(raise_exception=True)
-        serializer_order.save()
-        order_info = serializer_order.data
+        order_instance, order_info = create_new_order(order_info)
         order_info['quantity'] = Decimal(0)
         order_info['discount'] = Decimal(0)
         order_info['amount'] = Decimal(0)
-        order_instance = serializer_order.instance
 
     order_pk = order_info['id']
-    cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
+    cart_info = get_cart_by_user_id(user_pk, for_messenger_user)
     cart_pk = cart_info.get('id', 0)
 
-    # найду и превращу все строки Корзины в строки Заказа
+    # найду и превращу все строки Корзины в строки последнего неоплаченного Заказа
     product_carts = get_cart_order_products(cart_pk, id_messenger)
 
     for product_cart in product_carts:
@@ -557,8 +571,8 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
         order_info['amount'] += product_cart.amount
 
         # если найду строку с тем же товаром в текущем Заказе, то изменю количество в ней, а строку Корзины удалю
-        order_row, _ = get_cart_order_product(
-            order_pk, product_cart.product.pk, id_messenger, True)
+        order_row, _ = get_cart_order_product(order_pk,
+                                              product_cart.product.pk, id_messenger, True)
 
         if order_row:
             order_row.quantity = order_row.quantity + product_cart.quantity
@@ -572,6 +586,29 @@ def create_or_update_order(user: AbstractBaseUser, order_info: dict) -> dict:
             product_cart.save()
 
     return order_info
+
+
+# Превращает строки Корзины(CartProduct) в строки Заказа при оформлении Заказа из Корзины
+def changing_cart_rows_to_order_rows(user: AbstractBaseUser, order: Order, session_key: str = '') -> None:
+    user_pk = user.pk if user.is_authenticated else 0
+
+    if user_pk:
+        cart_info = get_cart_by_user_id(user_pk)
+        phone = user.phone
+    else:
+        cart_info = get_cart_by_sessionid(session_key)
+        phone = ''
+
+    cart_pk = cart_info.get('id', 0)
+
+    # найду и превращу все строки Корзины в строки Заказа
+    product_carts = get_cart_order_products(cart_pk)
+
+    for product_cart in product_carts:
+        product_cart.cart = None
+        product_cart.order = order
+        product_cart.phone = phone
+        product_cart.save()
 
 
 # получает полную информацию о Заказе с товарами
@@ -640,6 +677,7 @@ def delete_cart_by_session_key(session_key: str) -> None:
         cart.delete()
 
 
+# объединяет корзину анонимного пользователя с корзиной залогиненного пользователя
 def merging_two_shopping_carts(user: AbstractBaseUser, session_key: str) -> None:
     anonymous_cart_products = CartProduct.objects.filter(
         cart__sessionid=session_key).values()

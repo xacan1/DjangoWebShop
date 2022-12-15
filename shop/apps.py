@@ -1,7 +1,6 @@
 from django.apps import AppConfig
 
 
-
 class ShopConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'shop'
@@ -16,4 +15,5 @@ class ShopConfig(AppConfig):
         signals.pre_save.connect(signals.set_default_currency, self.get_model('Currency'))
         signals.pre_save.connect(signals.set_default_price_type, self.get_model('PriceType'))
         signals.post_save.connect(signals.set_default_photo_product, self.get_model('ImageProduct'))
+        signals.pre_save.connect(signals.set_default_status_order, self.get_model('Order'))
         return super().ready()

@@ -748,7 +748,7 @@ class APICreateUpdateOrder(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request: Request) -> Response:
-        data_response = services.create_or_update_order(
+        data_response = services.create_or_update_order_for_messenger(
             request.user, request.data)
         return Response(data_response)
 

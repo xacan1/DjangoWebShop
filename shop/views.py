@@ -5,6 +5,7 @@ from shop.forms import *
 from shop import services
 from shop.models import *
 from shop.mixins import DataMixin
+from django.http import HttpResponse
 
 
 class IndexView(DataMixin, FormView):
@@ -153,36 +154,47 @@ class ProductDetailView(DataMixin, DetailView):
         return {**context, **c_def}
 
 
-class CheckoutView(DataMixin, FormView):
-    form_class = SimpleForm
+class AddOrderView(DataMixin, CreateView):
+    model = Order
+    form_class = AddOrderForm
     template_name = 'shop/checkout.html'
+    success_url = reverse_lazy('new-order-success')
+
+    def form_valid(self, form) -> HttpResponse:
+        response = super().form_valid(form)
+        order = form.instance
+        services.changing_cart_rows_to_order_rows(self.request.user, order,
+                                                  self.request.session.session_key)
+        return response
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         cart = services.get_cart_full_info(user=self.request.user,
                                            session_key=self.request.session.session_key)
+
+        # установим значения формы если пользователь уже залогинен
+        if self.request.user.is_authenticated:
+            form = self.form_class(initial={'first_name': self.request.user.first_name,
+                                            'last_name': self.request.user.last_name,
+                                            'email': self.request.user.email,
+                                            'phone': self.request.user.phone})
+            context['form'] = form
+
         c_def = self.get_user_context(title='Оформление заказа', cart=cart)
         return {**context, **c_def}
 
 
-class AddOrderView(DataMixin, FormView):
+class AddOrderSuccessView(DataMixin, FormView):
     form_class = SimpleForm
-    template_name = 'shop/checkout.html'
-    success_url = reverse_lazy('checkout')
+    template_name = 'shop/new-order-success.html'
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        form1 = AddOrderForm1()
-        cart = services.get_cart_full_info(user=self.request.user,
-                                           session_key=self.request.session.session_key)
-        c_def = self.get_user_context(title='Оформление заказа', cart=cart, form1=form1)
+        c_def = self.get_user_context(title='Заказ оформлен')
         return {**context, **c_def}
-    
-    def post(self, request, *args: str, **kwargs):
-        request = super().post(request, *args, **kwargs)
-        form1 = AddOrderForm1(self.request.POST)
 
-        if form1.is_valid():
-            print(form1.cleaned_data)
 
-        return request
+class OrderView(DataMixin, DetailView):
+    model = Order
+    template_name = 'shop/order.html'
+    context_object_name = 'order'

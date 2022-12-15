@@ -39,63 +39,49 @@
                                         <label>Имя пользователя</label>
                                         <div class="row">
                                             <div class="col-md-6 form-input form">
-                                                <input type="text" placeholder="Имя">
+                                                <!-- <input type="text" placeholder="Имя"> -->
+                                                {{ form.first_name }}
+                                                <div class="text-danger">{{ form.first_name.errors }}</div>
                                             </div>
                                             <div class="col-md-6 form-input form">
-                                                <input type="text" placeholder="Фамилия">
+                                                <!-- <input type="text" placeholder="Фамилия"> -->
+                                                {{ form.last_name }}
+                                                <div class="text-danger">{{ form.last_name.errors }}</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="single-form form-default">
+                                    <div class="single-form form-default has-validation">
                                         <label>Email</label>
                                         <div class="form-input form">
-                                            <input type="text" placeholder="Email">
+                                            <!-- <input type="text" placeholder="Email"> -->
+                                            {{ form.email }}
+                                            <div class="text-danger">{{ form.email.errors }}</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="single-form form-default">
-                                        <label>Телефон</label>
+                                        <label>Телефон (начиная с 7)</label>
                                         <div class="form-input form">
-                                            <input type="text" placeholder="Телефон">
+                                            <!-- <input type="text" placeholder="Телефон"> -->
+                                            {{ form.phone }}
+                                            <div class="text-danger">{{ form.phone.errors }}</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="single-form form-default">
-                                        <label>Адрес доставки</label>
+                                        <label>Адрес доставки (Населенный пункт, улица, номер дома)</label>
                                         <div class="form-input form">
-                                            <input type="text" placeholder="Адрес доставки">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="single-form form-default">
-                                        <label>Населенный пункт</label>
-                                        <div class="form-input form">
-                                            <input type="text" placeholder="Населенный пункт">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="single-form form-default">
-                                        <label>Почтовый индекс</label>
-                                        <div class="form-input form">
-                                            <input type="text" placeholder="Почтовый индекс">
+                                            <!-- <input type="text" placeholder="Адрес доставки"> -->
+                                            {{ form.address }}
+                                            <div class="text-danger">{{ form.address.errors }}</div>
                                         </div>
                                     </div>
                                 </div>
                                 <!-- <div class="col-md-6">
-                                    <div class="single-form form-default">
-                                        <label>Страна</label>
-                                        <div class="form-input form">
-                                            <input type="text" placeholder="Страна">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
                                     <div class="single-form form-default">
                                         <label>Область/Провинция</label>
                                         <div class="select-items">
@@ -110,12 +96,34 @@
                                         </div>
                                     </div>
                                 </div> -->
+                                <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Способ получения</label>
+                                        <div class="select-items">
+                                            {{ form.delivery_type }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="single-form form-default">
+                                        <label>Способ оплаты</label>
+                                        <div class="select-items">
+                                            {{ form.payment_type }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="single-form form-default">
+                                        <label>Комментарий к заказу</label>
+                                        <div class="form form-input">
+                                            {{ form.comment }}
+                                            <div class="text-danger">{{ form.comment.errors }}</div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-12">
                                     <div class="steps-form-btn button">
-                                        <button class="btn" data-bs-toggle="collapse"
-                                            data-bs-target="#collapseThree" aria-expanded="false"
-                                            aria-controls="collapseThree">Назад</button>
-                                        <a href="javascript:void(0)" class="btn btn-alt">Продолжить</a>
+                                        <button class="btn" type="submit">Подтвердить заказ</button>
                                     </div>
                                 </div>
                             </div>

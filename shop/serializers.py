@@ -182,6 +182,7 @@ class CouponSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    currency = CurrencySerializer(read_only=True)
     status = StatusSerializer(read_only=True)
     delivery_type = DeliveryTypeSerializer(read_only=True)
     payment_type = PaymentTypeSerializer(read_only=True)

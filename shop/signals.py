@@ -95,3 +95,12 @@ def update_cart_product_signal(sender, **kwargs) -> None:
             order.discount = order_sum['sum_discount'] if order_sum['sum_discount'] else 0
             order.status_id = 5 if order.quantity == 0 or order.amount == 0 else services.get_default_status()
             order.save()
+
+
+def set_default_status_order(sender, **kwargs) -> None:
+    order = kwargs['instance']
+
+    try:
+        status = order.status
+    except ObjectDoesNotExist:
+        order.status = services.get_default_status()
