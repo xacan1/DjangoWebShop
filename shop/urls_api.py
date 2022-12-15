@@ -100,9 +100,9 @@ urlpatterns = [
     path('api/v1/orders_update/<int:pk>', OrderAPIUpdate.as_view()),
     path('api/v1/orders_delete/<int:pk>', OrderAPIDelete.as_view()),
     # API специализированный для магазина
-    path('api/v1/update_product_to_cart', APIUpdateProductToCart.as_view(), name='update_product_to_cart'),
-    path('api/v1/delete_product_from_cart', APIDeleteProductFromCart.as_view()), # использует только телеграм бот
-    path('api/v1/create_update_order', APICreateUpdateOrder.as_view()),
+    path('api/v1/update_product_to_cart', APIUpdateProductToCart.as_view(), name='update_product_to_cart'), 
+    path('api/v1/delete_product_from_cart', APIDeleteProductFromCart.as_view()), 
+    path('api/v1/create_update_order', APICreateUpdateOrder.as_view()), # использует только телеграм бот
     path('api/v1/check_stock_for_order', APICheckStockForOrder.as_view()),
     path('api/v1/get_cart_info', APIGetCartInfo.as_view()),
     path('api/v1/get_order_info', APIGetOrderInfo.as_view()),

@@ -44,63 +44,36 @@ def calculate_product_cart_table_row(sender, **kwargs) -> None:
 
 
 # после записи или удаления CartProduct пересчитаем Cart
-def update_cart_product_signal(sender, **kwargs) -> None:
+def update_cart_product(sender, **kwargs) -> None:
     product_row = kwargs['instance']
 
     try:
-        cart = product_row.cart
+        # пересчитаю общие суммы Корзины
+        if product_row.cart:
+            cart_pk = product_row.cart.pk
+            services.update_cart_sum(cart_pk)
+
     except ObjectDoesNotExist:
-        return
+        pass
 
-    # try:
-    #     order = product_row.order
-    # except ObjectDoesNotExist:
-    #     return
+    try:
+        if product_row.order:
+            order_pk = product_row.order.pk
+            services.update_order_sum(order_pk)
 
-    if cart:
-        cart_pk = product_row.cart.pk
-
-        # в любом случае пересчитаю общие суммы Корзины
-        cart_sum = CartProduct.objects.filter(cart=cart_pk, order=None).aggregate(
-            sum_quantity=models.Sum('quantity'),
-            sum_amount=models.Sum('amount'),
-            sum_discount=models.Sum('discount')
-        )
-
-        queryset = Cart.objects.filter(pk=cart_pk)
-
-        if queryset.exists():
-            cart = queryset[0]
-            cart.quantity = cart_sum['sum_quantity'] if cart_sum['sum_quantity'] else 0
-            cart.amount = cart_sum['sum_amount'] if cart_sum['sum_amount'] else 0
-            cart.discount = cart_sum['sum_discount'] if cart_sum['sum_discount'] else 0
-            cart.save()
-
-    # если есть Заказ, то пересчитаю его общие суммы и сменю статус
-    if product_row.order:
-        order_pk = product_row.order.pk
-
-        order_sum = CartProduct.objects.filter(order=order_pk, cart=None).aggregate(
-            sum_quantity=models.Sum('quantity'),
-            sum_amount=models.Sum('amount'),
-            sum_discount=models.Sum('discount')
-        )
-
-        queryset = Order.objects.filter(pk=order_pk)
-
-        if queryset.exists():
-            order = queryset[0]
-            order.quantity = order_sum['sum_quantity'] if order_sum['sum_quantity'] else 0
-            order.amount = order_sum['sum_amount'] if order_sum['sum_amount'] else 0
-            order.discount = order_sum['sum_discount'] if order_sum['sum_discount'] else 0
-            order.status_id = 5 if order.quantity == 0 or order.amount == 0 else services.get_default_status()
-            order.save()
+    except ObjectDoesNotExist:
+        pass
 
 
-def set_default_status_order(sender, **kwargs) -> None:
+def set_default_status_and_currency_order(sender, **kwargs) -> None:
     order = kwargs['instance']
 
     try:
         status = order.status
     except ObjectDoesNotExist:
         order.status = services.get_default_status()
+
+    try:
+        currency = order.currency
+    except ObjectDoesNotExist:
+        order.currency = services.get_default_currency()

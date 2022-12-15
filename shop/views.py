@@ -161,6 +161,7 @@ class AddOrderView(DataMixin, CreateView):
     success_url = reverse_lazy('new-order-success')
 
     def form_valid(self, form) -> HttpResponse:
+        form.instance.user = self.request.user if self.request.user.is_authenticated else None
         response = super().form_valid(form)
         order = form.instance
         services.changing_cart_rows_to_order_rows(self.request.user, order,

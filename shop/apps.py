@@ -9,11 +9,11 @@ class ShopConfig(AppConfig):
     def ready(self) -> None:
         from shop import signals
         
-        signals.post_delete.connect(signals.update_cart_product_signal, self.get_model('CartProduct'))
-        signals.post_save.connect(signals.update_cart_product_signal, self.get_model('CartProduct'))
+        signals.post_delete.connect(signals.update_cart_product, self.get_model('CartProduct'))
+        signals.post_save.connect(signals.update_cart_product, self.get_model('CartProduct'))
         signals.pre_save.connect(signals.calculate_product_cart_table_row, self.get_model('CartProduct'))
         signals.pre_save.connect(signals.set_default_currency, self.get_model('Currency'))
         signals.pre_save.connect(signals.set_default_price_type, self.get_model('PriceType'))
         signals.post_save.connect(signals.set_default_photo_product, self.get_model('ImageProduct'))
-        signals.pre_save.connect(signals.set_default_status_order, self.get_model('Order'))
+        signals.pre_save.connect(signals.set_default_status_and_currency_order, self.get_model('Order'))
         return super().ready()

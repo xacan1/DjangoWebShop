@@ -293,8 +293,6 @@ class UserSettings(models.Model):
 # phone - заполняется когда строка корзины превращается в строку заказа
 # warehouse - не обязательное поле, нужно для учета в 1С, но можно и обойтись для ЗаказаПокупателя
 class CartProduct(models.Model):
-    # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True,
-    #                          verbose_name='Покупатель')
     cart = models.ForeignKey('Cart', on_delete=models.CASCADE,
                              related_name='get_cart_products', null=True,
                              blank=True, verbose_name='Корзина')
@@ -507,7 +505,7 @@ class Order(models.Model):
     sessionid = models.CharField(max_length=40, default='', blank=True,
                                  verbose_name='Ключ сессии')
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE,
-                                 verbose_name='Валюта корзины')
+                                 verbose_name='Валюта заказа')
     first_name = models.CharField(max_length=150, verbose_name='Имя')
     last_name = models.CharField(max_length=150, verbose_name='Фамилия')
     phone = models.CharField(max_length=15, verbose_name='Телефон')

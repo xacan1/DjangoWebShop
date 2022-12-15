@@ -91,32 +91,6 @@ def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
     return price_products
 
 
-# НЕИСПОЛЬЗУЕТСЯ УДАЛИТЬ Получает словарь товаров со списокм складов и остатков по ним
-def get_products_stocks_for_category(category_slug: str) -> dict[list[dict]]:
-    price_products = Prices.objects.select_related('product', 'product__category').filter(
-        product__category__slug=category_slug, price_type__default=True)
-    stock_products = StockProducts.objects.select_related('product', 'warehouse').filter(
-        product__pk__in=price_products.values('product__pk'))
-
-    stocks = {}
-
-    for product_info in stock_products:
-        current_product_pk = product_info.product.pk
-        warehouses_products = []
-
-        for product_info2 in stock_products:
-            if product_info2.product.pk == current_product_pk:
-                warehouses_products.append(
-                    {'warehouse_pk': product_info2.warehouse.pk})
-                warehouses_products.append(
-                    {'warehouse_name': product_info2.warehouse.name})
-                warehouses_products.append({'stock': product_info2.stock})
-
-        stocks[product_info.product] = warehouses_products
-
-    return stocks
-
-
 # Возвращает всю необходимую информацию для списка товаров исходя из поиска по наименованию
 def search_products(search_text: str):
     price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
@@ -439,10 +413,9 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
         'price': Decimal(price_info.get('price', 0.0)),
         'discount_percentage': int(price_info.get('discount_percentage', 0)),
     }
-
     # Строка товара для корзины готова, теперь попробуем найти строку с этим товаром в Корзине
-    product_cart, product_cart_info = get_cart_order_product(
-        cart_pk, product_pk, id_messenger)
+    product_cart, product_cart_info = get_cart_order_product(cart_pk,
+                                                             product_pk, id_messenger)
 
     new_quantity = new_cart_product['quantity']
 
@@ -506,6 +479,45 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
     return data_response
 
 
+# Обновлю сумму всей Корзины, так как в сигналах не получается отловить Корзину при замене ее на Заказ
+def update_cart_sum(cart_pk: int):
+    if cart_pk:
+        cart_sum = CartProduct.objects.filter(cart=cart_pk, order=None).aggregate(
+            sum_quantity=models.Sum('quantity'),
+            sum_amount=models.Sum('amount'),
+            sum_discount=models.Sum('discount')
+        )
+
+        queryset = Cart.objects.filter(pk=cart_pk)
+
+        if queryset.exists():
+            cart = queryset[0]
+            cart.quantity = cart_sum['sum_quantity'] if cart_sum['sum_quantity'] else 0
+            cart.amount = cart_sum['sum_amount'] if cart_sum['sum_amount'] else 0
+            cart.discount = cart_sum['sum_discount'] if cart_sum['sum_discount'] else 0
+            cart.save()
+
+
+# Обновлю сумму всего Заказа
+def update_order_sum(order_pk: int):
+    if order_pk:
+        order_sum = CartProduct.objects.filter(order=order_pk, cart=None).aggregate(
+            sum_quantity=models.Sum('quantity'),
+            sum_amount=models.Sum('amount'),
+            sum_discount=models.Sum('discount')
+        )
+
+        queryset = Order.objects.filter(pk=order_pk)
+
+        if queryset.exists():
+            order = queryset[0]
+            order.quantity = order_sum['sum_quantity'] if order_sum['sum_quantity'] else 0
+            order.amount = order_sum['sum_amount'] if order_sum['sum_amount'] else 0
+            order.discount = order_sum['sum_discount'] if order_sum['sum_discount'] else 0
+            # order.status_id = 5 if order.quantity == 0 or order.amount == 0 else services.get_default_status().pk
+            order.save()
+
+
 # Логика данной функции заточена под Телеграм магазин, так как если находит неоплаченный заказ,
 # то прибавляет к нему товары из корзины вместо создания нового заказа.
 # Превращает строки Корзины в строки Заказа при оформлении Заказа из Корзины
@@ -562,28 +574,30 @@ def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dic
     cart_pk = cart_info.get('id', 0)
 
     # найду и превращу все строки Корзины в строки последнего неоплаченного Заказа
-    product_carts = get_cart_order_products(cart_pk, id_messenger)
+    cart_products = get_cart_order_products(cart_pk, id_messenger)
 
-    for product_cart in product_carts:
+    for cart_product in cart_products:
         # увеличу общие данные Заказа только для того, что бы вернуть их в ответе, расчет в самой БД делается сигналами
-        order_info['quantity'] += product_cart.quantity
-        order_info['discount'] += product_cart.discount
-        order_info['amount'] += product_cart.amount
+        order_info['quantity'] += cart_product.quantity
+        order_info['discount'] += cart_product.discount
+        order_info['amount'] += cart_product.amount
 
         # если найду строку с тем же товаром в текущем Заказе, то изменю количество в ней, а строку Корзины удалю
         order_row, _ = get_cart_order_product(order_pk,
-                                              product_cart.product.pk, id_messenger, True)
+                                              cart_product.product.pk, id_messenger, True)
 
         if order_row:
-            order_row.quantity = order_row.quantity + product_cart.quantity
+            order_row.quantity = order_row.quantity + cart_product.quantity
             order_row.save()
-            product_cart.delete()
+            cart_product.delete()
         else:
             # если строку не нашёл, то переделаю строку Корзины в строку Заказа
-            product_cart.cart = None
-            product_cart.order = order_instance
-            product_cart.phone = phone
-            product_cart.save()
+            cart_product.cart = None
+            cart_product.order = order_instance
+            cart_product.phone = phone
+            cart_product.save()
+
+    update_cart_sum(cart_pk)
 
     return order_info
 
@@ -601,14 +615,16 @@ def changing_cart_rows_to_order_rows(user: AbstractBaseUser, order: Order, sessi
 
     cart_pk = cart_info.get('id', 0)
 
-    # найду и превращу все строки Корзины в строки Заказа
-    product_carts = get_cart_order_products(cart_pk)
+    # найду и переделаю все строки Корзины в строки Заказа
+    cart_products = get_cart_order_products(cart_pk)
 
-    for product_cart in product_carts:
-        product_cart.cart = None
-        product_cart.order = order
-        product_cart.phone = phone
-        product_cart.save()
+    for cart_product in cart_products:
+        cart_product.cart = None
+        cart_product.order = order
+        cart_product.phone = phone
+        cart_product.save()
+
+    update_cart_sum(cart_pk)
 
 
 # получает полную информацию о Заказе с товарами
@@ -765,8 +781,8 @@ def update_price_in_cart_order(cart_order_pk: int, id_messenger: int = 0, for_or
         if orderset.exists() and orderset[0].paid:
             return
 
-    cart_products = get_cart_order_products(
-        cart_order_pk, id_messenger, for_order)
+    cart_products = get_cart_order_products(cart_order_pk, id_messenger,
+                                            for_order)
 
     for product_row in cart_products:
         product_pk = product_row.product.pk
@@ -830,7 +846,7 @@ def add_favorite_product(user: AbstractBaseUser, favorite_product: dict) -> dict
     if queryset.exists():
         return favorite_product
 
-    # усли нет, то добавим новую строку
+    # eсли нет, то добавим новую строку
     serializer_order = FavoriteProductCreateSerializer(data=favorite_product)
     serializer_order.is_valid(raise_exception=True)
     serializer_order.save()
