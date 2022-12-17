@@ -3,4 +3,119 @@
 
 {% block content %}
 
+<!-- Start Breadcrumbs -->
+<div class="breadcrumbs">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 col-md-6 col-12">
+                <div class="breadcrumbs-content">
+                    <h1 class="page-title">{{ order }}</h1>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-12">
+                <ul class="breadcrumb-nav">
+                    <li><a href="{% url 'home' %}"><i class="lni lni-home"></i> Главная</a></li>
+                    <li>{{ order }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Breadcrumbs -->
+
+<div class="shopping-cart section">
+    <div class="container">
+        <div class="cart-list-head">
+            <div class="cart-list-title">
+                <div class="row">
+                    <div class="col-lg-1 col-md-1 col-12">
+                        <!-- <p>Изображение</p> -->
+                    </div>
+                    <div class="col-lg-4 col-md-3 col-12">
+                        <p>Товар</p>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-12">
+                        <p>Количество</p>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-12">
+                        <p>Цена</p>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-12">
+                        <p>Сумма</p>
+                    </div>
+                </div>
+            </div>
+            {% for row_product in products %}
+            <div class="cart-single-list">
+                <div class="row align-items-center shop-row-cart-order">
+                    <div class="col-lg-1 col-md-1 col-12">
+                        {% if row_product.product.photo %}
+                        <a href="{% url 'productdetails' row_product.product.slug %}"><img src="{{ row_product.product.photo.url }}" alt="#"></a>
+                        {% else %}
+                        <a href="{% url 'productdetails' row_product.product.slug %}"><img src="https://via.placeholder.com/220x200" alt="#"></a>
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-4 col-md-3 col-12">
+                        <h5 class="product-name">
+                            <a href="{% url 'productdetails' row_product.product.slug %}">
+                            {{ row_product.product.name }}</a>
+                        </h5>
+                        <!-- <p class="product-des">
+                            <span><em>Тип:</em> Mirrorless</span>
+                            <span><em>Цвет:</em> Black</span>
+                        </p> -->
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-12">
+                        <p class="shop-price">{{ row_product.quantity|floatformat:'0g' }}</p>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-12">
+                        <p class="shop-price">{{ row_product.price|floatformat:'2g' }}</p>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-12">
+                        <p class="shop-price">{{ row_product.amount|floatformat:'2g' }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-12">
+            <!-- Total Amount -->
+            <div class="total-amount">
+                <div class="row">
+                    <div class="col-lg-8 col-md-6 col-12">
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <div class="right">
+                            <div id="shop-total-amount-cart">
+                                <!-- Итого -->
+                            <div class="shop-for-del">
+                                <ul>
+                                    <li>
+                                        Сумма товаров в заказе<span>{{ order.amount }}</span>
+                                    </li>
+                                    <li>
+                                        Доставка<span>Бесплатно</span>
+                                    </li>        
+                                    <!-- <li hidden="">Скидка<span>0,00</span>
+                                    </li>         -->
+                                    <li class="last">
+                                        К оплате<span>{{ order.amount }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="button">
+                            <a href="#" class="btn">Оплатить заказ</a>
+                            <a href="#" class="btn btn-alt">Отменить заказ</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--/ End Total Amount -->
+        </div>
+    
+    </div>
+</div>
+
 {% endblock content %}

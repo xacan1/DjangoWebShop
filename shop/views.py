@@ -199,3 +199,11 @@ class OrderView(DataMixin, DetailView):
     model = Order
     template_name = 'shop/order.html'
     context_object_name = 'order'
+    pk_url_kwarg = 'number'
+    
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        order = kwargs['object']
+        products = services.get_cart_order_products(order.pk, for_order=True)
+        c_def = self.get_user_context(title=f'{order}', products=products)
+        return {**context, **c_def}

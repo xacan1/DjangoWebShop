@@ -538,11 +538,12 @@ class Order(models.Model):
     discount = models.DecimalField(max_digits=15, decimal_places=2, blank=True,
                                    default=0, verbose_name='Общая скидка')
     paid = models.BooleanField(default=False, verbose_name='Оплачен')
+    canceled = models.BooleanField(default=False, verbose_name='Отменен')
     coupon = models.ForeignKey(Coupon, null=True, blank=True,
                                on_delete=models.SET_NULL, verbose_name='Купон')
     # номер уникален в пределах 1 года как в 1С, заполняется когда 1С загрузит заказ и вернет назад свой код документа
-    number = models.CharField(max_length=11, default='', blank=True,
-                              verbose_name='Внешний номер заказа')
+    external_code = models.CharField(max_length=11, default='', blank=True,
+                              verbose_name='Внешний номер')
 
     def __str__(self) -> str:
         return f'Заказ №{self.pk} от {self.time_update.strftime("%d.%m.%Y")}'
