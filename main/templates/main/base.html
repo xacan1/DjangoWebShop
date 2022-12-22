@@ -93,13 +93,13 @@
                             <div class="user">
                                 <i class="lni lni-user"></i>
                                 {% if user.is_authenticated %}
-                                <a href="{% url 'profile' user.pk %}">Личный кабинет</a>
+                                <a href="{% url 'personal-account' %}">Личный кабинет</a>
                                 {% endif %}
                             </div>
                             <ul class="user-login">
                                 {% if user.is_authenticated %}
                                 <li>
-                                    <a href="{% url 'profile' user.pk %}">{{ user.email }}</a>
+                                    <a href="{% url 'personal-account' %}">{{ user.email }}</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'logout' %}">Выйти</a>
@@ -189,12 +189,12 @@
                                                     <a href="javascript:void(0)" onclick="delete_cart_product(this);" class="remove" title="Удалить товар"><i
                                                             class="lni lni-close"></i></a>
                                                     <div class="cart-img-head">
-                                                        <a class="cart-img" href="% url 'productdetails' row_product.product.slug %"><img
+                                                        <a class="cart-img" href="% url 'product-details' row_product.product.slug %"><img
                                                                 src="{ row_product.product.photo }" alt="#"></a>
                                                     </div>
                                                 </div>
                                                 <div class="content">
-                                                    <h4><a href="% url 'productdetails' row_product.product.slug %">
+                                                    <h4><a href="% url 'product-details' row_product.product.slug %">
                                                             { row_product.product.name }</a></h4>
                                                     <p class="quantity">{ row_product.quantity|floatformat }x - <span class="amount">{ row_product.amount|floatformat:'2g' }</span></p>
                                                 </div>

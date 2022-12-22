@@ -753,6 +753,15 @@ class APICreateUpdateOrder(APIView):
         return Response(data_response)
 
 
+class APICancelOrder(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request: Request) -> Request:
+        order_pk = int(request.data.get('order_pk', 0))
+        data_response = services.cancel_order(request.user, order_pk)
+        return Response(data_response)
+
+
 class APICheckStockForOrder(APIView):
     permission_classes = (AllowAny,)
 

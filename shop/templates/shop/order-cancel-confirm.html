@@ -2,34 +2,35 @@
 {% load static %}
 
 {% block content %}
-
 <div class="p-5 ">
     <div class="d-table">
         <div class="d-table-cell">
             <div class="container">
                 <div class="success-content">
-                    <h3>Ваш заказ успешно оформлен!</h3>
                     {% if user.is_authenticated %}
-                    <h6>Теперь Вы можете увидеть его в списке заказов в личном кабинете.</h6>
-                    <p>На указанный e-mail отправлена информация о заказе.</p>
                     <div class="row justify-content-center">
-                        <div class="col-md-3 py-2">
+                        <div class="col-md-12 py-5">
+                            <h5>Ваш заказ сейчас будет отменен. Продолжить?</h5>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6 py-2">
                             <div class="button">
-                                <a href="{% url 'home' %}" class="btn">На главную</a>
+                                <a href="{% url 'order' order_pk %}" class="btn">Назад</a>
                             </div>
                         </div>
-                        <div class="col-md-3 py-2">
+                        <div class="col-md-6 py-2">
                             <div class="button">
-                                <a href="{% url 'personal-account' %}" class="btn">В личный кабинет</a>
+                                <button class="btn btn-alt" onclick="cancel_order(this);location.href=`{% url 'order-cancel-complete' %}`" data-shop-order-pk="{{ order_pk }}">Отменить заказ</button>
                             </div>
                         </div>
                     </div>
                     {% else %}
-                    <h6>На указанный e-mail отправлена информация о заказе.</h6>
+                    <h3>Для отмены заказа войдите на сайт.</h3>
                     <div class="row justify-content-center">
                         <div class="col-md-3 py-2">
                             <div class="button">
-                                <a href="{% url 'home' %}" class="btn">На главную</a>
+                                <a href="{% url 'login' %}" class="btn">Войти</a>
                             </div>
                         </div>
                     </div>
@@ -39,5 +40,4 @@
         </div>
     </div>
 </div>
-
 {% endblock content %}

@@ -200,10 +200,30 @@ class OrderView(DataMixin, DetailView):
     template_name = 'shop/order.html'
     context_object_name = 'order'
     pk_url_kwarg = 'number'
-    
+
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         order = kwargs['object']
-        products = services.get_cart_order_products(order.pk, for_order=True)
-        c_def = self.get_user_context(title=f'{order}', products=products)
+        c_def = self.get_user_context(title=f'{order}')
+        return {**context, **c_def}
+
+
+class OrderCancelConfirmView(DataMixin, FormView):
+    form_class = SimpleForm
+    template_name = 'shop/order-cancel-confirm.html'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        order_pk = self.kwargs.get('number', 0)
+        c_def = self.get_user_context(title='Отмена заказа', order_pk=order_pk)
+        return {**context, **c_def}
+
+
+class OrderCancelCompleteView(DataMixin, FormView):
+    form_class = SimpleForm
+    template_name = 'shop/order-cancel-complete.html'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Заказ отменен')
         return {**context, **c_def}

@@ -48,15 +48,3 @@ class RegisterUserView(DataMixin, CreateView):
 class RegisterUserSuccessView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'main/registration-success.html'
-
-
-class ProfileUserView(DataMixin, DetailView):
-    model = CustomUser
-    template_name = 'main/index.html'
-    context_object_name = 'user_data'
-    pk_url_kwarg = 'user_id'
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Профиль пользователя')
-        return {**context, **c_def}

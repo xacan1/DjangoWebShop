@@ -1,0 +1,55 @@
+{% extends 'personal_account/base.html' %}
+{% load static %}
+
+{% block account_content %}
+<div class="col-lg-9 col-12">
+    <div class="cart-list-title">
+        <div class="row">
+            <div class="col-lg-4 col-md-3 col-12">
+                <p>Заказ</p>
+            </div>
+            <div class="col-lg-2 col-md-2 col-12">
+                <p>Сумма</p>
+            </div>
+            <div class="col-lg-2 col-md-2 col-12">
+                <p>Статус</p>
+            </div>
+            <div class="col-lg-1 col-md-2 col-12">
+                <p>Оплачен</p>
+            </div>
+            <div class="col-lg-1 col-md-2 col-12">
+                <p>Отменен</p>
+            </div>
+        </div>
+    </div>
+    {% for order in user.get_orders.all %}
+    <div class="cart-single-list">
+        <div class="row align-items-center">
+            <div class="col-lg-4 col-md-3 col-12">
+                <a href="{% url 'order' order.pk %}">{{ order }}</a>
+            </div>
+            <div class="col-lg-2 col-md-2 col-12">
+                {{ order.amount }}{{ order.currency.sign }}
+            </div>
+            <div class="col-lg-2 col-md-2 col-12">
+                {{ order.status.name }}
+            </div>
+            <div class="col-lg-1 col-md-2 col-12">
+                {% if order.paid %}
+                <span>Да</span>
+                {% else %}
+                <span>Нет</span>
+                {% endif %}
+            </div>
+            <div class="col-lg-1 col-md-2 col-12">
+                {% if order.canceled %}
+                <span>Да</span>
+                {% else %}
+                <span>Нет</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock account_content %}

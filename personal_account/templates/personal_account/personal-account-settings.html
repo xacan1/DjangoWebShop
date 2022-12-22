@@ -1,0 +1,9 @@
+{% extends 'personal_account/base.html' %}
+{% load static %}
+
+{% block account_content %}
+<div class="col-lg-9 col-12">
+    <p>Валюта: {{ user.get_settings.currency }}</p>
+    <p>Тип цен: {{ user.get_settings.price_type }}</p>
+</div>
+{% endblock account_content %}

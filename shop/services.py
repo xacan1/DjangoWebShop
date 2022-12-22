@@ -149,6 +149,20 @@ def get_orders_for_session(sessionid: str, paid: bool = False) -> models.QuerySe
     return orders
 
 
+# получает Заказ по ID для конкретного пользователя (нужно например для проверки принадлежит ли данный заказ пользователю,
+#  что бы исключить работу с чужим заказом)
+def get_order_for_user(user_pk: int, order_pk: int) -> Order:
+    order = None
+    params = {'user': user_pk, 'pk': order_pk}
+
+    queryset = Order.objects.filter(**params)
+
+    if queryset.exists():
+        order = queryset[0]
+
+    return order
+
+
 # создает новую Корзину пользователя если ее ещё нет
 def create_new_cart(new_cart_info: dict) -> dict:
     if 'currency' not in new_cart_info:
@@ -197,6 +211,7 @@ def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool = False) -> dict:
     return cart_info
 
 
+# получает или создает Корзину пользователя по session_key пользователя в виде словаря
 def get_cart_by_sessionid(session_key: str, for_anonymous_user: bool = False) -> dict:
     cart_info = {}
 
@@ -600,6 +615,22 @@ def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dic
     update_cart_sum(cart_pk)
 
     return order_info
+
+
+def cancel_order(user: AbstractBaseUser, order_pk: int) -> dict:
+    if not user.is_authenticated:
+        data_response = {'error': 'user is not authenticated'}
+        return data_response
+
+    order = get_order_for_user(user.pk, order_pk)
+
+    if order and not order.canceled:
+        order.canceled = True
+        order.save()
+
+    data_response = {'canceled': 'complete'}
+
+    return data_response
 
 
 # Превращает строки Корзины(CartProduct) в строки Заказа при оформлении Заказа из Корзины

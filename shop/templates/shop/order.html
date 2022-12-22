@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block content %}
-
 <!-- Start Breadcrumbs -->
 <div class="breadcrumbs">
     <div class="container">
@@ -45,19 +44,19 @@
                     </div>
                 </div>
             </div>
-            {% for row_product in products %}
+            {% for row_product in order.get_order_products.all %}
             <div class="cart-single-list">
                 <div class="row align-items-center shop-row-cart-order">
                     <div class="col-lg-1 col-md-1 col-12">
                         {% if row_product.product.photo %}
-                        <a href="{% url 'productdetails' row_product.product.slug %}"><img src="{{ row_product.product.photo.url }}" alt="#"></a>
+                        <a href="{% url 'product-details' row_product.product.slug %}"><img src="{{ row_product.product.photo.url }}" alt="#"></a>
                         {% else %}
-                        <a href="{% url 'productdetails' row_product.product.slug %}"><img src="https://via.placeholder.com/220x200" alt="#"></a>
+                        <a href="{% url 'product-details' row_product.product.slug %}"><img src="https://via.placeholder.com/220x200" alt="#"></a>
                         {% endif %}
                     </div>
                     <div class="col-lg-4 col-md-3 col-12">
                         <h5 class="product-name">
-                            <a href="{% url 'productdetails' row_product.product.slug %}">
+                            <a href="{% url 'product-details' row_product.product.slug %}">
                             {{ row_product.product.name }}</a>
                         </h5>
                         <!-- <p class="product-des">
@@ -78,7 +77,6 @@
             </div>
             {% endfor %}
         </div>
-
         <div class="col-12">
             <!-- Total Amount -->
             <div class="total-amount">
@@ -89,33 +87,31 @@
                         <div class="right">
                             <div id="shop-total-amount-cart">
                                 <!-- Итого -->
-                            <div class="shop-for-del">
-                                <ul>
-                                    <li>
-                                        Сумма товаров в заказе<span>{{ order.amount }}</span>
-                                    </li>
-                                    <li>
-                                        Доставка<span>Бесплатно</span>
-                                    </li>        
-                                    <!-- <li hidden="">Скидка<span>0,00</span>
-                                    </li>         -->
-                                    <li class="last">
-                                        К оплате<span>{{ order.amount }}</span>
-                                    </li>
-                                </ul>
+                                <div class="shop-for-del">
+                                    <ul>
+                                        <li>
+                                            Сумма товаров в заказе<span>{{ order.amount }}</span>
+                                        </li>
+                                        <li>
+                                            Доставка<span>Бесплатно</span>
+                                        </li>        
+                                        <!-- <li hidden="">Скидка<span>0,00</span>
+                                        </li>         -->
+                                        <li class="last">
+                                            К оплате<span>{{ order.amount }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
                         <div class="button">
                             <a href="#" class="btn">Оплатить заказ</a>
-                            <a href="#" class="btn btn-alt">Отменить заказ</a>
+                            <a href="{% url 'order-cancel-confirm' order.pk %}" class="btn btn-alt">Отменить заказ</a>
                         </div>
                     </div>
                 </div>
             </div>
             <!--/ End Total Amount -->
         </div>
-    
     </div>
 </div>
-
 {% endblock content %}

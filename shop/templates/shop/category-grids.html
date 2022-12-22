@@ -16,7 +16,7 @@
                 <ul class="breadcrumb-nav">
                     <li><a href="{% url 'home' %}"><i class="lni lni-home"></i> Главная</a></li>
                     {% for parent in parent_categories %}
-                    <li><a href="{% url 'productlist' parent.slug %}">{{ parent.name }}</a></li>
+                    <li><a href="{% url 'product-list' parent.slug %}">{{ parent.name }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
@@ -41,7 +41,7 @@
                                     <!-- Start Single Category -->
                                     <!-- <div class="single-product2">
                                         <div class="product-image2"> -->
-                                    <a class="subcategory__item" href="{% url 'productlist' category.slug %}">
+                                    <a class="subcategory__item" href="{% url 'product-list' category.slug %}">
                                         <div class="subcategory__content">
                                             <div class="subcategory__image">
                                                 <picture>

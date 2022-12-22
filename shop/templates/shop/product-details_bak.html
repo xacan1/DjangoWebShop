@@ -16,7 +16,7 @@
                 <ul class="breadcrumb-nav">
                     <li><a href="{% url 'home' %}"><i class="lni lni-home"></i> Главная</a></li>
                     {% for parent in parent_categories %}
-                    <li><a href="{% url 'productlist' parent.slug %}">{{ parent.name }}</a></li>
+                    <li><a href="{% url 'product-list' parent.slug %}">{{ parent.name }}</a></li>
                     {% endfor %}
                 </ul>
             </div>
