@@ -104,8 +104,12 @@
                                 </div>
                             </div>
                         <div class="button">
+                            {% if not order.canceled %}
                             <a href="#" class="btn">Оплатить заказ</a>
                             <a href="{% url 'order-cancel-confirm' order.pk %}" class="btn btn-alt">Отменить заказ</a>
+                            {% else %}
+                            <a href="{% url 'user-orders' %}" class="btn">К списку заказов</a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
