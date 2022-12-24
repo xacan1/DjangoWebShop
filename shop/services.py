@@ -360,6 +360,8 @@ def get_settings_user(user: AbstractBaseUser) -> dict:
 
     if cartset.exists():
         settings = cartset[0]
+        settings_info['currency'] = settings.currency if settings.currency else get_default_currency()
+        settings_info['price_type'] = settings.price_type if settings.price_type else get_default_price_type()
     else:
         settings_info = {
             'user': user,
@@ -367,12 +369,6 @@ def get_settings_user(user: AbstractBaseUser) -> dict:
             'price_type': get_default_price_type()
         }
         settings = create_new_settings(settings_info)
-
-    if not settings.currency:
-        settings_info['currency'] = get_default_currency()
-
-    if not settings.price_type:
-        settings_info['price_type'] = get_default_price_type()
 
     return settings_info
 
@@ -411,7 +407,8 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
 
     # получим актуальные цены
     settings_user = get_settings_user(user)
-    price_type_pk = settings_user.get('price_type', 0)
+    price_type = settings_user['price_type']
+    price_type_pk = price_type.pk if price_type is not None else 0
     price_info = get_last_price(product_pk, price_type_pk)
 
     if not price_info:
@@ -548,7 +545,8 @@ def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dic
     phone = order_info.get('phone', '')
     for_messenger_user = order_info.get('for_anonymous_user', False)
     settings_user = get_settings_user(user)
-    order_info['currency'] = settings_user['currency']
+    currency = settings_user['currency']
+    order_info['currency'] = currency.pk if currency is not None else 0
     order_info['status'] = order_info.get('status_pk', get_default_status().pk)
     order_info['delivery_type'] = order_info.get('delivery_type_pk',
                                                  get_default_delivery_type())
@@ -673,7 +671,8 @@ def get_order_full_info(user: AbstractBaseUser, get_params: dict = {}, session_k
 
     user_pk = user.pk if user.is_authenticated else 0
     settings_user = get_settings_user(user)
-    price_type_pk = settings_user.get('price_type', 0)
+    price_type = settings_user['price_type']
+    price_type_pk = price_type.pk if price_type is not None else 0
 
     update_price_in_cart_order(order_pk, id_messenger, True, price_type_pk)
 
@@ -762,7 +761,8 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_ke
 
     cart_pk = cart_info.get('id', 0)
     settings_user = get_settings_user(user)
-    price_type_pk = settings_user.get('price_type', 0)
+    price_type = settings_user['price_type']
+    price_type_pk = price_type.pk if price_type is not None else 0
 
     # надо обновить строки и корзину если цены не совпадают
     update_price_in_cart_order(cart_pk, id_messenger, False, price_type_pk)

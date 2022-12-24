@@ -789,7 +789,7 @@ class APIGetCartInfo(APIView):
     def get(self, request: Request) -> Response:
         get_params = request.query_params
         get_params = {param: get_params[param] for param in get_params}
-        session_key = self.request.session.session_key
+        session_key = '' if self.request.session.session_key is None else self.request.session.session_key
         old_session_key = self.request.session.get('sessionid', '')
 
         # сессия изменилась из-за логина, надо сделать слияние анонимной корзины с пользовательской
