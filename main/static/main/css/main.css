@@ -2301,7 +2301,7 @@ ol {
   border-right: 1px solid #eee;
   margin-right: 40px;
   padding-right: 112px;
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
@@ -2324,7 +2324,8 @@ ol {
 
 .header .mega-category-menu .cat-button {
   display: inline-block;
-  color: #081828;
+  /* color: #081828; */
+  color: #fff;
   font-size: 15px;
   font-weight: 600;
 }
@@ -2337,11 +2338,21 @@ ol {
   top: 2px;
 }
 
-.header .mega-category-menu:hover .sub-category {
+/* Хасан */
+.header .cat-button:focus ~ .sub-category,
+.header .cat-button:active ~ .sub-category
+{
   opacity: 1;
   visibility: visible;
   top: 61px;
 }
+/* Хасан */
+
+/* .header .mega-category-menu:hover .sub-category {
+  opacity: 1;
+  visibility: visible;
+  top: 61px;
+} */
 
 .header .mega-category-menu .sub-category {
   position: absolute;

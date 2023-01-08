@@ -66,8 +66,8 @@
                         <div class="bottom-content">
                             <div class="row align-items-end">
                                 <div class="col-lg-4 col-md-4 col-12">
-                                    <div class="warehouses py-3">
-                                        <!-- Выбор склада нужно перенести в оформление заказа а в корзине оставить лишь скрытый контроль остатков по всем складам -->
+                                    <!-- Выбор склада нужно перенести в оформление заказа а в корзине оставить лишь скрытый контроль остатков по всем складам -->
+                                    <!-- <div class="warehouses py-3">
                                         {% if product_stocks %}
                                         <p class="py-1">Выберите склад:</p>
                                         {% for stock in product_stocks %}
@@ -77,7 +77,7 @@
                                         {% else %}
                                         <p class="py-1">Нет в наличии</p>
                                         {% endif %}
-                                    </div>
+                                    </div> -->
                                     <div class="button cart-button">
                                         {% if product_stocks %}
                                         <button class="btn" onclick="add_product_to_cart(this);" data-shop-product-pk="{{ product_data.pk }}" style="width: 100%;">Купить</button>
