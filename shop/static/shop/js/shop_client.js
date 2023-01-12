@@ -399,6 +399,11 @@ async function get_wishlist_info() {
 
 async function update_wishlist_header() {
     let wishlist_header = document.querySelector('#shop-total-wishlist');
+
+    if (!wishlist_header) {
+        return;
+    }
+    
     let wishlist_info = await get_wishlist_info();
     wishlist_header.textContent = formatter0.format(wishlist_info.count);
 }

@@ -13,7 +13,7 @@
                         <div class="hero-slider">
                             <!-- Start Single Slider -->
                             <div class="single-slider"
-                                style="background-image: url(https://via.placeholder.com/1310x500);">
+                                style="background-image: url(https://via.placeholder.com/800x500);">
                                 <div class="content">
                                     <h2><span>No restocking fee (₽35 savings)</span>
                                         M75 Sport Watch
@@ -29,7 +29,7 @@
                             <!-- End Single Slider -->
                             <!-- Start Single Slider -->
                             <div class="single-slider"
-                                style="background-image: url(https://via.placeholder.com/1310x500);">
+                                style="background-image: url(https://via.placeholder.com/800x500);">
                                 <div class="content">
                                     <h2><span>Big Sale Offer</span>
                                         Get the Best Deal on CCTV Camera
@@ -47,6 +47,33 @@
                         <!-- End Hero Slider -->
                     </div>
                 </div>
+                <!-- <div class="col-lg-4 col-12">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-6 col-12 md-custom-padding">
+                            <div class="hero-small-banner"
+                                style="background-image: url('https://via.placeholder.com/370x250');">
+                                <div class="content">
+                                    <h2>
+                                        <span>New line required</span>
+                                        iPhone 12 Pro Max
+                                    </h2>
+                                    <h3>₽25000.00</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-6 col-12">
+                            <div class="hero-small-banner style2">
+                                <div class="content">
+                                    <h2>Еженедельная распродажа!</h2>
+                                    <p>На этой неделе скидки до 50% на все товары в нашем магазине. </p>
+                                    <div class="button">
+                                        <a class="btn" href="product-grids.html">Купить</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
             </div>
         </div>
     </section>
@@ -495,6 +522,52 @@
                     </div> -->
                     <!-- End Banner -->
                 <!-- </div> -->
+                <!-- <div class="col-lg-4 col-md-12 col-12">
+                    <div class="offer-content">
+                        <div class="image">
+                            <img src="https://via.placeholder.com/510x600" alt="#">
+                            <span class="sale-tag">-50%</span>
+                        </div>
+                        <div class="text">
+                            <h2><a href="product-grids.html">Bluetooth Headphone</a></h2>
+                            <ul class="review">
+                                <li><i class="lni lni-star-filled"></i></li>
+                                <li><i class="lni lni-star-filled"></i></li>
+                                <li><i class="lni lni-star-filled"></i></li>
+                                <li><i class="lni lni-star-filled"></i></li>
+                                <li><i class="lni lni-star-filled"></i></li>
+                                <li><span>5.0 Review(s)</span></li>
+                            </ul>
+                            <div class="price">
+                                <span>₽20000.00</span>
+                                <span class="discount-price">₽40000.00</span>
+                            </div>
+                            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry incididunt ut
+                                eiusmod tempor labores.</p>
+                        </div>
+                        <div class="box-head">
+                            <div class="box">
+                                <h1 id="days">000</h1>
+                                <h2 id="daystxt">Days</h2>
+                            </div>
+                            <div class="box">
+                                <h1 id="hours">00</h1>
+                                <h2 id="hourstxt">Hours</h2>
+                            </div>
+                            <div class="box">
+                                <h1 id="minutes">00</h1>
+                                <h2 id="minutestxt">Minutes</h2>
+                            </div>
+                            <div class="box">
+                                <h1 id="seconds">00</h1>
+                                <h2 id="secondstxt">Secondes</h2>
+                            </div>
+                        </div>
+                        <div style="background: rgb(204, 24, 24);" class="alert">
+                            <h1 style="padding: 50px 80px;color: white;">Извините! Акция закончилась! </h1>
+                        </div>
+                    </div>
+                </div> -->
             </div>
         </div>
     </section>
@@ -636,22 +709,6 @@
     <!-- End Home Product List -->
 
     <!-- Start Brands Area -->
-    <div class="brands d-none">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6 offset-lg-3 col-md-12 col-12">
-                    <!-- <h2 class="title">Popular Brands</h2> -->
-                </div>
-            </div>
-            <div class="brands-logo-wrapper">
-                <div class="brands-logo-carousel d-flex align-items-center justify-content-between">
-                    <div class="brand-logo">
-                        <!-- <img src="https://via.placeholder.com/220x160" alt="#"> -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- End Brands Area -->
 
     <!-- Start Blog Section Area -->
@@ -705,48 +762,5 @@
         </div>
     </section>
     <!-- End Shipping Info -->
-
-    <script src="{% static 'main/js/tiny-slider.js' %}"></script>
-    <script type="text/javascript">
-        //========= Hero Slider 
-        tns({
-            container: '.hero-slider',
-            slideBy: 'page',
-            autoplay: true,
-            autoplayButtonOutput: false,
-            mouseDrag: true,
-            gutter: 0,
-            items: 1,
-            nav: false,
-            controls: true,
-            controlsText: ['<i class="lni lni-chevron-left"></i>', '<i class="lni lni-chevron-right"></i>'],
-        });
-
-        //======== Brand Slider
-        tns({
-            container: '.brands-logo-carousel',
-            autoplay: true,
-            autoplayButtonOutput: false,
-            mouseDrag: true,
-            gutter: 15,
-            nav: false,
-            controls: false,
-            responsive: {
-                0: {
-                    items: 1,
-                },
-                540: {
-                    items: 3,
-                },
-                768: {
-                    items: 5,
-                },
-                992: {
-                    items: 6,
-                }
-            }
-        });
-
-    </script>
 
 {% endblock content %}
