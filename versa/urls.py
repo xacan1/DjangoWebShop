@@ -23,7 +23,7 @@ from main.views import PageNotFound
 urlpatterns = [
     path('admin-shop/', admin.site.urls),
     path('', include('main.urls')),
-    path('', include('shop.urls_api')),
+    path('', include('api.urls')),
     path('', include('shop.urls')),
     path('', include('personal_account.urls')),
 ]

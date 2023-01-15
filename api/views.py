@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.views import Response, Request, APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, AllowAny
 from shop.models import *
-from shop.serializers import *
+from api.serializers import *
 from shop import services
 
 

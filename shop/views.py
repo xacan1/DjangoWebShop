@@ -110,6 +110,16 @@ class CategoryProductListView(DataMixin, FormView):
         return {**context, **c_def}
 
 
+class CategoryMobile(DataMixin, ListView):
+    model = Category
+    template_name = 'shop/categories-mobile.html'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='FAQ')
+        return {**context, **c_def}
+
+
 class SearchView(DataMixin, ListView):
     template_name = 'shop/product-list.html'
     paginate_by = 10

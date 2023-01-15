@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'shop.apps.ShopConfig',
     'personal_account.apps.PersonalAccountConfig',
     'main.apps.MainConfig',
+    'api.apps.ApiConfig',
     'rest_framework',
     'rest_framework.authtoken',
 ]

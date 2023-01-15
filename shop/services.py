@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.contrib.auth.models import AbstractBaseUser
-from shop.serializers import *
+from api.serializers import *
 from shop.models import *
 
 
