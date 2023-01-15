@@ -29,62 +29,30 @@
 <section class="product-grids section">
     <div class="container">
         <div class="row">
-            <div class="col-lg-9 col-12">
-                <div class="product-grids-head">
-                    <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade show active" id="nav-grid" role="tabpanel"
-                            aria-labelledby="nav-grid-tab">
-                            <div class="row">
-                                {% if nested_categories %}
-                                {% for category in nested_categories %}
-                                <div class="col-lg-4 col-md-8 col-12">
-                                    <!-- Start Single Category -->
-                                    <!-- <div class="single-product2">
-                                        <div class="product-image2"> -->
-                                    <a class="subcategory__item" href="{% url 'product-list' category.slug %}">
-                                        <div class="subcategory__content">
-                                            <div class="subcategory__image">
-                                                <picture>
-                                                    {% if category.photo %}
-                                                    <img src="{{ category.photo.url }}" alt="#">
-                                                    {% else %}
-                                                    <img src="https://via.placeholder.com/150x150" alt="#">
-                                                    {% endif %}
-                                                </picture>
-                                            </div>
-                                            <span class="subcategory__title">{{ category.name }}</span>
-                                        </div>
-                                    </a>
-                                    <!-- </div> -->
-
-                                    <!-- </div> -->
-                                    <!-- End Single Category -->
-                                </div>
-                                {% endfor %}
+            {% if nested_categories %}
+            {% for category in nested_categories %}
+            <div class="col-lg-4 col-md-6 col-12 py-1">
+                <!-- Start Single Category -->
+                <a class="subcategory__item" href="{% url 'product-list' category.slug %}">
+                    <div class="subcategory__content">
+                        <div class="subcategory__image">
+                            <picture>
+                                {% if category.photo %}
+                                <img src="{{ category.photo.url }}" alt="#">
                                 {% else %}
-                                <h3>Раздел пуст</h3>
+                                <img src="https://via.placeholder.com/150x150" alt="#">
                                 {% endif %}
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <!-- Pagination -->
-                                    <!-- <div class="pagination left">
-                                        <ul class="pagination-list">
-                                            <li><a href="javascript:void(0)">1</a></li>
-                                            <li class="active"><a href="javascript:void(0)">2</a></li>
-                                            <li><a href="javascript:void(0)">3</a></li>
-                                            <li><a href="javascript:void(0)">4</a></li>
-                                            <li><a href="javascript:void(0)"><i class="lni lni-chevron-right"></i></a>
-                                            </li>
-                                        </ul>
-                                    </div> -->
-                                    <!--/ End Pagination -->
-                                </div>
-                            </div>
+                            </picture>
                         </div>
+                        <span class="subcategory__title">{{ category.name }}</span>
                     </div>
-                </div>
+                </a>
+                <!-- End Single Category -->
             </div>
+            {% endfor %}
+            {% else %}
+            <h3>Раздел пуст</h3>
+            {% endif %}
         </div>
     </div>
 </section>

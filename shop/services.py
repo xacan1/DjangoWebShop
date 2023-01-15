@@ -120,6 +120,16 @@ def get_nested_categories(category_slug: str) -> tuple[models.Model, models.Quer
     return (root_category, nested_categories)
 
 
+# Возвращает только корневые категории (нужно для мобильной версии сайта)
+def get_root_categories() -> models.QuerySet[Category]:
+    root_categories = Category.objects.filter(parent=None)
+
+    if not root_categories.exists():
+        root_categories = models.QuerySet(Category)
+
+    return root_categories
+
+
 # находит отсортированные по дате неоплаченные(по умолчанию) заказы для всей корзины или только для конкретного id_messenger
 def get_orders_for_user(user_pk: int, id_messenger: int = 0, paid: bool = False) -> models.QuerySet:
     orders = []

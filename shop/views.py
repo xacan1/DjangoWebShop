@@ -91,7 +91,11 @@ class CategoryProductListView(DataMixin, FormView):
         parent_categories = services.get_parents_category(slug, [])
         self.price_products = services.get_products_prices_for_category(slug)
 
-        if self.price_products:
+        if slug == 'root':
+            root_categories = services.get_root_categories()
+            c_def = self.get_user_context(title='Каталог',
+                                          nested_categories=root_categories)
+        elif self.price_products:
             total_show_product = 10
             paginator = Paginator(self.price_products, total_show_product)
             page_number = self.request.GET.get('page')
@@ -107,16 +111,6 @@ class CategoryProductListView(DataMixin, FormView):
                                           nested_categories=nested_categories,
                                           parent_categories=parent_categories)
 
-        return {**context, **c_def}
-
-
-class CategoryMobile(DataMixin, ListView):
-    model = Category
-    template_name = 'shop/categories-mobile.html'
-
-    def get_context_data(self, **kwargs) -> dict:
-        context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='FAQ')
         return {**context, **c_def}
 
 
