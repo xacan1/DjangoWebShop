@@ -1,11 +1,12 @@
 from decimal import Decimal
 from django.contrib.auth.models import AbstractBaseUser
+from django.db.models import Q
 from api.serializers import *
 from shop.models import *
 
 
 def get_default_status() -> Status:
-    status = 0
+    status = None
     queryset = Status.objects.filter(for_bot=True)
 
     if queryset.exists():
@@ -86,15 +87,29 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
 # Возвращает все цены товаров входящих непосредственно в данную категорию с ценами по умолчанию или пустой список
 def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
     price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
-        product__category__slug=category_slug, price_type__default=True)
+        product__category__slug=category_slug, product__is_published=True, price_type__default=True)
 
     return price_products
 
 
-# Возвращает всю необходимую информацию для списка товаров исходя из поиска по наименованию
-def search_products(search_text: str):
+# Возвращает всю необходимую информацию для списка товаров исходя из поиска по текстовым полям
+def search_products(search_text: str) -> models.QuerySet:
+    search_text = search_text[0:100]
+    search_words = search_text.split(' ', 9)
+    q_filter_and = Q()
+
+    for word in search_words:
+        if not word:
+            continue
+
+        q_filter_or = Q()
+        q_filter_or |= Q(product__name__icontains=word)
+        q_filter_or |= Q(product__description__icontains=word)
+        q_filter_or |= Q(product__external_code__icontains=word)
+        q_filter_and &= q_filter_or
+
     price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
-        product__name__icontains=search_text, price_type__default=True)
+        q_filter_and, product__is_published=True, price_type__default=True)
 
     return price_products
 

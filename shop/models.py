@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone, datetime_safe
 from django.core.validators import MinValueValidator, MaxValueValidator
-from .utils import unique_slugify
 from rest_framework.authtoken.models import Token
+from shop.utils import unique_slugify
 
 
 User = get_user_model()
