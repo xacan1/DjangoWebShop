@@ -481,3 +481,21 @@ async function cancel_order(btn) {
         return;
     }
 }
+
+// интерактивный фильтр товаров
+// async function filter_products() {
+
+//     let params_get = '';
+
+    
+
+//     let options = {
+//         method: 'GET',
+//         headers: { 'Content-Type': 'application/json;charset=utf-8', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
+//         credentials: 'same-origin'
+//     }
+
+//     let response = await fetch('/product-list/' + params_get, options);
+
+
+// }

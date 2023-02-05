@@ -11,12 +11,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-from . import config
+from versa import config
 
 try:
-    from .local_settings import *
+    from versa.local_settings import *
 except ImportError:
-    from .prod_settings import *
+    from versa.prod_settings import *
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

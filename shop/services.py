@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.contrib.auth.models import AbstractBaseUser
-from django.db.models import Q
+from django.db.models import Q, Min, Max, Prefetch
 from api.serializers import *
 from shop.models import *
 
@@ -84,16 +84,47 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
     return parents[::-1]
 
 
-# Возвращает все цены товаров входящих непосредственно в данную категорию с ценами по умолчанию или пустой список
-def get_products_prices_for_category(category_slug: str) -> models.QuerySet:
-    price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
-        product__category__slug=category_slug, product__is_published=True, price_type__default=True)
+# Получает отфильтрованные товары с ценами по умолчанию и входящими в конкретную категорию
+# get_parameters - параметры GET запроса сформированного из данных фильтра на странице
+# причем ключи словаря это ID AttributeValues и ключ price_range_max, а значения это названия атрибутов
+# возвращает набор данных и признак что товары существуют в категории,даже если из-за отборов список товаров пуст
+# это нужно для правильного выбора в шаблона во вьюхе
+def filter_products_for_category(category_slug: str, get_parameters: dict[str, str]) -> tuple[models.QuerySet, bool]:
+    price_max = get_parameters.get('price_range_max', 999999999)
+    current_attribute = ''
+    values = []
 
-    return price_products
+    price_products = Prices.objects.prefetch_related(
+        'product', 'product__category', 'product__get_attributes_product', 'price_type').filter(
+        price__lte=price_max, product__category__slug=category_slug, price_type__default=True, product__is_published=True)
+    
+    products_exist = price_products.exists()
+
+    for value_pk, attribute in get_parameters.items():
+        if not value_pk.isdigit():
+            continue
+
+        if not current_attribute:
+            values.append(value_pk)
+            current_attribute = attribute
+        elif current_attribute != attribute:
+            price_products = price_products.filter(
+                product__get_attributes_product__value__in=values)
+            values.clear()
+            values.append(value_pk)
+            current_attribute = attribute
+        else:
+            values.append(value_pk)
+
+    if values:
+        price_products = price_products.filter(
+            product__get_attributes_product__value__in=values)
+
+    return price_products, products_exist
 
 
 # Возвращает всю необходимую информацию для списка товаров исходя из поиска по текстовым полям
-def search_products(search_text: str) -> models.QuerySet:
+def search_products(search_text: str) -> tuple[models.QuerySet, dict]:
     search_text = search_text[0:100]
     search_words = search_text.split(' ', 9)
     q_filter_and = Q()
@@ -111,7 +142,9 @@ def search_products(search_text: str) -> models.QuerySet:
     price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
         q_filter_and, product__is_published=True, price_type__default=True)
 
-    return price_products
+    min_max_price = price_products.aggregate(Min('price'), Max('price'))
+
+    return price_products, min_max_price
 
 
 def get_attributes_product(product_pk: int) -> models.QuerySet:
@@ -119,6 +152,35 @@ def get_attributes_product(product_pk: int) -> models.QuerySet:
         'attribute', 'value').filter(product=product_pk)
 
     return product_attributes
+
+
+# Получает все атрибуты товаров в данной категории сгруппированные по имени атрибута
+# Возвращает словарь списка словарей: {'attribute': [{attribute_values}]}
+def get_attributes_category_with_values(category_slug: str) -> dict[str:list[dict]]:
+    category_attribute_values = AttributeValues.objects.select_related(
+        'attribute', 'attribute__category'
+    ).order_by('attribute').values(
+        'pk', 'attribute__name', 'string_value', 'numeric_value'
+    ).filter(Q(attribute__category=None) | Q(attribute__category__slug=category_slug))
+
+    attribute_groups = {}
+    current_attribute = ''
+
+    for attribute_value in category_attribute_values:
+        if current_attribute != attribute_value['attribute__name']:
+            current_attribute = attribute_value['attribute__name']
+            attribute_groups[current_attribute] = []
+
+        attribute_groups[current_attribute].append(attribute_value)
+
+    return attribute_groups
+
+
+def get_min_max_price_category(category_slug: str) -> dict:
+    min_max_price = Prices.objects.select_related('product', 'product__category').filter(
+        product__category__slug=category_slug, product__is_published=True, price_type__default=True).aggregate(Min('price'), Max('price'))
+
+    return min_max_price
 
 
 # Возвращает вложенные категории в корневую категорию и саму категорию

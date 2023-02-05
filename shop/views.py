@@ -71,14 +71,17 @@ class FaqView(DataMixin, FormView):
 
 
 # выводит либо список категорий либо список номенклатуры если в категории больше нет подкатегорий
+# products_exist - признак что товары есть в категории, даже если и не найдены из-за фильтров
 class CategoryProductListView(DataMixin, FormView):
     form_class = SimpleForm
     slug_url_kwarg = 'category_slug'
+    price_products = Product.objects.none()
+    products_exist = False
 
     def get_template_names(self) -> list[str]:
         template_names = []
 
-        if hasattr(self, 'price_products') and self.price_products:
+        if self.products_exist:
             template_names.append('shop/product-list.html')
         else:
             template_names.append('shop/category-grids.html')
@@ -89,20 +92,34 @@ class CategoryProductListView(DataMixin, FormView):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('category_slug', '')
         parent_categories = services.get_parents_category(slug, [])
-        self.price_products = services.get_products_prices_for_category(slug)
+        self.price_products, self.products_exist = services.filter_products_for_category(
+            slug, self.request.GET)
 
         if slug == 'root':
             root_categories = services.get_root_categories()
             c_def = self.get_user_context(title='Каталог',
                                           nested_categories=root_categories)
-        elif self.price_products:
+        elif self.products_exist:
+            attribute_groups = services.get_attributes_category_with_values(
+                slug)
+            min_max_price = services.get_min_max_price_category(slug)
             total_show_product = 10
             paginator = Paginator(self.price_products, total_show_product)
             page_number = self.request.GET.get('page')
             page_obj = paginator.get_page(page_number)
+            add_for_pagination = ''
+
+            for get_param, value in self.request.GET.items():
+                if get_param != 'page':
+                    add_for_pagination += f'&{get_param}={value}'
+            
             c_def = self.get_user_context(title='Список товаров',
                                           total_show_product=total_show_product,
                                           parent_categories=parent_categories,
+                                          attribute_groups=attribute_groups,
+                                          min_max_price=min_max_price,
+                                          data_form=self.request.GET,
+                                          add_for_pagination=add_for_pagination,
                                           page_obj=page_obj)
         else:
             category, nested_categories = services.get_nested_categories(slug)
@@ -117,19 +134,23 @@ class CategoryProductListView(DataMixin, FormView):
 class SearchView(DataMixin, ListView):
     template_name = 'shop/product-list.html'
     paginate_by = 10
+    min_max_price = {'price__min': 0, 'price__max': 0}
 
     def get_queryset(self) -> models.QuerySet[Product]:
         q = self.request.GET.get('q')
-        queryset = services.search_products(q)
+        queryset, self.min_max_price = services.search_products(q)
         return queryset
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         q = self.request.GET.get('q')
+        add_for_pagination = f'&q={q}'
+        
         c_def = self.get_user_context(title=q,
                                       search_text=q,
+                                      add_for_pagination=add_for_pagination,
+                                      min_max_price=self.min_max_price,
                                       total_show_product=self.paginate_by)
-
         return {**context, **c_def}
 
 
