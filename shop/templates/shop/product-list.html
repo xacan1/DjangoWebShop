@@ -73,7 +73,7 @@
                     <!-- End Single Widget -->
                     <!-- Start Single Widget -->
                     {% if attribute_groups %}
-                    <form action="#" method="get">
+                    <form action="#" method="get" id="filtersAttributes">
                         <div class="single-widget range">
                             <h3>Максимальная цена</h3>
                             <input type="range" class="form-range" name="price_range_max" step="100" min="{{ min_max_price.price__min }}" max="{{ min_max_price.price__max }}" 
@@ -116,15 +116,14 @@
                         <div class="row align-items-center">
                             <div class="col-lg-7 col-md-8 col-12">
                                 <div class="product-sorting">
-                                    <label for="sorting">Сортировать:</label>
-                                    <select class="form-control" id="sorting">
-                                        <option>Популярное</option>
-                                        <option>Сначала дешевые</option>
-                                        <option>Сначала дорогие</option>
-                                        <option>По алфавиту А - Я</option>
-                                        <option>По алфавиту Я - А</option>
+                                    <label for="sorting">Упорядочить:</label>
+                                    <select name="sorting" class="form-control" id="selectSorting" form="filtersAttributes">
+                                        <option value="price_asc">Сначала дешевле</option>
+                                        <option value="price_desc">Сначала дороже</option>
+                                        <option value="alphabet_asc">По алфавиту А - Я</option>
+                                        <option value="alphabet_desc">По алфавиту Я - А</option>
                                     </select>
-                                    <h3 class="total-show-product">Показаны: <span>1 - {{ total_show_product }} товаров</span></h3>
+                                    <h3 class="total-show-product">Показаны: <span>{{ amount_product_from }} - {{ amount_product_upto }} товаров</span></h3>
                                 </div>
                             </div>
                             <div class="col-lg-5 col-md-4 col-12">

@@ -89,7 +89,7 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
 # причем ключи словаря это ID AttributeValues и ключ price_range_max, а значения это названия атрибутов
 # возвращает набор данных и признак что товары существуют в категории,даже если из-за отборов список товаров пуст
 # это нужно для правильного выбора в шаблона во вьюхе
-def filter_products_for_category(category_slug: str, get_parameters: dict[str, str]) -> tuple[models.QuerySet, bool]:
+def filter_products_for_category(category_slug: str, get_parameters: dict[str, str]) -> tuple[models.QuerySet[Prices], bool]:
     price_max = get_parameters.get('price_range_max', 999999999)
     current_attribute = ''
     values = []
@@ -97,7 +97,7 @@ def filter_products_for_category(category_slug: str, get_parameters: dict[str, s
     price_products = Prices.objects.prefetch_related(
         'product', 'product__category', 'product__get_attributes_product', 'price_type').filter(
         price__lte=price_max, product__category__slug=category_slug, price_type__default=True, product__is_published=True)
-    
+
     products_exist = price_products.exists()
 
     for value_pk, attribute in get_parameters.items():
@@ -121,6 +121,21 @@ def filter_products_for_category(category_slug: str, get_parameters: dict[str, s
             product__get_attributes_product__value__in=values)
 
     return price_products, products_exist
+
+
+def sorted_products_for_category(queryset: models.QuerySet, get_parameters: dict[str, str]) -> models.QuerySet[Prices]:
+    ordering = get_parameters.get('sorting', 'price_asc')
+
+    if ordering == 'price_asc':
+        queryset = queryset.order_by('price')
+    elif ordering == 'price_desc':
+        queryset = queryset.order_by('-price')
+    elif ordering == 'alphabet_asc':
+        queryset = queryset.order_by('product__name')
+    elif ordering == 'alphabet_desc':
+        queryset = queryset.order_by('-product__name')
+
+    return queryset
 
 
 # Возвращает всю необходимую информацию для списка товаров исходя из поиска по текстовым полям

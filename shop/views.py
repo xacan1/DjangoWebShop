@@ -94,27 +94,34 @@ class CategoryProductListView(DataMixin, FormView):
         parent_categories = services.get_parents_category(slug, [])
         self.price_products, self.products_exist = services.filter_products_for_category(
             slug, self.request.GET)
+        self.price_products = services.sorted_products_for_category(
+            self.price_products, self.request.GET)
 
         if slug == 'root':
             root_categories = services.get_root_categories()
             c_def = self.get_user_context(title='Каталог',
                                           nested_categories=root_categories)
         elif self.products_exist:
+            show_product_per_page = 10
+            paginator = Paginator(self.price_products, show_product_per_page)
+            page_number = self.request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+
+            amount_product_from = show_product_per_page * page_obj.number - show_product_per_page + 1
+            amount_product_upto = amount_product_from + len(page_obj.object_list) - 1
+
             attribute_groups = services.get_attributes_category_with_values(
                 slug)
             min_max_price = services.get_min_max_price_category(slug)
-            total_show_product = 10
-            paginator = Paginator(self.price_products, total_show_product)
-            page_number = self.request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
             add_for_pagination = ''
 
             for get_param, value in self.request.GET.items():
                 if get_param != 'page':
                     add_for_pagination += f'&{get_param}={value}'
-            
+
             c_def = self.get_user_context(title='Список товаров',
-                                          total_show_product=total_show_product,
+                                          amount_product_from=amount_product_from,
+                                          amount_product_upto=amount_product_upto,
                                           parent_categories=parent_categories,
                                           attribute_groups=attribute_groups,
                                           min_max_price=min_max_price,
@@ -145,7 +152,7 @@ class SearchView(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         q = self.request.GET.get('q')
         add_for_pagination = f'&q={q}'
-        
+
         c_def = self.get_user_context(title=q,
                                       search_text=q,
                                       add_for_pagination=add_for_pagination,

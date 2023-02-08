@@ -7,7 +7,26 @@ const formatter0 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, ma
 window.addEventListener('load', update_cart_header());
 window.addEventListener('load', update_wishlist_header());
 window.addEventListener('load', setEventListener());
+window.addEventListener('load', load_saved_values());
+window.addEventListener('load', elements_listener());
 
+
+
+async function elements_listener() {
+    let selectSorting = document.getElementById('selectSorting');
+
+    if (selectSorting) {
+        selectSorting.addEventListener('change', sort_products);
+    }
+}
+
+function load_saved_values() {
+    let selectSorting = document.getElementById('selectSorting');
+
+    if (selectSorting) {
+        selectSorting.value = get_selectSorting(selectSorting);
+    }
+}
 
 function getCookie(name) {
     let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
@@ -18,7 +37,7 @@ function setEventListener() {
     let modal = document.getElementById('successAddProductToCartModal');
 
     if (modal) {
-        modal.addEventListener('show.bs.modal', function(event) {
+        modal.addEventListener('show.bs.modal', function (event) {
             handlerAddProductToCart(event);
         });
     }
@@ -91,7 +110,7 @@ async function update_cart_header() {
 
         // подправим путь к карточке товара
         let path_product = '/product-details/' + row.product.slug;
-        
+
         new_li.innerHTML = `<div>\
             <a href="javascript:void(0)" onclick="delete_cart_product(this);" class="remove" title="Удалить товар"><i\
                     class="lni lni-close"></i></a>\
@@ -123,7 +142,7 @@ async function update_cart_header() {
         let button = cart_header.querySelector('.shopping-item>.bottom>.button');
         button.setAttribute('hidden', true);
     }
-    
+
     // обновим иконку коризны
     cart_header.querySelector('#shop-total-items').textContent = formatter0.format(cart_info.quantity);
 
@@ -391,7 +410,7 @@ async function get_wishlist_info() {
         console.log('Ошибка HTTP get_wishlist_info: ' + response.status);
         return wishlist_info;
     }
-    
+
     wishlist_info = await response.json();
 
     return wishlist_info;
@@ -403,7 +422,7 @@ async function update_wishlist_header() {
     if (!wishlist_header) {
         return;
     }
-    
+
     let wishlist_info = await get_wishlist_info();
     wishlist_header.textContent = formatter0.format(wishlist_info.count);
 }
@@ -487,7 +506,7 @@ async function cancel_order(btn) {
 
 //     let params_get = '';
 
-    
+
 
 //     let options = {
 //         method: 'GET',
@@ -499,3 +518,37 @@ async function cancel_order(btn) {
 
 
 // }
+
+
+// интерактивная сортировка товаров
+async function sort_products() {
+    let input_price_max = document.querySelector('input.form-range');
+
+    if (!input_price_max) {
+        console.log('Не найдена максимальная цена!');
+        return;
+    }
+
+    let params_get = '?' + input_price_max.name + '=' + input_price_max.value;
+    let inputs = document.querySelectorAll('input.form-check-input[checked]');
+
+    for (let input of inputs) {
+        params_get += '&' + input.name + '=' + input.value;
+    }
+
+    let select = document.getElementById('selectSorting');
+    save_selectSorting(select);
+
+    params_get += '&sorting' + '=' + select.value;
+
+    location.href = params_get;
+}
+
+function save_selectSorting(elem) {
+    sessionStorage.setItem(elem.name, elem.value);
+}
+
+function get_selectSorting(elem) {
+    return sessionStorage.getItem(elem.name);
+}
+
