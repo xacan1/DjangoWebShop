@@ -134,6 +134,8 @@ def sorted_products_for_category(queryset: models.QuerySet, get_parameters: dict
         queryset = queryset.order_by('product__name')
     elif ordering == 'alphabet_desc':
         queryset = queryset.order_by('-product__name')
+    else:
+        queryset = queryset.order_by('price')
 
     return queryset
 
