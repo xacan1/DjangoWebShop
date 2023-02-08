@@ -11,7 +11,6 @@ window.addEventListener('load', load_saved_values());
 window.addEventListener('load', elements_listener());
 
 
-
 async function elements_listener() {
     let selectSorting = document.getElementById('selectSorting');
 
@@ -24,7 +23,11 @@ function load_saved_values() {
     let selectSorting = document.getElementById('selectSorting');
 
     if (selectSorting) {
-        selectSorting.value = get_selectSorting(selectSorting);
+        let value = get_selectSorting(selectSorting);
+
+        if (value) {
+            selectSorting.value = value;
+        }   
     }
 }
 
