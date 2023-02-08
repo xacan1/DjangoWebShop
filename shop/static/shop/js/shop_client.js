@@ -27,7 +27,10 @@ function load_saved_values() {
 
         if (value) {
             selectSorting.value = value;
-        }   
+        }
+        else {
+            selectSorting.value = 'price_asc';
+        }
     }
 }
 
