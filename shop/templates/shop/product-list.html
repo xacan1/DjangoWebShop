@@ -76,12 +76,10 @@
                     <form action="#" method="get" id="filtersAttributes">
                         <div class="single-widget range">
                             <h3>Максимальная цена</h3>
-                            <input type="range" class="form-range" name="price_range_max" step="100" min="{{ min_max_price.price__min }}" max="{{ min_max_price.price__max }}" 
-                                value="{% if 'price_range_max' in data_form %}{{ data_form.price_range_max }}{% else %}{{ min_max_price.price__max }}{% endif %}"
-                                onchange="rangePrimary.value=value">
+                            {{ form.price_range_max }}
                             <div class="range-inner">
                                 <label>{% if page_obj %}{{ page_obj.0.currency.sign }}{% endif %}</label>
-                                <input type="text" id="rangePrimary" placeholder="{% if 'price_range_max' in data_form %}{{ data_form.price_range_max }}{% else %}{{ min_max_price.price__max }}{% endif %}">
+                                {{ form.current_price }}
                             </div>
                         </div>
                         <!-- Start Single Widget -->
@@ -117,12 +115,7 @@
                             <div class="col-lg-7 col-md-8 col-12">
                                 <div class="product-sorting">
                                     <label for="sorting">Упорядочить:</label>
-                                    <select name="sorting" class="form-control" id="selectSorting" form="filtersAttributes">
-                                        <option value="price_asc">Сначала дешевле</option>
-                                        <option value="price_desc">Сначала дороже</option>
-                                        <option value="alphabet_asc">По алфавиту А - Я</option>
-                                        <option value="alphabet_desc">По алфавиту Я - А</option>
-                                    </select>
+                                    {{ form.sorting }}
                                     <h3 class="total-show-product">Показаны: <span>{{ amount_product_from }} - {{ amount_product_upto }} товаров</span></h3>
                                 </div>
                             </div>

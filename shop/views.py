@@ -73,10 +73,33 @@ class FaqView(DataMixin, FormView):
 # выводит либо список категорий либо список номенклатуры если в категории больше нет подкатегорий
 # products_exist - признак что товары есть в категории, даже если и не найдены из-за фильтров
 class CategoryProductListView(DataMixin, FormView):
-    form_class = SimpleForm
     slug_url_kwarg = 'category_slug'
     price_products = Product.objects.none()
     products_exist = False
+
+    # проверяет если товары есть, то выберает класс формы для списка товаров иначе класс пустой формы
+    def get_form_class(self):
+        form_class = super().get_form_class()
+        slug = self.kwargs.get('category_slug', '')
+
+        if slug and slug != 'root':
+            self.price_products, self.products_exist = services.filter_products_for_category(
+                slug, self.request.GET)
+            self.price_products = services.sorted_products_for_category(
+                self.price_products, self.request.GET)
+
+        
+        form_class = ProductListForm if self.products_exist else SimpleForm
+        return form_class
+    
+    # передадим данные в форму
+    def get_initial(self):
+        initial = super().get_initial()
+        slug = self.kwargs.get('category_slug', '')
+        min_max_price = services.get_min_max_price_category(slug)
+        initial = {**initial, **min_max_price}
+        initial['get_params'] = self.request.GET
+        return initial
 
     def get_template_names(self) -> list[str]:
         template_names = []
@@ -92,10 +115,6 @@ class CategoryProductListView(DataMixin, FormView):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('category_slug', '')
         parent_categories = services.get_parents_category(slug, [])
-        self.price_products, self.products_exist = services.filter_products_for_category(
-            slug, self.request.GET)
-        self.price_products = services.sorted_products_for_category(
-            self.price_products, self.request.GET)
 
         if slug == 'root':
             root_categories = services.get_root_categories()
@@ -107,12 +126,13 @@ class CategoryProductListView(DataMixin, FormView):
             page_number = self.request.GET.get('page')
             page_obj = paginator.get_page(page_number)
 
-            amount_product_from = show_product_per_page * page_obj.number - show_product_per_page + 1
-            amount_product_upto = amount_product_from + len(page_obj.object_list) - 1
+            amount_product_from = show_product_per_page * \
+                page_obj.number - show_product_per_page + 1
+            amount_product_upto = amount_product_from + \
+                len(page_obj.object_list) - 1
 
             attribute_groups = services.get_attributes_category_with_values(
                 slug)
-            min_max_price = services.get_min_max_price_category(slug)
             add_for_pagination = ''
 
             for get_param, value in self.request.GET.items():
@@ -124,7 +144,6 @@ class CategoryProductListView(DataMixin, FormView):
                                           amount_product_upto=amount_product_upto,
                                           parent_categories=parent_categories,
                                           attribute_groups=attribute_groups,
-                                          min_max_price=min_max_price,
                                           data_form=self.request.GET,
                                           add_for_pagination=add_for_pagination,
                                           page_obj=page_obj)

@@ -7,6 +7,35 @@ class SimpleForm(forms.Form):
     pass
 
 
+class ProductListForm(forms.Form):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        initial = kwargs['initial']
+        get_params = initial['get_params']
+        min_price = initial.get('price__min', 0)
+        max_price = initial.get('price__max', 0)
+        self.fields['price_range_max'].widget.attrs['min'] = min_price
+        self.fields['price_range_max'].widget.attrs['max'] = max_price
+        self.fields['price_range_max'].widget.attrs['value'] = get_params.get(
+            'price_range_max', max_price)
+        self.fields['current_price'].widget.attrs['placeholder'] = get_params.get(
+            'price_range_max', max_price)
+
+    price_range_max = forms.IntegerField(widget=forms.NumberInput(
+        attrs={'class': 'form-range', 'type': 'range', 'name': 'price_range_max', 'step': '100', 'onchange': 'rangePrimary.value=value'})
+    )
+    current_price = forms.IntegerField(
+        widget=forms.TextInput(attrs={'id': 'rangePrimary', 'readonly': '', 'form': ''}),
+        required=False
+    )
+    sorting = forms.ChoiceField(
+        choices=(('price_asc', 'Сначала дешевле'), ('price_desc', 'Сначала дороже'),
+                 ('alphabet_asc', 'По алфавиту А - Я'), ('alphabet_desc', 'По алфавиту Я - А'),),
+        widget=forms.Select(attrs={
+                            'class': 'form-control', 'id': 'selectSorting', 'form': 'filtersAttributes'}),
+    )
+
+
 class AddOrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

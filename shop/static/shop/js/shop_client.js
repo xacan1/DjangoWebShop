@@ -557,4 +557,3 @@ function save_selectSorting(elem) {
 function get_selectSorting(elem) {
     return sessionStorage.getItem(elem.name);
 }
-
