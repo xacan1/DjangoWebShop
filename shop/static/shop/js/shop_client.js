@@ -6,8 +6,7 @@ const formatter0 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, ma
 
 window.addEventListener('load', update_cart_header());
 window.addEventListener('load', update_wishlist_header());
-window.addEventListener('load', setEventListener());
-window.addEventListener('load', load_saved_values());
+// window.addEventListener('load', load_saved_values());
 window.addEventListener('load', elements_listener());
 
 
@@ -17,29 +16,7 @@ async function elements_listener() {
     if (selectSorting) {
         selectSorting.addEventListener('change', sort_products);
     }
-}
 
-function load_saved_values() {
-    let selectSorting = document.getElementById('selectSorting');
-
-    if (selectSorting) {
-        let value = get_selectSorting(selectSorting);
-
-        if (value) {
-            selectSorting.value = value;
-        }
-        else {
-            selectSorting.value = 'price_asc';
-        }
-    }
-}
-
-function getCookie(name) {
-    let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
-    return matches ? decodeURIComponent(matches[1]) : undefined;
-}
-
-function setEventListener() {
     let modal = document.getElementById('successAddProductToCartModal');
 
     if (modal) {
@@ -48,6 +25,28 @@ function setEventListener() {
         });
     }
 }
+
+// function load_saved_values() {
+//     let selectSorting = document.getElementById('selectSorting');
+
+//     if (selectSorting) {
+//         let value = get_selectSorting(selectSorting);
+
+//         if (value) {
+//             selectSorting.value = value;
+//         }
+//         else {
+//             selectSorting.value = 'price_asc';
+//         }
+//     }
+// }
+
+
+function getCookie(name) {
+    let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
 
 async function get_cart_info() {
     // не авторизованным пользователям сервер ничего не вернет по этому запоним объект по умолчанию
@@ -422,6 +421,7 @@ async function get_wishlist_info() {
     return wishlist_info;
 }
 
+
 async function update_wishlist_header() {
     let wishlist_header = document.querySelector('#shop-total-wishlist');
 
@@ -485,6 +485,7 @@ async function delete_favorite_product(btn) {
     update_wishlist_header();
 }
 
+
 async function cancel_order(btn) {
     const order_pk = btn.getAttribute('data-shop-order-pk');
 
@@ -507,24 +508,6 @@ async function cancel_order(btn) {
     }
 }
 
-// интерактивный фильтр товаров
-// async function filter_products() {
-
-//     let params_get = '';
-
-
-
-//     let options = {
-//         method: 'GET',
-//         headers: { 'Content-Type': 'application/json;charset=utf-8', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
-//         credentials: 'same-origin'
-//     }
-
-//     let response = await fetch('/product-list/' + params_get, options);
-
-
-// }
-
 
 // интерактивная сортировка товаров
 async function sort_products() {
@@ -543,17 +526,19 @@ async function sort_products() {
     }
 
     let select = document.getElementById('selectSorting');
-    save_selectSorting(select);
+    // save_selectSorting(select);
 
     params_get += '&sorting' + '=' + select.value;
 
     location.href = params_get;
 }
 
-function save_selectSorting(elem) {
-    sessionStorage.setItem(elem.name, elem.value);
-}
 
-function get_selectSorting(elem) {
-    return sessionStorage.getItem(elem.name);
-}
+// function save_selectSorting(elem) {
+//     sessionStorage.setItem(elem.name, elem.value);
+// }
+
+
+// function get_selectSorting(elem) {
+//     return sessionStorage.getItem(elem.name);
+// }

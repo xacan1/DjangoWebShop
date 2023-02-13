@@ -88,10 +88,9 @@ class CategoryProductListView(DataMixin, FormView):
             self.price_products = services.sorted_products_for_category(
                 self.price_products, self.request.GET)
 
-        
         form_class = ProductListForm if self.products_exist else SimpleForm
         return form_class
-    
+
     # передадим данные в форму
     def get_initial(self):
         initial = super().get_initial()
@@ -99,6 +98,7 @@ class CategoryProductListView(DataMixin, FormView):
         min_max_price = services.get_min_max_price_category(slug)
         initial = {**initial, **min_max_price}
         initial['get_params'] = self.request.GET
+        initial['attribute_groups'] = services.get_attributes_category_with_values(slug)
         return initial
 
     def get_template_names(self) -> list[str]:
@@ -131,8 +131,7 @@ class CategoryProductListView(DataMixin, FormView):
             amount_product_upto = amount_product_from + \
                 len(page_obj.object_list) - 1
 
-            attribute_groups = services.get_attributes_category_with_values(
-                slug)
+            # добавляю к адресам пагинации параметры запроса, что бы при переходе на другую страницу GET запрос в точности повторялся 
             add_for_pagination = ''
 
             for get_param, value in self.request.GET.items():
@@ -143,8 +142,6 @@ class CategoryProductListView(DataMixin, FormView):
                                           amount_product_from=amount_product_from,
                                           amount_product_upto=amount_product_upto,
                                           parent_categories=parent_categories,
-                                          attribute_groups=attribute_groups,
-                                          data_form=self.request.GET,
                                           add_for_pagination=add_for_pagination,
                                           page_obj=page_obj)
         else:

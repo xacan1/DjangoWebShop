@@ -72,7 +72,6 @@
                     </div> -->
                     <!-- End Single Widget -->
                     <!-- Start Single Widget -->
-                    {% if attribute_groups %}
                     <form action="#" method="get" id="filtersAttributes">
                         <div class="single-widget range">
                             <h3>Максимальная цена</h3>
@@ -88,26 +87,24 @@
                             <div class="button py-2">
                                 <button class="btn">Отфильтровать</button>
                             </div>
-                            {% for key, value in attribute_groups.items %}
-                            <h3>{{ key }}</h3>
-                                {% for attribute in value %}
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="{{ key }}" name="{{ attribute.pk }}" id="flexCheck{{ attribute.pk }}" 
-                                        {% if attribute.pk|stringformat:"d" in data_form %} checked {% endif %}>
-                                    <label class="form-check-label" for="flexCheck{{ attribute.pk }}">
-                                        {{ attribute.string_value }}
-                                    </label>
-                                </div>
-                                {% endfor %}
+                            {% for element in form %}
+                                {% if element.name != 'price_range_max' and element.name != 'current_price' and element.name != 'sorting' %}
+                                    {% if element.is_hidden %}
+                                    <h3>{{ element.label }}</h3>
+                                    {% else %}
+                                    <div class="form-check">
+                                        {{ element }}
+                                        <label class="form-check-label" for="flexCheck{{ element.name }}">{{ element.label }}</label>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </form>
-                    {% endif %}
                     <!-- End Single Widget -->
                 </div>
                 <!-- End Product Sidebar -->
             </div>
-            
             <div class="col-lg-9 col-12">
                 <div class="product-grids-head">
                     <div class="product-grid-topbar">
