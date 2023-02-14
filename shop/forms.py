@@ -16,12 +16,15 @@ class ProductListForm(forms.Form):
         initial = kwargs['initial']
         min_price = initial.get('price__min', 0)
         max_price = initial.get('price__max', 0)
+        step_price = round((max_price - min_price) / 100, -2)
 
         get_params = initial['get_params']
         current_price = get_params.get('price_range_max', max_price)
 
+        # Установлю цены от минимальной цены по отобранным товарам до максимальной
         self.fields['price_range_max'].widget.attrs['min'] = min_price
         self.fields['price_range_max'].widget.attrs['max'] = max_price
+        self.fields['price_range_max'].widget.attrs['step'] = step_price if step_price < 100 else 100
         self.fields['price_range_max'].widget.attrs['value'] = current_price
         self.fields['current_price'].widget.attrs['placeholder'] = current_price
 
@@ -36,23 +39,23 @@ class ProductListForm(forms.Form):
 
             for value in values:
                 name = str(value['pk'])
+                attrs={'class': 'form-check-input', 'value': attribute, 'id': f'flexCheck{name}'}
 
+                # Если параметр содержится в GET запросе, то на нем стоит галочка, значит пометим его при повторном вызове формы
                 if name in get_params:
-                    self.fields[name] = forms.BooleanField(label=value['string_value'], widget=forms.CheckboxInput(
-                        attrs={'class': 'form-check-input', 'value': attribute, 'id': f'flexCheck{name}', 'checked': ''}), required=False)
-                else:
-                    self.fields[name] = forms.BooleanField(label=value['string_value'], widget=forms.CheckboxInput(
-                        attrs={'class': 'form-check-input', 'value': attribute, 'id': f'flexCheck{name}'}), required=False)
+                    attrs['checked'] = ''
+
+                self.fields[name] = forms.BooleanField(label=value['string_value'], widget=forms.CheckboxInput(attrs=attrs), required=False)
 
     price_range_max = forms.IntegerField(widget=forms.NumberInput(
-        attrs={'class': 'form-range', 'type': 'range', 'name': 'price_range_max', 'step': '100', 'onchange': 'rangePrimary.value=value'})
+        attrs={'class': 'form-range', 'type': 'range', 'name': 'price_range_max', 'onchange': 'rangePrimary.value=value'})
     )
     current_price = forms.IntegerField(
         widget=forms.TextInput(
             attrs={'id': 'rangePrimary', 'readonly': '', 'form': ''}),
         required=False
     )
-    sorting = forms.ChoiceField(
+    sorting = forms.ChoiceField(label='Упорядочить:',
         choices=SORT_CHOICES,
         widget=forms.Select(attrs={
                             'class': 'form-control', 'id': 'selectSorting', 'form': 'filtersAttributes'}),

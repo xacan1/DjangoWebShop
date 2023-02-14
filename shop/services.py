@@ -157,7 +157,7 @@ def search_products(search_text: str) -> tuple[models.QuerySet, dict]:
         q_filter_and &= q_filter_or
 
     price_products = Prices.objects.select_related('product', 'product__category', 'currency').filter(
-        q_filter_and, product__is_published=True, price_type__default=True)
+        q_filter_and, product__is_published=True, price_type__default=True).order_by('product__name')
 
     min_max_price = price_products.aggregate(Min('price'), Max('price'))
 
@@ -988,3 +988,11 @@ def add_favorite_product(user: AbstractBaseUser, favorite_product: dict) -> dict
     favorite_product = serializer_order.data
 
     return favorite_product
+
+
+# подсчитывает количество товаров на странице
+def count_product_from_to(paginate_by: int, page_number: int, len_object_list: int ) -> tuple[int, int]:
+    amount_product_from = paginate_by * page_number - paginate_by + 1
+    amount_product_upto = amount_product_from + len_object_list - 1
+
+    return amount_product_from, amount_product_upto

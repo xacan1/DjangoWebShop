@@ -134,10 +134,10 @@
                         <!-- Start Main Menu Search -->
                         <div class="main-menu-search">
                             <!-- navbar search start -->
-                            <form action="{% url 'search' %}" method="GET">
+                            <form action="{% url 'search' %}" method="get">
                                 <div class="navbar-search search-style-5">
                                     <div class="search-input">
-                                        <input type="text" name="q" value="{{ search_text }}" placeholder="Поиск">
+                                        <input type="text" name="q" value="{{ search_text }}" placeholder="Поиск" required>
                                     </div>
                                     <div class="search-btn">
                                         <button class="submit"><i class="lni lni-search-alt"></i></button>

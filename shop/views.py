@@ -98,7 +98,8 @@ class CategoryProductListView(DataMixin, FormView):
         min_max_price = services.get_min_max_price_category(slug)
         initial = {**initial, **min_max_price}
         initial['get_params'] = self.request.GET
-        initial['attribute_groups'] = services.get_attributes_category_with_values(slug)
+        initial['attribute_groups'] = services.get_attributes_category_with_values(
+            slug)
         return initial
 
     def get_template_names(self) -> list[str]:
@@ -121,17 +122,16 @@ class CategoryProductListView(DataMixin, FormView):
             c_def = self.get_user_context(title='Каталог',
                                           nested_categories=root_categories)
         elif self.products_exist:
-            show_product_per_page = 10
-            paginator = Paginator(self.price_products, show_product_per_page)
-            page_number = self.request.GET.get('page')
+            paginate_by = 10
+            paginator = Paginator(self.price_products, paginate_by)
+            page_number = self.request.GET.get('page', 1)
             page_obj = paginator.get_page(page_number)
+            amount_product_total = paginator.count
+            amount_product_from, amount_product_upto = services.count_product_from_to(
+                paginate_by, int(page_number), len(page_obj.object_list))
 
-            amount_product_from = show_product_per_page * \
-                page_obj.number - show_product_per_page + 1
-            amount_product_upto = amount_product_from + \
-                len(page_obj.object_list) - 1
-
-            # добавляю к адресам пагинации параметры запроса, что бы при переходе на другую страницу GET запрос в точности повторялся 
+            # добавляю к адресам пагинации параметры запроса, что бы при переходе на другую страницу
+            # GET запрос не только содержал номер страницы, но и в точности повторялся по всем параметрам
             add_for_pagination = ''
 
             for get_param, value in self.request.GET.items():
@@ -141,6 +141,7 @@ class CategoryProductListView(DataMixin, FormView):
             c_def = self.get_user_context(title='Список товаров',
                                           amount_product_from=amount_product_from,
                                           amount_product_upto=amount_product_upto,
+                                          amount_product_total=amount_product_total,
                                           parent_categories=parent_categories,
                                           add_for_pagination=add_for_pagination,
                                           page_obj=page_obj)
@@ -158,6 +159,19 @@ class SearchView(DataMixin, ListView):
     template_name = 'shop/product-list.html'
     paginate_by = 10
     min_max_price = {'price__min': 0, 'price__max': 0}
+    amount_product_from = 0
+    amount_product_upto = 0
+    amount_product_total = 0
+
+    # def get_paginate_by(self, queryset: _BaseQuerySet[Any]) -> Optional[int]:
+    #     return super().get_paginate_by(queryset)
+
+    def paginate_queryset(self, queryset, page_size) -> tuple[Paginator, int, models.QuerySet[Product], bool]:
+        paginator, page, page_obj, has_other_pages = super().paginate_queryset(queryset, page_size)
+        self.amount_product_total = paginator.count
+        self.amount_product_from, self.amount_product_upto = services.count_product_from_to(
+                self.paginate_by, page.number, page_obj.count())
+        return paginator, page, page_obj, has_other_pages
 
     def get_queryset(self) -> models.QuerySet[Product]:
         q = self.request.GET.get('q')
@@ -169,8 +183,11 @@ class SearchView(DataMixin, ListView):
         q = self.request.GET.get('q')
         add_for_pagination = f'&q={q}'
 
-        c_def = self.get_user_context(title=q,
+        c_def = self.get_user_context(title=f'поиск: {q}',
                                       search_text=q,
+                                      amount_product_from=self.amount_product_from,
+                                      amount_product_upto=self.amount_product_upto,
+                                      amount_product_total=self.amount_product_total,
                                       add_for_pagination=add_for_pagination,
                                       min_max_price=self.min_max_price,
                                       total_show_product=self.paginate_by)

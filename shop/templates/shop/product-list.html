@@ -9,7 +9,7 @@
         <div class="row align-items-center">
             <div class="col-lg-6 col-md-6 col-12">
                 <div class="breadcrumbs-content">
-                    <h1 class="page-title">Список товаров</h1>
+                    <h1 class="page-title">{% if form %}Список товаров{% else %}Поиск: {{ search_text }}{% endif %}</h1>
                 </div>
             </div>
             <div class="col-lg-6 col-md-6 col-12">
@@ -72,6 +72,7 @@
                     </div> -->
                     <!-- End Single Widget -->
                     <!-- Start Single Widget -->
+                    {% if form %}
                     <form action="#" method="get" id="filtersAttributes">
                         <div class="single-widget range">
                             <h3>Максимальная цена</h3>
@@ -101,6 +102,7 @@
                             {% endfor %}
                         </div>
                     </form>
+                    {% endif %}
                     <!-- End Single Widget -->
                 </div>
                 <!-- End Product Sidebar -->
@@ -111,9 +113,11 @@
                         <div class="row align-items-center">
                             <div class="col-lg-7 col-md-8 col-12">
                                 <div class="product-sorting">
-                                    <label for="sorting">Упорядочить:</label>
+                                    {% if form %}
+                                    {{ form.sorting.label_tag }}
                                     {{ form.sorting }}
-                                    <h3 class="total-show-product">Показаны: <span>{{ amount_product_from }} - {{ amount_product_upto }} товаров</span></h3>
+                                    {% endif %}
+                                    <h3 class="total-show-product">Показаны: <span>{{ amount_product_from }} - {{ amount_product_upto }} товаров из: {{ amount_product_total }}</span></h3>
                                 </div>
                             </div>
                             <div class="col-lg-5 col-md-4 col-12">
