@@ -1,2 +1,2 @@
 # DjangoWebShopForTelegramBot
-Бэкенд магазина для телеграм бота на Django + DRF
+Онлайн магазин с Telegram ботом для телеграм бота на Django + DRF
