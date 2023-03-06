@@ -8,8 +8,8 @@ class SimpleForm(forms.Form):
 
 
 class ProductListForm(forms.Form):
-    SORT_CHOICES=(('price_asc', 'Сначала дешевле'), ('price_desc', 'Сначала дороже'),
-                 ('alphabet_asc', 'По алфавиту А - Я'), ('alphabet_desc', 'По алфавиту Я - А'),)
+    SORT_CHOICES = (('price_asc', 'Сначала дешевле'), ('price_desc', 'Сначала дороже'),
+                    ('alphabet_asc', 'По алфавиту А - Я'), ('alphabet_desc', 'По алфавиту Я - А'),)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -30,22 +30,25 @@ class ProductListForm(forms.Form):
 
         # Найду и установлю значение из кортежа сортировки по значению sorting в GET параметрах, ведь именно оно прилетело нам из прошлого запроса пользователя
         if 'sorting' in get_params:
-            self.fields['sorting'].initial = [choice[0] for choice in self.SORT_CHOICES if choice[0]==get_params['sorting']]
+            self.fields['sorting'].initial = [choice[0] for choice in self.SORT_CHOICES if choice[0] == get_params['sorting']]
 
         # Динамически создам поля атрибутов товаров, ведь сайт не знает что за товары
         for attribute, values in initial['attribute_groups'].items():
             # Создам скрытое поле только ради Label что бы отобразить имя атрибута в группировке и не создавать кастомное поле для этой формы
-            self.fields[attribute] = forms.CharField(label=attribute, widget=forms.HiddenInput())
+            self.fields[attribute] = forms.CharField(
+                label=attribute, widget=forms.HiddenInput())
 
             for value in values:
                 name = str(value['pk'])
-                attrs={'class': 'form-check-input', 'value': attribute, 'id': f'flexCheck{name}'}
+                attrs = {'class': 'form-check-input',
+                         'value': attribute, 'id': f'flexCheck{name}'}
 
                 # Если параметр содержится в GET запросе, то на нем стоит галочка, значит пометим его при повторном вызове формы
                 if name in get_params:
                     attrs['checked'] = ''
 
-                self.fields[name] = forms.BooleanField(label=value['string_value'], widget=forms.CheckboxInput(attrs=attrs), required=False)
+                self.fields[name] = forms.BooleanField(
+                    label=value['string_value'], widget=forms.CheckboxInput(attrs=attrs), required=False)
 
     price_range_max = forms.IntegerField(widget=forms.NumberInput(
         attrs={'class': 'form-range', 'type': 'range', 'name': 'price_range_max', 'onchange': 'rangePrimary.value=value'})
@@ -55,7 +58,8 @@ class ProductListForm(forms.Form):
             attrs={'id': 'rangePrimary', 'readonly': '', 'form': ''}),
         required=False
     )
-    sorting = forms.ChoiceField(label='Упорядочить:',
+    sorting = forms.ChoiceField(
+        label='Упорядочить:',
         choices=SORT_CHOICES,
         widget=forms.Select(attrs={
                             'class': 'form-control', 'id': 'selectSorting', 'form': 'filtersAttributes'}),

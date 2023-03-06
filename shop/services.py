@@ -84,6 +84,22 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
     return parents[::-1]
 
 
+# Топ продаж из 4-х товаров
+def get_top_sales() -> models.QuerySet[Prices]:
+    top_sales = CartProduct.objects.values('product').annotate(total=models.Sum('quantity')).order_by('-total')
+
+    if not top_sales.exists() or top_sales.count() < 4:
+        top_sales = Product.objects.all()[0:4]
+        top_sales = [product.pk for product in top_sales]
+    else:
+        top_sales = [product['product'] for product in top_sales]
+
+    price_products = Prices.objects.select_related(
+        'product', 'product__category', 'price_type').filter(product__pk__in=top_sales, price_type__default=True, product__is_published=True)
+
+    return price_products
+
+
 # Получает отфильтрованные товары с ценами по умолчанию и входящими в конкретную категорию
 # get_parameters - параметры GET запроса сформированного из данных фильтра на странице
 # причем ключи словаря это ID AttributeValues и ключ price_range_max, а значения это названия атрибутов

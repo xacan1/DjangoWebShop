@@ -221,7 +221,7 @@
         <!-- Start Header Bottom -->
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-8 col-md-6 col-12">
+                <div class="col-md-6 col-lg-8 col-12">
                     <div class="nav-inner">
                         <!-- Start Mega Category Menu -->
                         <div class="button mega-category-menu">
@@ -244,18 +244,24 @@
                             <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
                                 <ul id="nav" class="navbar-nav ms-auto">
                                     <li class="nav-item">
-                                        <a href="{% url 'home' %}" class="active" aria-label="Toggle navigation">Главная</a>
+                                        <a href="{% url 'home' %}" class="active1" aria-label="Toggle navigation">Главная</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="dd-menu collapsed" href="javascript:void(0)" data-bs-toggle="collapse"
                                             data-bs-target="#submenu-1-2" aria-controls="navbarSupportedContent"
-                                            aria-expanded="false" aria-label="Toggle navigation">Страницы</a>
+                                            aria-expanded="false" aria-label="Toggle navigation">Покупателю</a>
                                         <ul class="sub-menu collapse" id="submenu-1-2">
-                                            <li class="nav-item"><a href="{% url 'about-us' %}">О нас</a></li>
-                                            <li class="nav-item"><a href="{% url 'faq' %}">Частые вопросы</a></li>
-                                            <li class="nav-item"><a href="{% url 'login' %}">Войти</a></li>
-                                            <li class="nav-item"><a href="{% url 'registration' %}">Регистрация</a></li>
-                                            <!-- <li class="nav-item"><a href="mail-success.html">Подтверждение Email</a></li> -->
+                                            <!-- <li class="nav-item"><a href="{% url 'about-us' %}">О нас</a></li>
+                                            <li class="nav-item"><a href="{% url 'faq' %}">Частые вопросы</a></li> -->
+                                            <li class="nav-item">
+                                                <a href="{% url 'home' %}" aria-label="Toggle navigation">Пользовательское соглашение</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="{% url 'home' %}" aria-label="Toggle navigation">Политика конфиденциальности</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="{% url 'home' %}" aria-label="Toggle navigation">Возврат товара</a>
+                                            </li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -267,9 +273,13 @@
                 <div class="col-lg-4 col-md-6 col-12">
                     <!-- Start Nav Social -->
                     <div class="nav-social">
-                        <h5 class="title">Подписывайтесь на нас: </h5>
+                        <h5 class="title">Наш торговый бот: </h5>
+                        <!-- <h5 class="title">Подписывайтесь на нас: </h5> -->
                         <ul>
                             <li>
+                                <a href="https://t.me/forsale_bot"><i class="lni lni-telegram-plane"></i></a>
+                            </li>
+                            <!-- <li>
                                 <a href="javascript:void(0)"><i class="lni lni-facebook-filled"></i></a>
                             </li>
                             <li>
@@ -280,7 +290,7 @@
                             </li>
                             <li>
                                 <a href="javascript:void(0)"><i class="lni lni-skype"></i></a>
-                            </li>
+                            </li> -->
                         </ul>
                     </div>
                     <!-- End Nav Social -->

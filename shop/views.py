@@ -14,7 +14,9 @@ class IndexView(DataMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Маркет скидок')
+        top_products = services.get_top_sales()
+        c_def = self.get_user_context(
+            title='Маркет скидок', top_products=top_products)
         return {**context, **c_def}
 
 
@@ -167,10 +169,11 @@ class SearchView(DataMixin, ListView):
     #     return super().get_paginate_by(queryset)
 
     def paginate_queryset(self, queryset, page_size) -> tuple[Paginator, int, models.QuerySet[Product], bool]:
-        paginator, page, page_obj, has_other_pages = super().paginate_queryset(queryset, page_size)
+        paginator, page, page_obj, has_other_pages = super(
+        ).paginate_queryset(queryset, page_size)
         self.amount_product_total = paginator.count
         self.amount_product_from, self.amount_product_upto = services.count_product_from_to(
-                self.paginate_by, page.number, page_obj.count())
+            self.paginate_by, page.number, page_obj.count())
         return paginator, page, page_obj, has_other_pages
 
     def get_queryset(self) -> models.QuerySet[Product]:

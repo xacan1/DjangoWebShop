@@ -59,8 +59,7 @@
                 <div class="col-12">
                     <div class="section-title">
                         <h2>Избранные категории </h2>
-                        <p>There are many variations of passages of Lorem Ipsum available, but the majority have
-                            suffered alteration in some form.</p>
+                        <!-- <p></p> -->
                     </div>
                 </div>
             </div>
@@ -116,57 +115,6 @@
                     </div>
                     <!-- End Single Category -->
                 </div>
-                <div class="col-lg-4 col-md-6 col-12">
-                    <!-- Start Single Category -->
-                    <div class="single-category">
-                        <h3 class="heading">Dslr камеры</h3>
-                        <ul>
-                            <li><a href="product-grids.html">Умные телевизоры</a></li>
-                            <li><a href="product-grids.html">QLED TV</a></li>
-                            <li><a href="product-grids.html">Аудио</a></li>
-                            <li><a href="product-grids.html">Наушники</a></li>
-                            <li><a href="product-grids.html">Все позиции</a></li>
-                        </ul>
-                        <div class="images">
-                            <img src="https://via.placeholder.com/170x170" alt="#">
-                        </div>
-                    </div>
-                    <!-- End Single Category -->
-                </div>
-                <div class="col-lg-4 col-md-6 col-12">
-                    <!-- Start Single Category -->
-                    <div class="single-category">
-                        <h3 class="heading">Смартфоны</h3>
-                        <ul>
-                            <li><a href="product-grids.html">Умные телевизоры</a></li>
-                            <li><a href="product-grids.html">QLED TV</a></li>
-                            <li><a href="product-grids.html">Аудио</a></li>
-                            <li><a href="product-grids.html">Наушники</a></li>
-                            <li><a href="product-grids.html">Все позиции</a></li>
-                        </ul>
-                        <div class="images">
-                            <img src="https://via.placeholder.com/170x170" alt="#">
-                        </div>
-                    </div>
-                    <!-- End Single Category -->
-                </div>
-                <div class="col-lg-4 col-md-6 col-12">
-                    <!-- Start Single Category -->
-                    <div class="single-category">
-                        <h3 class="heading">Игровые консоли</h3>
-                        <ul>
-                            <li><a href="product-grids.html">Умные телевизоры</a></li>
-                            <li><a href="product-grids.html">QLED TV</a></li>
-                            <li><a href="product-grids.html">Аудио</a></li>
-                            <li><a href="product-grids.html">Наушники</a></li>
-                            <li><a href="product-grids.html">Все позиции</a></li>
-                        </ul>
-                        <div class="images">
-                            <img src="https://via.placeholder.com/170x170" alt="#">
-                        </div>
-                    </div>
-                    <!-- End Single Category -->
-                </div>
             </div>
         </div>
     </section>
@@ -178,178 +126,32 @@
             <div class="row">
                 <div class="col-12">
                     <div class="section-title">
-                        <h2>Популярные продукты</h2>
-                        <p>There are many variations of passages of Lorem Ipsum available, but the majority have
-                            suffered alteration in some form.</p>
+                        <h2>Популярное на {{ request.get_host }}</h2>
+                        <!-- <p></p> -->
                     </div>
                 </div>
             </div>
             <div class="row">
+                {% for product_info in top_products %}
                 <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
+                    <!-- отдельный товар -->
                     <div class="single-product">
                         <div class="product-image">
+                            {% if product_info.product.photo %}
+                            <img src="{{ product_info.product.photo.url }}" alt="{{ product_info.product.name }}">
+                            {% else %}
                             <img src="https://via.placeholder.com/335x335" alt="#">
+                            {% endif %}
+                            <!-- <span class="sale-tag">-25%</span> -->
+                            <!-- <span class="new-tag">New</span> -->
                             <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
+                                <button class="btn" style="width: 100%;" data-shop-product-pk="{{ product_info.product.pk }}" data-bs-toggle="modal" data-bs-target="#successAddProductToCartModal"><i class="lni lni-cart"></i>В корзину</button>
                             </div>
                         </div>
                         <div class="product-info">
-                            <span class="category">Watches</span>
+                            <span class="category">{{ product_info.product.category.name }}</span>
                             <h4 class="title">
-                                <a href="product-grids.html">Xiaomi Mi Band 5</a>
-                            </h4>
-                            <div class="price">
-                                <span>₽12500.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Single Product -->
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
-                    <div class="single-product">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/335x335" alt="#">
-                            <span class="sale-tag">-25%</span>
-                            <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <span class="category">Speaker</span>
-                            <h4 class="title">
-                                <a href="product-grids.html">Big Power Sound Speaker</a>
-                            </h4>
-                            <div class="price">
-                                <span>₽17500.00</span>
-                                <span class="discount-price">₽19000.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Single Product -->
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
-                    <div class="single-product">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/335x335" alt="#">
-                            <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <span class="category">Camera</span>
-                            <h4 class="title">
-                                <a href="product-grids.html">WiFi Security Camera</a>
-                            </h4>
-                            <div class="price">
-                                <span>₽25000.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Single Product -->
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
-                    <div class="single-product">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/335x335" alt="#">
-                            <span class="new-tag">New</span>
-                            <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <span class="category">Phones</span>
-                            <h4 class="title">
-                                <a href="product-grids.html">iphone 6x plus</a>
-                            </h4>
-                            <div class="price">
-                                <span>₽25000.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Single Product -->
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
-                    <div class="single-product">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/335x335" alt="#">
-                            <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <span class="category">Наушники</span>
-                            <h4 class="title">
-                                <a href="product-grids.html">Wireless Наушники</a>
-                            </h4>
-                            <div class="price">
-                                <span>₽22000.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Single Product -->
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
-                    <div class="single-product">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/335x335" alt="#">
-                            <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <span class="category">Speaker</span>
-                            <h4 class="title">
-                                <a href="product-grids.html">Mini Bluetooth Speaker</a>
-                            </h4>
-                            <div class="price">
-                                <span>₽4300.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Single Product -->
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
-                    <div class="single-product">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/335x335" alt="#">
-                            <span class="sale-tag">-50%</span>
-                            <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <span class="category">Наушники</span>
-                            <h4 class="title">
-                                <a href="product-grids.html">PX7 Wireless Наушники</a>
-                            </h4>
-                            <div class="price">
-                                <span>₽6200.00</span>
-                                <span class="discount-price">₽200.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Single Product -->
-                </div>
-                <div class="col-lg-3 col-md-6 col-12">
-                    <!-- Start Single Product -->
-                    <div class="single-product">
-                        <div class="product-image">
-                            <img src="https://via.placeholder.com/335x335" alt="#">
-                            <div class="button">
-                                <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <span class="category">Laptop</span>
-                            <h4 class="title">
-                                <a href="product-grids.html">Apple MacBook Air</a>
+                                <a href="{% url 'product-details' product_info.product.slug %}">{{ product_info.product.name }}</a>
                             </h4>
                             <!-- <ul class="review">
                                 <li><i class="lni lni-star-filled"></i></li>
@@ -357,15 +159,16 @@
                                 <li><i class="lni lni-star-filled"></i></li>
                                 <li><i class="lni lni-star-filled"></i></li>
                                 <li><i class="lni lni-star-filled"></i></li>
-                                <li><span>5.0 Review(s)</span></li>
+                                <li><span>5.0 Оценка</span></li>
                             </ul> -->
                             <div class="price">
-                                <span>₽75000.00</span>
+                                <span>{{ product_info.currency.sign }}{{ product_info.price }}</span>
                             </div>
                         </div>
                     </div>
-                    <!-- End Single Product -->
+                    <!-- отдельный товар -->
                 </div>
+                {% endfor %}
             </div>
         </div>
     </section>
@@ -375,7 +178,7 @@
     <!-- End Banner Area -->
 
     <!-- Start Special Offer -->
-    <section class="special-offer section">
+    <!-- <section class="special-offer section">
         <div class="container">
             <div class="row">
                 <div class="col-12">
@@ -387,126 +190,113 @@
                 </div>
             </div>
             <div class="row">
-                <!-- <div class="col-lg-8 col-md-12 col-12"> -->
-                    <div class="row">
-                        <div class="col-lg-3 col-md-3 col-12">
-                            <!-- Start Single Product -->
-                            <div class="single-product">
-                                <div class="product-image">
-                                    <img src="https://via.placeholder.com/335x335" alt="#">
-                                    <span class="sale-tag">-50%</span>
-                                    <div class="button">
-                                        <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                                    </div>
-                                </div>
-                                <div class="product-info">
-                                    <span class="category">Camera</span>
-                                    <h4 class="title">
-                                        <a href="product-grids.html">WiFi Security Camera</a>
-                                    </h4>
-                                    <div class="price">
-                                        <span>₽25000.00</span>
-                                    </div>
+                <div class="row">
+                    <div class="col-lg-3 col-md-3 col-12">
+                        <div class="single-product">
+                            <div class="product-image">
+                                <img src="https://via.placeholder.com/335x335" alt="#">
+                                <span class="sale-tag">-50%</span>
+                                <div class="button">
+                                    <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
                                 </div>
                             </div>
-                            <!-- End Single Product -->
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-12">
-                            <!-- Start Single Product -->
-                            <div class="single-product">
-                                <div class="product-image">
-                                    <img src="https://via.placeholder.com/335x335" alt="#">
-                                    <span class="sale-tag">-50%</span>
-                                    <div class="button">
-                                        <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добвить в корзину</a>
-                                    </div>
-                                </div>
-                                <div class="product-info">
-                                    <span class="category">Laptop</span>
-                                    <h4 class="title">
-                                        <a href="product-grids.html">Apple MacBook Air</a>
-                                    </h4>
-                                    <div class="price">
-                                        <span>₽75000.00</span>
-                                    </div>
+                            <div class="product-info">
+                                <span class="category">Camera</span>
+                                <h4 class="title">
+                                    <a href="product-grids.html">WiFi Security Camera</a>
+                                </h4>
+                                <div class="price">
+                                    <span>₽25000.00</span>
                                 </div>
                             </div>
-                            <!-- End Single Product -->
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-12">
-                            <!-- Start Single Product -->
-                            <div class="single-product">
-                                <div class="product-image">
-                                    <img src="https://via.placeholder.com/335x335" alt="#">
-                                    <span class="sale-tag">-50%</span>
-                                    <div class="button">
-                                        <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                                    </div>
-                                </div>
-                                <div class="product-info">
-                                    <span class="category">Speaker</span>
-                                    <h4 class="title">
-                                        <a href="product-grids.html">Bluetooth Speaker</a>
-                                    </h4>
-                                    <div class="price">
-                                        <span>₽4300.00</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- End Single Product -->
-                        </div>
-                        <div class="col-lg-3 col-md-3 col-12">
-                            <!-- Start Single Product -->
-                            <div class="single-product">
-                                <div class="product-image">
-                                    <img src="https://via.placeholder.com/335x335" alt="#">
-                                    <span class="sale-tag">-50%</span>
-                                    <div class="button">
-                                        <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
-                                    </div>
-                                </div>
-                                <div class="product-info">
-                                    <span class="category">Speaker</span>
-                                    <h4 class="title">
-                                        <a href="product-grids.html">Bluetooth Speaker</a>
-                                    </h4>
-                                    <div class="price">
-                                        <span>₽4300.00</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- End Single Product -->
                         </div>
                     </div>
-                    <!-- Start Banner -->
-                    <!-- <div class="single-banner right"
-                        style="background-image:url('https://via.placeholder.com/730x310');margin-top: 30px;">
-                        <div class="content">
-                            <h2>Samsung Notebook 9 </h2>
-                            <p>Lorem ipsum dolor sit amet, <br>eiusmod tempor
-                                incididunt ut labore.</p>
-                            <div class="price">
-                                <span>₽50000.00</span>
+                    <div class="col-lg-3 col-md-3 col-12">
+                        <div class="single-product">
+                            <div class="product-image">
+                                <img src="https://via.placeholder.com/335x335" alt="#">
+                                <span class="sale-tag">-50%</span>
+                                <div class="button">
+                                    <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добвить в корзину</a>
+                                </div>
                             </div>
-                            <div class="button">
-                                <a href="product-grids.html" class="btn">Купить</a>
+                            <div class="product-info">
+                                <span class="category">Laptop</span>
+                                <h4 class="title">
+                                    <a href="product-grids.html">Apple MacBook Air</a>
+                                </h4>
+                                <div class="price">
+                                    <span>₽75000.00</span>
+                                </div>
                             </div>
                         </div>
-                    </div> -->
-                    <!-- End Banner -->
-                <!-- </div> -->
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-12">
+                        <div class="single-product">
+                            <div class="product-image">
+                                <img src="https://via.placeholder.com/335x335" alt="#">
+                                <span class="sale-tag">-50%</span>
+                                <div class="button">
+                                    <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <span class="category">Speaker</span>
+                                <h4 class="title">
+                                    <a href="product-grids.html">Bluetooth Speaker</a>
+                                </h4>
+                                <div class="price">
+                                    <span>₽4300.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-12">
+                        <div class="single-product">
+                            <div class="product-image">
+                                <img src="https://via.placeholder.com/335x335" alt="#">
+                                <span class="sale-tag">-50%</span>
+                                <div class="button">
+                                    <a href="product-details.html" class="btn"><i class="lni lni-cart"></i> Добавить в корзину</a>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <span class="category">Speaker</span>
+                                <h4 class="title">
+                                    <a href="product-grids.html">Bluetooth Speaker</a>
+                                </h4>
+                                <div class="price">
+                                    <span>₽4300.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="single-banner right"
+                    style="background-image:url('https://via.placeholder.com/730x310');margin-top: 30px;">
+                    <div class="content">
+                        <h2>Samsung Notebook 9 </h2>
+                        <p>Lorem ipsum dolor sit amet, <br>eiusmod tempor
+                            incididunt ut labore.</p>
+                        <div class="price">
+                            <span>₽50000.00</span>
+                        </div>
+                        <div class="button">
+                            <a href="product-grids.html" class="btn">Купить</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- End Special Offer -->
 
     <!-- Start Home Product List -->
-    <section class="home-product-list section">
+    <!-- <section class="home-product-list section">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-4 col-12 custom-responsive-margin">
                     <h4 class="list-title">Бестселлеры</h4>
-                    <!-- Start Single List -->
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -518,8 +308,7 @@
                             <span>₽22000.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
-                    <!-- Start Single List -->
+
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -531,8 +320,7 @@
                             <span>₽6000.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
-                    <!-- Start Single List -->
+                    
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -544,11 +332,10 @@
                             <span>₽8400.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
                 </div>
                 <div class="col-lg-4 col-md-4 col-12 custom-responsive-margin">
                     <h4 class="list-title">Новые поступления</h4>
-                    <!-- Start Single List -->
+
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -560,8 +347,7 @@
                             <span>₽120000.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
-                    <!-- Start Single List -->
+
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -573,8 +359,7 @@
                             <span>₽110000.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
-                    <!-- Start Single List -->
+
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -586,11 +371,10 @@
                             <span>₽25000.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
+
                 </div>
                 <div class="col-lg-4 col-md-4 col-12">
                     <h4 class="list-title">Самые популярные</h4>
-                    <!-- Start Single List -->
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -602,8 +386,6 @@
                             <span>₽5000.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
-                    <!-- Start Single List -->
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -615,8 +397,6 @@
                             <span>₽90000.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
-                    <!-- Start Single List -->
                     <div class="single-list">
                         <div class="list-image">
                             <a href="product-grids.html"><img src="https://via.placeholder.com/100x100" alt="#"></a>
@@ -628,11 +408,10 @@
                             <span>₽1200.00</span>
                         </div>
                     </div>
-                    <!-- End Single List -->
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- End Home Product List -->
 
     <!-- Start Brands Area -->
@@ -668,7 +447,7 @@
                     </div>
                     <div class="media-body">
                         <h5>Бесплатная доставка.</h5>
-                        <span>При заказе от 7000₽</span>
+                        <span>При заказе от 10000₽</span>
                     </div>
                 </li>
                 <!-- Money Return -->
@@ -705,6 +484,8 @@
         </div>
     </section>
     <!-- End Shipping Info -->
+
+    {% include 'shop/add_product_to_cart_modal.html' %}
 
     <script src="{% static 'main/js/tiny-slider.js' %}"></script>
     <script type="text/javascript">
