@@ -72,6 +72,11 @@ class FaqView(DataMixin, FormView):
         return {**context, **c_def}
 
 
+class PrivacyPolicyView(DataMixin, FormView):
+    form_class = SimpleForm
+    template_name = 'shop/privacy-policy.html'
+
+
 # выводит либо список категорий либо список номенклатуры если в категории больше нет подкатегорий
 # products_exist - признак что товары есть в категории, даже если и не найдены из-за фильтров
 class CategoryProductListView(DataMixin, FormView):

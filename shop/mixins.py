@@ -4,7 +4,7 @@ from shop import services
 user_menu = {'Войти': 'login',
              'Регистрация': 'registration', 'Выйти': 'logout'}
 main_menu = {'Главная': 'home', 'О нас': 'about-us',
-             'Обратная связь': 'contact'}
+             'Часто задаваемые вопросы': 'faq', 'Обратная связь': 'contact'}
 
 
 class DataMixin:
