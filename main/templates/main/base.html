@@ -9,7 +9,7 @@
     <meta name="publisher-email" content="h.smirnov.m@yandex.ru">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <!-- <link rel="shortcut icon" type="image/x-icon" href="assets/images/favicon.svg" /> -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'main/images/favicon.ico' %}" />
 
     <!-- ========================= CSS here ========================= -->
     <link type="text/css" rel="stylesheet" href="{% static 'main/css/bootstrap.min.css' %}" />
@@ -53,26 +53,21 @@
                             <ul class="menu-top-link">
                                 <li>
                                     <div class="select-position">
-                                        <select id="select4">
-                                            <option value="0" selected>₽ RUB</option>
-                                            <option value="1">€ EURO</option>
-                                            <option value="2">$ USD</option>
-                                            <option value="3">₹ INR</option>
-                                            <option value="4">¥ CNY</option>
-                                            <option value="5">৳ BDT</option>
+                                        <select id="selectCurrency">
+                                            {% for currency in currencies %}
+                                            <option value="{{ currency.abbreviation }}">{{ currency.sign }} {{ currency.abbreviation }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="select-position">
-                                        <select id="select5">
+                                        <select id="selectLanuage">
                                             <option value="0" selected>Русский</option>
                                             <option value="1">Español</option>
                                             <option value="2">English</option>
                                             <option value="3">Français</option>
                                             <option value="4">العربية</option>
-                                            <option value="5">हिन्दी</option>
-                                            <option value="6">বাংলা</option>
                                         </select>
                                     </div>
                                 </li>
@@ -125,8 +120,8 @@
                 <div class="row align-items-center">
                     <div class="col-lg-3 col-md-3 col-7">
                         <!-- Start Header Logo -->
-                        <a class="navbar-brand" href="{% url 'home' %}">
-                            <img src="{% static 'main/images/logo/logo.svg' %}" alt="Logo">
+                        <a class="navbar-brand py-0" href="{% url 'home' %}">
+                            <img src="{% static 'main/images/logo/logo-forsale.svg' %}" alt="Logo">
                         </a>
                         <!-- End Header Logo -->
                     </div>
@@ -157,7 +152,7 @@
                                 </h3>
                             </div>
                             <div class="navbar-cart">
-                                <div class="wishlist">
+                                <div class="wishlist d-md-block d-none">
                                     {%  if user.is_authenticated %}
                                     <a href="{% url 'wishlist' %}">
                                         <i class="lni lni-heart"></i>
@@ -170,7 +165,7 @@
                                     </a>
                                     {% endif %}
                                 </div>
-                                <div class="cart-items" id="shop-cart-header">
+                                <div class="cart-items d-md-block d-none" id="shop-cart-header">
                                     <a href="{% url 'cart' %}" class="main-btn">
                                         <i class="lni lni-cart"></i>
                                         <span id="shop-total-items" class="total-items"></span>
@@ -318,7 +313,7 @@
                         <div class="col-lg-3 col-md-4 col-12">
                             <div class="footer-logo">
                                 <a href="{% url 'home' %}">
-                                    <img src="{% static 'main/images/logo/white-logo.svg' %}" alt="#">
+                                    <img src="{% static 'main/images/logo/white-logo-forsale.svg' %}" alt="#">
                                 </a>
                             </div>
                         </div>
@@ -395,7 +390,7 @@
                                     <li><a href="javascript:void(0)">Свяжитесь с нами</a></li>
                                     <li><a href="javascript:void(0)">Загрузки</a></li>
                                     <li><a href="javascript:void(0)">Карта сайта</a></li>
-                                    <li><a href="{% url 'faq' %}">Часто задаваемые вопросы</a></li>
+                                    <li><a href="{% url 'faq' %}">Частые вопросы</a></li>
                                 </ul>
                             </div>
                             <!-- End Single Widget -->

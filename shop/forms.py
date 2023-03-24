@@ -30,7 +30,8 @@ class ProductListForm(forms.Form):
 
         # Найду и установлю значение из кортежа сортировки по значению sorting в GET параметрах, ведь именно оно прилетело нам из прошлого запроса пользователя
         if 'sorting' in get_params:
-            self.fields['sorting'].initial = [choice[0] for choice in self.SORT_CHOICES if choice[0] == get_params['sorting']]
+            self.fields['sorting'].initial = [
+                choice[0] for choice in self.SORT_CHOICES if choice[0] == get_params['sorting']]
 
         # Динамически создам поля атрибутов товаров, ведь сайт не знает что за товары
         for attribute, values in initial['attribute_groups'].items():

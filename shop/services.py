@@ -57,6 +57,11 @@ def get_default_currency() -> Currency:
     return currency
 
 
+def get_currencies() -> models.QuerySet[Currency]:
+    queryset = Currency.objects.all()
+    return queryset
+
+
 # Возвращает рекурсивно все категории с подкатегориями в виде списка кортежей с slug, name и списокм подкатегорий если он есть
 # categories = [(slug, name, []),]
 def get_categories(parent_id) -> list:
@@ -86,7 +91,8 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
 
 # Топ продаж из 4-х товаров
 def get_top_sales() -> models.QuerySet[Prices]:
-    top_sales = CartProduct.objects.values('product').annotate(total=models.Sum('quantity')).order_by('-total')
+    top_sales = CartProduct.objects.values('product').annotate(
+        total=models.Sum('quantity')).order_by('-total')
 
     if not top_sales.exists() or top_sales.count() < 4:
         top_sales = Product.objects.all()[0:4]
@@ -1007,7 +1013,7 @@ def add_favorite_product(user: AbstractBaseUser, favorite_product: dict) -> dict
 
 
 # подсчитывает количество товаров на странице
-def count_product_from_to(paginate_by: int, page_number: int, len_object_list: int ) -> tuple[int, int]:
+def count_product_from_to(paginate_by: int, page_number: int, len_object_list: int) -> tuple[int, int]:
     amount_product_from = paginate_by * page_number - paginate_by + 1
     amount_product_upto = amount_product_from + len_object_list - 1
 

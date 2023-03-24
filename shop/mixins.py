@@ -31,4 +31,5 @@ class DataMixin:
         context['user_menu'] = context_user_menu
         context['main_menu'] = context_main_menu
         context['categories'] = services.get_categories(None)
+        context['currencies'] = services.get_currencies()
         return context

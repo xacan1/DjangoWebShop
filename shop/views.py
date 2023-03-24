@@ -15,8 +15,8 @@ class IndexView(DataMixin, FormView):
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         top_products = services.get_top_sales()
-        c_def = self.get_user_context(
-            title='Маркет скидок', top_products=top_products)
+        context['top_products'] = top_products
+        c_def = self.get_user_context(title='Маркет скидок')
         return {**context, **c_def}
 
 
