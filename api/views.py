@@ -671,12 +671,11 @@ class StockProductsAPIViewSet(viewsets.ModelViewSet):
 # Возвращает строки корзины по ID мессенжера, если корзина создана в телеграмме
 class CartProductAPIViewSet(viewsets.ModelViewSet):
     serializer_class = CartProductSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         get_params = self.request.query_params
         get_params = {param: get_params[param] for param in get_params}
-        # queryset = CartProduct.objects.filter(**get_params).annotate(quantity_sum=models.Sum('quantity')).order_by()
         queryset = CartProduct.objects.filter(**get_params)
         return queryset
 

@@ -168,7 +168,7 @@ async function delete_cart_product(btn) {
         credentials: 'same-origin'
     }
 
-    let response = await fetch(`/api/v1/carts/product_to_cart_delete/${product_cart_pk}`, options);
+    let response = await fetch(`/api/v1/carts/products/${product_cart_pk}`, options);
 
     if (!response.ok) {
         console.log('Ошибка HTTP: ' + response.status);
