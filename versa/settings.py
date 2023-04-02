@@ -162,11 +162,7 @@ EMAIL_HOST_PASSWORD = config.EMAIL_PASSWORD
 EMAIL_PORT = 465
 EMAIL_USE_TLS = True
 
-ADMINS = [
-    ('Admin', 'xacan-mail@mail.ru'),
-]
-
-MANAGERS = ADMINS
+MANAGERS = config.ADMINS
 
 # LOGGING = {
 #     'version': 1,

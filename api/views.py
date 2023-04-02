@@ -1,6 +1,7 @@
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.views import Response, Request, APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, IsAuthenticatedOrReadOnly, AllowAny
+from api.permissions import IsAdminOrReadOnly, IsAdminOrIsAuthenticated
 from shop.models import *
 from api.serializers import *
 from shop import services
@@ -27,9 +28,9 @@ class UsersAPIRetrieve(generics.RetrieveAPIView):
 # top_level_only - GET-параметр, сообщающий, что нужно вернуть только верхний уровень иерархии групп номенклатуры
 # category_pk - если надо вернуть состав только одной группы номенклатуры
 # может быть уставнолен только один параметр либо ни одного
-class CategoryAPIList(generics.ListAPIView):
+class CategoryAPIViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         top_level_only = self.request.query_params.get('top_level_only', False)
@@ -45,31 +46,48 @@ class CategoryAPIList(generics.ListAPIView):
         return queryset
 
 
-class CategoryAPICreate(generics.CreateAPIView):
-    serializer_class = CategorySerializer
-    permission_classes = (IsAdminUser,)
+# class CategoryAPIList(generics.ListAPIView):
+#     serializer_class = CategorySerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         top_level_only = self.request.query_params.get('top_level_only', False)
+#         category_pk = self.request.query_params.get('category_pk', 0)
+
+#         if top_level_only:
+#             queryset = Category.objects.filter(parent=None)
+#         elif category_pk:
+#             queryset = Category.objects.filter(parent=category_pk)
+#         else:
+#             queryset = Category.objects.all()
+
+#         return queryset
 
 
-class CategoryAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = (IsAuthenticated,)
+# class CategoryAPICreate(generics.CreateAPIView):
+#     serializer_class = CategorySerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class CategoryAPIUpdate(generics.UpdateAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = (IsAdminUser,)
+# class CategoryAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class CategoryAPIDelete(generics.DestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = (IsAdminUser,)
+# class CategoryAPIUpdate(generics.UpdateAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class FavoriteProductAPIList(generics.ListAPIView):
-    serializer_class = FavoriteProductSerializer
+# class CategoryAPIDelete(generics.DestroyAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class FavoriteProductAPIViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -78,36 +96,55 @@ class FavoriteProductAPIList(generics.ListAPIView):
         queryset = FavoriteProduct.objects.filter(**get_params)
         return queryset
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            serializer_class = FavoriteProductSerializer
+        else:
+            serializer_class = FavoriteProductCreateSerializer
 
-class FavoriteProductAPICreate(generics.CreateAPIView):
-    serializer_class = FavoriteProductCreateSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class FavoriteProductAPIRetrieve(generics.RetrieveAPIView):
-    queryset = FavoriteProduct.objects.all()
-    serializer_class = FavoriteProductSerializer
-    permission_classes = (IsAuthenticated,)
+        return serializer_class
 
 
-class FavoriteProductAPIUpdate(generics.UpdateAPIView):
-    queryset = FavoriteProduct.objects.all()
-    serializer_class = FavoriteProductCreateSerializer
-    permission_classes = (IsAuthenticated,)
+# class FavoriteProductAPIList(generics.ListAPIView):
+#     serializer_class = FavoriteProductSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = FavoriteProduct.objects.filter(**get_params)
+#         return queryset
 
 
-class FavoriteProductAPIDelete(generics.DestroyAPIView):
-    queryset = FavoriteProduct.objects.all()
-    serializer_class = FavoriteProductCreateSerializer
-    permission_classes = (IsAuthenticated,)
+# class FavoriteProductAPICreate(generics.CreateAPIView):
+#     serializer_class = FavoriteProductCreateSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class FavoriteProductAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = FavoriteProduct.objects.all()
+#     serializer_class = FavoriteProductSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class FavoriteProductAPIUpdate(generics.UpdateAPIView):
+#     queryset = FavoriteProduct.objects.all()
+#     serializer_class = FavoriteProductCreateSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class FavoriteProductAPIDelete(generics.DestroyAPIView):
+#     queryset = FavoriteProduct.objects.all()
+#     serializer_class = FavoriteProductCreateSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
 # Выводит список товаров с остатками по складам и ценами
 # category_pk - категория товара (каталог)
 # warehouse_pk - склад
-class ProductAPIList(generics.ListAPIView):
+class ProductAPIViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         # self.request.data - данные POST запроса
@@ -131,27 +168,64 @@ class ProductAPIList(generics.ListAPIView):
         return queryset
 
 
-class ProductAPICreate(generics.CreateAPIView):
-    serializer_class = ProductSerializer
-    permission_classes = (IsAdminUser,)
+# class ProductAPIList(generics.ListAPIView):
+#     serializer_class = ProductSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         # self.request.data - данные POST запроса
+#         # self.request.query_params - данные GET запроса
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         category_pk = get_params.get('category_pk', 0)
+#         warehouse_pk = get_params.get('warehouse_pk', 0)
+
+#         if category_pk and warehouse_pk:
+#             queryset = Product.objects.filter(
+#                 category=category_pk, get_stock_product__warehouse=warehouse_pk)
+#         elif category_pk:
+#             queryset = Product.objects.filter(category=category_pk)
+#         elif warehouse_pk:
+#             queryset = Product.objects.filter(
+#                 get_stock_product__warehouse=warehouse_pk)
+#         else:
+#             queryset = Product.objects.filter(**get_params)
+
+#         return queryset
 
 
-class ProductAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+# class ProductAPICreate(generics.CreateAPIView):
+#     serializer_class = ProductSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+# class ProductAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class ProductAPIUpdate(generics.UpdateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+# class ProductAPIDelete(generics.DestroyAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class ImageProductAPViewSet(viewsets.ModelViewSet):
+    serializer_class = ImageProductSerializer
     permission_classes = (IsAuthenticated,)
 
-
-class ProductAPIUpdate(generics.UpdateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class ProductAPIDelete(generics.DestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    permission_classes = (IsAdminUser,)
+    def get_queryset(self):
+        get_params = self.request.query_params
+        get_params = {param: get_params[param] for param in get_params}
+        queryset = ImageProduct.objects.filter(**get_params)
+        return queryset
 
 
 class ImageProductAPIList(generics.ListAPIView):
@@ -188,38 +262,44 @@ class ImageProductAPIDelete(generics.DestroyAPIView):
     permission_classes = (IsAdminUser,)
 
 
-class AttributeAPIList(generics.ListAPIView):
+class AttributeAPIViewSet(viewsets.ModelViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
 
-class AttributeAPICreate(generics.CreateAPIView):
-    serializer_class = AttributeSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeAPIList(generics.ListAPIView):
+#     queryset = Attribute.objects.all()
+#     serializer_class = AttributeSerializer
+#     permission_classes = (AllowAny,)
 
 
-class AttributeAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Attribute.objects.all()
-    serializer_class = AttributeSerializer
-    permission_classes = (IsAuthenticated,)
+# class AttributeAPICreate(generics.CreateAPIView):
+#     serializer_class = AttributeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class AttributeAPIUpdate(generics.UpdateAPIView):
-    queryset = Attribute.objects.all()
-    serializer_class = AttributeSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Attribute.objects.all()
+#     serializer_class = AttributeSerializer
+#     permission_classes = (AllowAny,)
 
 
-class AttributeAPIDelete(generics.DestroyAPIView):
-    queryset = Attribute.objects.all()
-    serializer_class = AttributeSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeAPIUpdate(generics.UpdateAPIView):
+#     queryset = Attribute.objects.all()
+#     serializer_class = AttributeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class AttributeValuesAPIList(generics.ListAPIView):
+# class AttributeAPIDelete(generics.DestroyAPIView):
+#     queryset = Attribute.objects.all()
+#     serializer_class = AttributeSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class AttributeValuesAPIViewSet(viewsets.ModelViewSet):
     serializer_class = AttributeValuesSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -228,32 +308,43 @@ class AttributeValuesAPIList(generics.ListAPIView):
         return queryset
 
 
-class AttributeValuesAPICreate(generics.CreateAPIView):
-    serializer_class = AttributeValuesSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeValuesAPIList(generics.ListAPIView):
+#     serializer_class = AttributeValuesSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = AttributeValues.objects.filter(**get_params)
+#         return queryset
 
 
-class AttributeValuesAPIRetrieve(generics.RetrieveAPIView):
-    queryset = AttributeValues.objects.all()
-    serializer_class = AttributeValuesSerializer
-    permission_classes = (IsAuthenticated,)
+# class AttributeValuesAPICreate(generics.CreateAPIView):
+#     serializer_class = AttributeValuesSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class AttributeValuesAPIUpdate(generics.UpdateAPIView):
-    queryset = AttributeValues.objects.all()
-    serializer_class = AttributeValuesSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeValuesAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = AttributeValues.objects.all()
+#     serializer_class = AttributeValuesSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class AttributeValuesAPIDelete(generics.DestroyAPIView):
-    queryset = AttributeValues.objects.all()
-    serializer_class = AttributeValuesSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeValuesAPIUpdate(generics.UpdateAPIView):
+#     queryset = AttributeValues.objects.all()
+#     serializer_class = AttributeValuesSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class AttributeProductValuesAPIList(generics.ListAPIView):
+# class AttributeValuesAPIDelete(generics.DestroyAPIView):
+#     queryset = AttributeValues.objects.all()
+#     serializer_class = AttributeValuesSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class AttributeProductValuesAPIViewSet(viewsets.ModelViewSet):
     serializer_class = AttributeProductValuesSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -262,32 +353,43 @@ class AttributeProductValuesAPIList(generics.ListAPIView):
         return queryset
 
 
-class AttributeProductValuesAPICreate(generics.CreateAPIView):
-    serializer_class = AttributeProductValuesSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeProductValuesAPIList(generics.ListAPIView):
+#     serializer_class = AttributeProductValuesSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = AttributeProductValues.objects.filter(**get_params)
+#         return queryset
 
 
-class AttributeProductValuesAPIRetrieve(generics.RetrieveAPIView):
-    queryset = AttributeProductValues.objects.all()
-    serializer_class = AttributeProductValuesSerializer
-    permission_classes = (IsAuthenticated,)
+# class AttributeProductValuesAPICreate(generics.CreateAPIView):
+#     serializer_class = AttributeProductValuesSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class AttributeProductValuesAPIUpdate(generics.UpdateAPIView):
-    queryset = AttributeProductValues.objects.all()
-    serializer_class = AttributeProductValuesSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeProductValuesAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = AttributeProductValues.objects.all()
+#     serializer_class = AttributeProductValuesSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class AttributeProductValuesAPIDelete(generics.DestroyAPIView):
-    queryset = AttributeProductValues.objects.all()
-    serializer_class = AttributeProductValuesSerializer
-    permission_classes = (IsAdminUser,)
+# class AttributeProductValuesAPIUpdate(generics.UpdateAPIView):
+#     queryset = AttributeProductValues.objects.all()
+#     serializer_class = AttributeProductValuesSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class CurrencyAPIList(generics.ListAPIView):
+# class AttributeProductValuesAPIDelete(generics.DestroyAPIView):
+#     queryset = AttributeProductValues.objects.all()
+#     serializer_class = AttributeProductValuesSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class CurrencyAPIViewSet(viewsets.ModelViewSet):
     serializer_class = CurrencySerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -296,32 +398,43 @@ class CurrencyAPIList(generics.ListAPIView):
         return queryset
 
 
-class CurrencyAPICreate(generics.CreateAPIView):
-    serializer_class = CurrencySerializer
-    permission_classes = (IsAdminUser,)
+# class CurrencyAPIList(generics.ListAPIView):
+#     serializer_class = CurrencySerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = Currency.objects.filter(**get_params)
+#         return queryset
 
 
-class CurrencyAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Currency.objects.all()
-    serializer_class = CurrencySerializer
-    permission_classes = (IsAuthenticated,)
+# class CurrencyAPICreate(generics.CreateAPIView):
+#     serializer_class = CurrencySerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class CurrencyAPIUpdate(generics.UpdateAPIView):
-    queryset = Currency.objects.all()
-    serializer_class = CurrencySerializer
-    permission_classes = (IsAdminUser,)
+# class CurrencyAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Currency.objects.all()
+#     serializer_class = CurrencySerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class CurrencyAPIDelete(generics.DestroyAPIView):
-    queryset = Currency.objects.all()
-    serializer_class = CurrencySerializer
-    permission_classes = (IsAdminUser,)
+# class CurrencyAPIUpdate(generics.UpdateAPIView):
+#     queryset = Currency.objects.all()
+#     serializer_class = CurrencySerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class PriceTypeAPIList(generics.ListAPIView):
+# class CurrencyAPIDelete(generics.DestroyAPIView):
+#     queryset = Currency.objects.all()
+#     serializer_class = CurrencySerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class PriceTypeAPIViewSet(viewsets.ModelViewSet):
     serializer_class = PriceTypeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -330,32 +443,43 @@ class PriceTypeAPIList(generics.ListAPIView):
         return queryset
 
 
-class PriceTypeAPIRetrieve(generics.RetrieveAPIView):
-    queryset = PriceType.objects.all()
-    serializer_class = PriceTypeSerializer
-    permission_classes = (IsAuthenticated,)
+# class PriceTypeAPIList(generics.ListAPIView):
+#     serializer_class = PriceTypeSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = PriceType.objects.filter(**get_params)
+#         return queryset
 
 
-class PriceTypeAPICreate(generics.CreateAPIView):
-    serializer_class = PriceTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class PriceTypeAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = PriceType.objects.all()
+#     serializer_class = PriceTypeSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class PriceTypeAPIUpdate(generics.UpdateAPIView):
-    queryset = PriceType.objects.all()
-    serializer_class = PriceTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class PriceTypeAPICreate(generics.CreateAPIView):
+#     serializer_class = PriceTypeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class PriceTypeAPIDelete(generics.DestroyAPIView):
-    queryset = PriceType.objects.all()
-    serializer_class = PriceTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class PriceTypeAPIUpdate(generics.UpdateAPIView):
+#     queryset = PriceType.objects.all()
+#     serializer_class = PriceTypeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class WarehouseAPIList(generics.ListAPIView):
+# class PriceTypeAPIDelete(generics.DestroyAPIView):
+#     queryset = PriceType.objects.all()
+#     serializer_class = PriceTypeSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class WarehouseAPIViewSet(viewsets.ModelViewSet):
     serializer_class = WarehouseSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -364,37 +488,46 @@ class WarehouseAPIList(generics.ListAPIView):
         return queryset
 
 
-class WarehouseAPICreate(generics.CreateAPIView):
-    serializer_class = WarehouseSerializer
-    permission_classes = (IsAdminUser,)
+# class WarehouseAPIList(generics.ListAPIView):
+#     serializer_class = WarehouseSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = Warehouse.objects.filter(**get_params)
+#         return queryset
 
 
-class WarehouseAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Warehouse.objects.all()
-    serializer_class = WarehouseSerializer
-    permission_classes = (IsAuthenticated,)
+# class WarehouseAPICreate(generics.CreateAPIView):
+#     serializer_class = WarehouseSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class WarehouseAPIUpdate(generics.UpdateAPIView):
-    queryset = Warehouse.objects.all()
-    serializer_class = WarehouseSerializer
-    permission_classes = (IsAdminUser,)
+# class WarehouseAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Warehouse.objects.all()
+#     serializer_class = WarehouseSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class WarehouseAPIDelete(generics.DestroyAPIView):
-    queryset = Warehouse.objects.all()
-    serializer_class = WarehouseSerializer
-    permission_classes = (IsAdminUser,)
+# class WarehouseAPIUpdate(generics.UpdateAPIView):
+#     queryset = Warehouse.objects.all()
+#     serializer_class = WarehouseSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class PricesAPIList(generics.ListAPIView):
-    serializer_class = PriceSerializer
-    permission_classes = (IsAuthenticated,)
+# class WarehouseAPIDelete(generics.DestroyAPIView):
+#     queryset = Warehouse.objects.all()
+#     serializer_class = WarehouseSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class PricesAPIViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
         get_params = {param: get_params[param] for param in get_params}
-        # product_pk = self.request.query_params.get('product_pk', 0)
 
         if get_params:
             queryset = Prices.objects.filter(**get_params)
@@ -403,52 +536,63 @@ class PricesAPIList(generics.ListAPIView):
 
         return queryset
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            serializer_class = PriceSerializer
+        else:
+            serializer_class = PriceCreateSerializer
 
-class PricesAPICreate(generics.CreateAPIView):
-    serializer_class = PriceCreateSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class PricesAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Prices.objects.all()
-    lookup_field = 'product'
-    serializer_class = PriceSerializer
-    permission_classes = (IsAuthenticated,)
+        return serializer_class
 
 
-class PricesAPIUpdate(generics.UpdateAPIView):
-    queryset = Prices.objects.all()
-    lookup_field = 'product'
-    serializer_class = PriceCreateSerializer
-    permission_classes = (IsAdminUser,)
+# class PricesAPIList(generics.ListAPIView):
+#     serializer_class = PriceSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         # product_pk = self.request.query_params.get('product_pk', 0)
+
+#         if get_params:
+#             queryset = Prices.objects.filter(**get_params)
+#         else:
+#             queryset = Prices.objects.order_by('product')
+
+#         return queryset
 
 
-class PricesAPIDelete(generics.DestroyAPIView):
-    queryset = Prices.objects.all()
-    lookup_field = 'product'
-    erializer_class = PriceSerializer
-    permission_classes = (IsAdminUser,)
+# class PricesAPICreate(generics.CreateAPIView):
+#     serializer_class = PriceCreateSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class StockProductsAPIList(generics.ListAPIView):
+# class PricesAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Prices.objects.all()
+#     lookup_field = 'product'
+#     serializer_class = PriceSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class PricesAPIUpdate(generics.UpdateAPIView):
+#     queryset = Prices.objects.all()
+#     lookup_field = 'product'
+#     serializer_class = PriceCreateSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+# class PricesAPIDelete(generics.DestroyAPIView):
+#     queryset = Prices.objects.all()
+#     lookup_field = 'product'
+#     erializer_class = PriceSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class StockProductsAPIViewSet(viewsets.ModelViewSet):
     serializer_class = StockProductSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
-        # product_pk = self.request.query_params.get('product_pk', 0)
-        # warehouse_pk = self.request.query_params.get('warehouse_pk', 0)
-        # params = {}
-
-        # if product_pk:
-        #     params['product'] = product_pk
-
-        # if warehouse_pk:
-        #     params['warehouse'] = warehouse_pk
-
-        # if params:
-        #     queryset = StockProducts.objects.filter(**params)
-        # else:
-        #     queryset = StockProducts.objects.order_by('product', 'warehouse')
         get_params = self.request.query_params
         get_params = {param: get_params[param] for param in get_params}
 
@@ -459,35 +603,73 @@ class StockProductsAPIList(generics.ListAPIView):
 
         return queryset
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            serializer_class = StockProductSerializer
+        else:
+            serializer_class = StockProductCreateSerializer
 
-class StockProductsAPICreate(generics.CreateAPIView):
-    serializer_class = StockProductCreateSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class StockProductsAPIRetrieve(generics.RetrieveAPIView):
-    queryset = StockProducts.objects.all()
-    lookup_field = 'product'
-    serializer_class = StockProductSerializer
-    permission_classes = (IsAuthenticated,)
+        return serializer_class
 
 
-class StockProductsAPIUpdate(generics.UpdateAPIView):
-    queryset = StockProducts.objects.all()
-    lookup_field = 'product'
-    serializer_class = StockProductCreateSerializer
-    permission_classes = (IsAdminUser,)
+# class StockProductsAPIList(generics.ListAPIView):
+#     serializer_class = StockProductSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         # product_pk = self.request.query_params.get('product_pk', 0)
+#         # warehouse_pk = self.request.query_params.get('warehouse_pk', 0)
+#         # params = {}
+
+#         # if product_pk:
+#         #     params['product'] = product_pk
+
+#         # if warehouse_pk:
+#         #     params['warehouse'] = warehouse_pk
+
+#         # if params:
+#         #     queryset = StockProducts.objects.filter(**params)
+#         # else:
+#         #     queryset = StockProducts.objects.order_by('product', 'warehouse')
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+
+#         if get_params:
+#             queryset = StockProducts.objects.filter(**get_params)
+#         else:
+#             queryset = StockProducts.objects.order_by('product', 'warehouse')
+
+#         return queryset
 
 
-class StockProductsAPIDelete(generics.DestroyAPIView):
-    queryset = StockProducts.objects.all()
-    lookup_field = 'product'
-    serializer_class = StockProductSerializer
-    permission_classes = (IsAdminUser,)
+# class StockProductsAPICreate(generics.CreateAPIView):
+#     serializer_class = StockProductCreateSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+# class StockProductsAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = StockProducts.objects.all()
+#     lookup_field = 'product'
+#     serializer_class = StockProductSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class StockProductsAPIUpdate(generics.UpdateAPIView):
+#     queryset = StockProducts.objects.all()
+#     lookup_field = 'product'
+#     serializer_class = StockProductCreateSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+# class StockProductsAPIDelete(generics.DestroyAPIView):
+#     queryset = StockProducts.objects.all()
+#     lookup_field = 'product'
+#     serializer_class = StockProductSerializer
+#     permission_classes = (IsAdminUser,)
 
 
 # Возвращает строки корзины по ID мессенжера, если корзина создана в телеграмме
-class CartProductAPILIst(generics.ListAPIView):
+class CartProductAPIViewSet(viewsets.ModelViewSet):
     serializer_class = CartProductSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -499,52 +681,70 @@ class CartProductAPILIst(generics.ListAPIView):
         return queryset
 
 
-# Создаю строку товара для корзины (отдельным сериализатором)
-class CartProductAPICreate(generics.CreateAPIView):
-    serializer_class = CartProductCreateSerializer
-    permission_classes = (IsAuthenticated,)
+# class CartProductAPILIst(generics.ListAPIView):
+#     serializer_class = CartProductSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         # queryset = CartProduct.objects.filter(**get_params).annotate(quantity_sum=models.Sum('quantity')).order_by()
+#         queryset = CartProduct.objects.filter(**get_params)
+#         return queryset
 
 
-# product - уникальная строка, так как не может один и тот же товар быть в разных строках корзины
-class CartProductAPIUpdate(generics.UpdateAPIView):
-    queryset = CartProduct.objects.all()
-    serializer_class = CartProductCreateSerializer
-    permission_classes = (IsAuthenticated,)
+# # Создаю строку товара для корзины (отдельным сериализатором)
+# class CartProductAPICreate(generics.CreateAPIView):
+#     serializer_class = CartProductCreateSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class CartProductAPIDelete(generics.DestroyAPIView):
-    queryset = CartProduct.objects.all()
-    serializer_class = CartProductSerializer
-    permission_classes = (AllowAny,)
+# # product - уникальная строка, так как не может один и тот же товар быть в разных строках корзины
+# class CartProductAPIUpdate(generics.UpdateAPIView):
+#     queryset = CartProduct.objects.all()
+#     serializer_class = CartProductCreateSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class CartAPICreate(generics.CreateAPIView):
-    serializer_class = CartSerializer
-    permission_classes = (IsAuthenticated,)
+# class CartProductAPIDelete(generics.DestroyAPIView):
+#     queryset = CartProduct.objects.all()
+#     serializer_class = CartProductSerializer
+#     permission_classes = (AllowAny,)
 
 
-class CartAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Cart.objects.all()
-    lookup_field = 'user'
-    serializer_class = CartSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class CartAPIUpdate(generics.UpdateAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class CartAPIDelete(generics.DestroyAPIView):
+class CartAPIViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = (IsAuthenticated,)
 
 
-class StatusesAPIList(generics.ListAPIView):
+# class CartAPICreate(generics.CreateAPIView):
+#     serializer_class = CartSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class CartAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Cart.objects.all()
+#     lookup_field = 'user'
+#     serializer_class = CartSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class CartAPIUpdate(generics.UpdateAPIView):
+#     queryset = Cart.objects.all()
+#     serializer_class = CartSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class CartAPIDelete(generics.DestroyAPIView):
+#     queryset = Cart.objects.all()
+#     serializer_class = CartSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+class StatusesAPIViewSet(viewsets.ModelViewSet):
     serializer_class = StatusSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -553,32 +753,43 @@ class StatusesAPIList(generics.ListAPIView):
         return queryset
 
 
-class StatusesAPICreate(generics.CreateAPIView):
-    serializer_class = StatusSerializer
-    permission_classes = (IsAdminUser,)
+# class StatusesAPIList(generics.ListAPIView):
+#     serializer_class = StatusSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = Status.objects.filter(**get_params)
+#         return queryset
 
 
-class StatusesAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Status.objects.all()
-    serializer_class = StatusSerializer
-    permission_classes = (IsAuthenticated,)
+# class StatusesAPICreate(generics.CreateAPIView):
+#     serializer_class = StatusSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class StatusesAPIUpdate(generics.UpdateAPIView):
-    queryset = Status.objects.all()
-    serializer_class = StatusSerializer
-    permission_classes = (IsAdminUser,)
+# class StatusesAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Status.objects.all()
+#     serializer_class = StatusSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class StatusesAPIDelete(generics.DestroyAPIView):
-    queryset = Status.objects.all()
-    serializer_class = StatusSerializer
-    permission_classes = (IsAdminUser,)
+# class StatusesAPIUpdate(generics.UpdateAPIView):
+#     queryset = Status.objects.all()
+#     serializer_class = StatusSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class PaymentTypesAPIList(generics.ListAPIView):
+# class StatusesAPIDelete(generics.DestroyAPIView):
+#     queryset = Status.objects.all()
+#     serializer_class = StatusSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class PaymentTypesAPIViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentTypeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -587,32 +798,43 @@ class PaymentTypesAPIList(generics.ListAPIView):
         return queryset
 
 
-class PaymentTypesAPICreate(generics.CreateAPIView):
-    serializer_class = PaymentTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class PaymentTypesAPIList(generics.ListAPIView):
+#     serializer_class = PaymentTypeSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = PaymentType.objects.filter(**get_params)
+#         return queryset
 
 
-class PaymentTypesAPIRetrieve(generics.RetrieveAPIView):
-    queryset = PaymentType.objects.all()
-    serializer_class = PaymentTypeSerializer
-    permission_classes = (IsAuthenticated,)
+# class PaymentTypesAPICreate(generics.CreateAPIView):
+#     serializer_class = PaymentTypeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class PaymentTypesAPIUpdate(generics.UpdateAPIView):
-    queryset = PaymentType.objects.all()
-    serializer_class = PaymentTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class PaymentTypesAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = PaymentType.objects.all()
+#     serializer_class = PaymentTypeSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class PaymentTypesAPIDelete(generics.DestroyAPIView):
-    queryset = PaymentType.objects.all()
-    serializer_class = PaymentTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class PaymentTypesAPIUpdate(generics.UpdateAPIView):
+#     queryset = PaymentType.objects.all()
+#     serializer_class = PaymentTypeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class DeliveryTypesAPIList(generics.ListAPIView):
+# class PaymentTypesAPIDelete(generics.DestroyAPIView):
+#     queryset = PaymentType.objects.all()
+#     serializer_class = PaymentTypeSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class DeliveryTypesAPIViewSet(viewsets.ModelViewSet):
     serializer_class = DeliveryTypeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -621,32 +843,43 @@ class DeliveryTypesAPIList(generics.ListAPIView):
         return queryset
 
 
-class DeliveryTypesAPICreate(generics.CreateAPIView):
-    serializer_class = DeliveryTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class DeliveryTypesAPIList(generics.ListAPIView):
+#     serializer_class = DeliveryTypeSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = DeliveryType.objects.filter(**get_params)
+#         return queryset
 
 
-class DeliveryTypesAPIRetrieve(generics.RetrieveAPIView):
-    queryset = DeliveryType.objects.all()
-    serializer_class = DeliveryTypeSerializer
-    permission_classes = (IsAuthenticated,)
+# class DeliveryTypesAPICreate(generics.CreateAPIView):
+#     serializer_class = DeliveryTypeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class DeliveryTypesAPIUpdate(generics.UpdateAPIView):
-    queryset = DeliveryType.objects.all()
-    serializer_class = DeliveryTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class DeliveryTypesAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = DeliveryType.objects.all()
+#     serializer_class = DeliveryTypeSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class DeliveryTypesAPIDelete(generics.DestroyAPIView):
-    queryset = DeliveryType.objects.all()
-    serializer_class = DeliveryTypeSerializer
-    permission_classes = (IsAdminUser,)
+# class DeliveryTypesAPIUpdate(generics.UpdateAPIView):
+#     queryset = DeliveryType.objects.all()
+#     serializer_class = DeliveryTypeSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class CouponsAPIList(generics.ListAPIView):
+# class DeliveryTypesAPIDelete(generics.DestroyAPIView):
+#     queryset = DeliveryType.objects.all()
+#     serializer_class = DeliveryTypeSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class CouponsAPIViewSet(viewsets.ModelViewSet):
     serializer_class = CouponSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -655,31 +888,41 @@ class CouponsAPIList(generics.ListAPIView):
         return queryset
 
 
-class CouponsAPICreate(generics.CreateAPIView):
-    serializer_class = CouponSerializer
-    permission_classes = (IsAdminUser,)
+# class CouponsAPIList(generics.ListAPIView):
+#     serializer_class = CouponSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = Coupon.objects.filter(**get_params)
+#         return queryset
 
 
-class CouponsAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Coupon.objects.all()
-    serializer_class = CouponSerializer
-    permission_classes = (IsAuthenticated,)
+# class CouponsAPICreate(generics.CreateAPIView):
+#     serializer_class = CouponSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class CouponsAPIUpdate(generics.UpdateAPIView):
-    queryset = Coupon.objects.all()
-    serializer_class = CouponSerializer
-    permission_classes = (IsAdminUser,)
+# class CouponsAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Coupon.objects.all()
+#     serializer_class = CouponSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class CouponsAPIDelete(generics.DestroyAPIView):
-    queryset = Coupon.objects.all()
-    serializer_class = CouponSerializer
-    permission_classes = (IsAdminUser,)
+# class CouponsAPIUpdate(generics.UpdateAPIView):
+#     queryset = Coupon.objects.all()
+#     serializer_class = CouponSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class OrdersAPIList(generics.ListAPIView):
-    serializer_class = OrderSerializer
+# class CouponsAPIDelete(generics.DestroyAPIView):
+#     queryset = Coupon.objects.all()
+#     serializer_class = CouponSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+class OrdersAPIViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -698,29 +941,58 @@ class OrdersAPIList(generics.ListAPIView):
 
         return queryset
 
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            serializer_class = OrderSerializer
+        else:
+            serializer_class = OrderCreateSerializer
 
-class OrdersAPICreate(generics.CreateAPIView):
-    serializer_class = OrderCreateSerializer
-    permission_classes = (IsAuthenticated,)
-
-
-class OrderAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Order.objects.all()
-    lookup_field = 'number'
-    serializer_class = OrderSerializer
-    permission_classes = (IsAuthenticated,)
+        return serializer_class
 
 
-class OrderAPIUpdate(generics.UpdateAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderCreateSerializer
-    permission_classes = (IsAuthenticated,)
+# class OrdersAPIList(generics.ListAPIView):
+#     serializer_class = OrderSerializer
+#     permission_classes = (IsAuthenticated,)
+
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+
+#         user_pk = self.request.user.pk
+#         id_messenger = get_params.get('id_messenger', 0)
+#         paid = get_params.get('paid', False)
+
+#         if user_pk and id_messenger:
+#             queryset = services.get_orders_for_user(
+#                 user_pk, id_messenger, paid)
+#         else:
+#             queryset = Order.objects.filter(**get_params)
+
+#         return queryset
 
 
-class OrderAPIDelete(generics.DestroyAPIView):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-    permission_classes = (IsAuthenticated,)
+# class OrdersAPICreate(generics.CreateAPIView):
+#     serializer_class = OrderCreateSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class OrderAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Order.objects.all()
+#     lookup_field = 'number'
+#     serializer_class = OrderSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class OrderAPIUpdate(generics.UpdateAPIView):
+#     queryset = Order.objects.all()
+#     serializer_class = OrderCreateSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+# class OrderAPIDelete(generics.DestroyAPIView):
+#     queryset = Order.objects.all()
+#     serializer_class = OrderSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
 # API специализированный для магазина

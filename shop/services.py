@@ -247,7 +247,7 @@ def get_root_categories() -> models.QuerySet[Category]:
 
 
 # находит отсортированные по дате неоплаченные(по умолчанию) заказы для всей корзины или только для конкретного id_messenger
-def get_orders_for_user(user_pk: int, id_messenger: int = 0, paid: bool = False) -> models.QuerySet:
+def get_orders_for_user(user_pk: int, id_messenger: int = 0, paid: bool = False) -> models.QuerySet[Order]:
     orders = []
     params = {'user': user_pk, 'paid': paid}
 
