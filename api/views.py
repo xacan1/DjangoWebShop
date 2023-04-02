@@ -678,6 +678,14 @@ class CartProductAPIViewSet(viewsets.ModelViewSet):
         get_params = {param: get_params[param] for param in get_params}
         queryset = CartProduct.objects.filter(**get_params)
         return queryset
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            serializer_class = CartProductSerializer
+        else:
+            serializer_class = CartProductCreateSerializer
+
+        return serializer_class
 
 
 # class CartProductAPILIst(generics.ListAPIView):
