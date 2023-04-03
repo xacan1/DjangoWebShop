@@ -324,7 +324,7 @@ def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool = False) -> dict:
 
     if user_pk:
         cartset = Cart.objects.filter(user=user_pk).values()
-
+        print(cartset)
         if cartset.exists():
             cart_info = cartset[0]
         else:
@@ -877,8 +877,9 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_ke
     for_anonymous_user = get_params.get('for_anonymous_user', False)
     id_messenger = get_params.get('id_messenger', '0')
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
-
+    
     if user_pk:
+        print('cartset')
         cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
         cartset = Cart.objects.filter(user=user_pk)
     else:

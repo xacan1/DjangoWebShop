@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.utils import timezone, datetime_safe
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -72,6 +73,9 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('product-details', kwargs={'product_slug': self.slug})
 
     class Meta:
         verbose_name = 'Товар'
@@ -542,7 +546,7 @@ class Order(models.Model):
                                on_delete=models.SET_NULL, verbose_name='Купон')
     # номер уникален в пределах 1 года как в 1С, заполняется когда 1С загрузит заказ и вернет назад свой код документа
     external_code = models.CharField(max_length=11, default='', blank=True,
-                              verbose_name='Внешний номер')
+                                     verbose_name='Внешний номер')
 
     def __str__(self) -> str:
         return f'Заказ №{self.pk} от {self.time_update.strftime("%d.%m.%Y")}'
