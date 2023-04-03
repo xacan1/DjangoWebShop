@@ -76,10 +76,20 @@ class PrivacyPolicyView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/privacy-policy.html'
 
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Политика конфиденциальности')
+        return {**context, **c_def}
+
 
 class UserAgreementView(DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/user-agreement.html'
+
+    def get_context_data(self, **kwargs) -> dict:
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Пользовательское соглашение')
+        return {**context, **c_def}
 
 
 # выводит либо список категорий либо список номенклатуры если в категории больше нет подкатегорий
