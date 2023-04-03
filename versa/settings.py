@@ -164,6 +164,8 @@ EMAIL_USE_TLS = True
 
 MANAGERS = config.ADMINS
 
+APPEND_SLASH = True
+
 # LOGGING = {
 #     'version': 1,
 #     'disable_existing_loggers': False,

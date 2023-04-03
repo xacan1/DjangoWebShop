@@ -219,7 +219,7 @@ class ProductAPIViewSet(viewsets.ModelViewSet):
 
 class ImageProductAPViewSet(viewsets.ModelViewSet):
     serializer_class = ImageProductSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
         get_params = self.request.query_params
@@ -228,38 +228,38 @@ class ImageProductAPViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class ImageProductAPIList(generics.ListAPIView):
-    serializer_class = ImageProductSerializer
-    permission_classes = (IsAuthenticated,)
+# class ImageProductAPIList(generics.ListAPIView):
+#     serializer_class = ImageProductSerializer
+#     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        get_params = self.request.query_params
-        get_params = {param: get_params[param] for param in get_params}
-        queryset = ImageProduct.objects.filter(**get_params)
-        return queryset
-
-
-class ImageProductAPICreate(generics.CreateAPIView):
-    serializer_class = ImageProductSerializer
-    permission_classes = (IsAdminUser,)
+#     def get_queryset(self):
+#         get_params = self.request.query_params
+#         get_params = {param: get_params[param] for param in get_params}
+#         queryset = ImageProduct.objects.filter(**get_params)
+#         return queryset
 
 
-class ImageProductAPIRetrieve(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ImageProductSerializer
-    permission_classes = (IsAuthenticated,)
+# class ImageProductAPICreate(generics.CreateAPIView):
+#     serializer_class = ImageProductSerializer
+#     permission_classes = (IsAdminUser,)
 
 
-class ImageProductAPIUpdate(generics.UpdateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ImageProductSerializer
-    permission_classes = (IsAdminUser,)
+# class ImageProductAPIRetrieve(generics.RetrieveAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ImageProductSerializer
+#     permission_classes = (IsAuthenticated,)
 
 
-class ImageProductAPIDelete(generics.DestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ImageProductSerializer
-    permission_classes = (IsAdminUser,)
+# class ImageProductAPIUpdate(generics.UpdateAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ImageProductSerializer
+#     permission_classes = (IsAdminUser,)
+
+
+# class ImageProductAPIDelete(generics.DestroyAPIView):
+#     queryset = Product.objects.all()
+#     serializer_class = ImageProductSerializer
+#     permission_classes = (IsAdminUser,)
 
 
 class AttributeAPIViewSet(viewsets.ModelViewSet):
