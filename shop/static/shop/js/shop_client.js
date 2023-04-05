@@ -345,7 +345,7 @@ function update_cart(cart_info) {
         let path_product = '/product-details/' + row.product.slug;
         let row_cart_order = document.createElement('div');
         row_cart_order.className = 'cart-single-list shop-for-del';
-        row_cart_order.innerHTML = `<div class="row align-items-center shop-row-cart-order" data-shop-product_cart-pk="${row.id}" data-shop-product-pk="${row.product.pk}" data-shop-price="${row.price}">\
+        row_cart_order.innerHTML = `<div class="row align-items-center shop-row-cart-order" data-shop-product_cart-pk="${row.id}" data-shop-product-pk="${row.product.id}" data-shop-price="${row.price}">\
             <div class="col-lg-1 col-md-1 col-12">\
                 <a href="${path_product}"><img src="${row.product.photo ? row.product.photo : 'https://via.placeholder.com/220x200'}" alt="#"></a>\
             </div>\

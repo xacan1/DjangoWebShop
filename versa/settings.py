@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
     'shop.apps.ShopConfig',
     'personal_account.apps.PersonalAccountConfig',
     'main.apps.MainConfig',
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'versa.urls'
@@ -165,6 +167,10 @@ EMAIL_USE_TLS = True
 MANAGERS = config.ADMINS
 
 APPEND_SLASH = True
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 # LOGGING = {
 #     'version': 1,

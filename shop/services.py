@@ -101,7 +101,8 @@ def get_top_sales() -> models.QuerySet[Prices]:
         top_sales = [product['product'] for product in top_sales]
 
     price_products = Prices.objects.select_related(
-        'product', 'product__category', 'price_type').filter(product__pk__in=top_sales, price_type__default=True, product__is_published=True)
+        'product', 'product__category', 'price_type', 'currency'
+    ).filter(product__pk__in=top_sales, price_type__default=True, product__is_published=True)
 
     return price_products
 
@@ -117,7 +118,8 @@ def filter_products_for_category(category_slug: str, get_parameters: dict[str, s
     values = []
 
     price_products = Prices.objects.prefetch_related(
-        'product', 'product__category', 'product__get_attributes_product', 'price_type').filter(
+        'product', 'product__category', 'product__get_attributes_product', 'price_type', 'currency'
+    ).filter(
         price__lte=price_max, product__category__slug=category_slug, price_type__default=True, product__is_published=True)
 
     products_exist = price_products.exists()
@@ -379,9 +381,9 @@ def get_cart_order_product(cart_order_pk: int, product_pk: int, id_messenger: in
     return product_cart, product_cart_info
 
 
-# получает все строки из Корзины или Заказа в виде списка
+# получает все строки из Корзины или Заказа
 # id_messenger - имеет значение только для выборки строк Корзины, иначе всегда 0
-def get_cart_order_products(cart_order_pk: int, id_messenger: int = 0, for_order: bool = False) -> models.QuerySet:
+def get_cart_order_products(cart_order_pk: int, id_messenger: int = 0, for_order: bool = False) -> models.QuerySet[CartProduct]:
     products_cart_order = []
     params = {}
 
@@ -877,7 +879,7 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_ke
     for_anonymous_user = get_params.get('for_anonymous_user', False)
     id_messenger = get_params.get('id_messenger', '0')
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
-    
+
     if user_pk:
         cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
         cartset = Cart.objects.filter(user=user_pk)

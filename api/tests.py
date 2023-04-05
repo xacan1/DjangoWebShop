@@ -7,8 +7,7 @@ from api.serializers import *
 
 
 class AttributesAPITest(APITestCase):
-    def __init__(self, methodName: str = "runTest") -> None:
-        super().__init__(methodName)
+    def setUp(self):
         self.factory = APIRequestFactory()
         self.view_detail = AttributeAPIViewSet.as_view({'get': 'retrieve',
                                                         'put': 'update',
@@ -17,8 +16,6 @@ class AttributesAPITest(APITestCase):
         self.view_list = AttributeAPIViewSet.as_view({'get': 'list',
                                                       'post': 'create'})
         self.attr_test = {'name': 'Атрибут_Тест', 'external_code': '000001'}
-
-    def my_init(self):
         self.test_user = User.objects.create(
             email='test@mail.ru',
             phone='1234567890',
@@ -32,7 +29,6 @@ class AttributesAPITest(APITestCase):
         )
 
     def test_attribute_create(self):
-        self.my_init()
         url = reverse('attribute-list')
         request = self.factory.post(url, self.attr_test, format='json')
         force_authenticate(request, user=self.test_admin)
@@ -40,7 +36,6 @@ class AttributesAPITest(APITestCase):
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
 
     def test_attribute_list(self):
-        self.my_init()
         attr1 = Attribute.objects.create(name='Атрибут1', external_code='001')
         attr2 = Attribute.objects.create(name='Атрибут2', external_code='002')
         url = reverse('attribute-list')
@@ -52,7 +47,6 @@ class AttributesAPITest(APITestCase):
         self.assertEqual(serializer_data, response.data)
 
     def test_attribute_update(self):
-        self.my_init()
         attr = Attribute.objects.create(**self.attr_test)
         new_name = 'Новое имя'
         url = reverse('attribute-detail', kwargs={'pk': attr.pk})
