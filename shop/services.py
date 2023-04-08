@@ -292,7 +292,7 @@ def get_order_for_user(user_pk: int, order_pk: int) -> Order:
 
 
 # создает новую Корзину пользователя если ее ещё нет
-def create_new_cart(new_cart_info: dict) -> dict:
+def create_new_cart(new_cart_info: dict) -> Cart:
     if 'currency' not in new_cart_info:
         default_currency = get_default_currency()
         new_cart_info['currency'] = default_currency.pk if default_currency is not None else 0
@@ -300,8 +300,8 @@ def create_new_cart(new_cart_info: dict) -> dict:
     serializer = CartCreateSerializer(data=new_cart_info)
     serializer.is_valid(raise_exception=True)
     serializer.save()
-    cart_info = serializer.data
-    cart_info['products'] = []
+    cart_info = serializer.instance
+    # cart_info['products'] = []
 
     return cart_info
 
@@ -321,41 +321,43 @@ def create_new_order(new_order_info: dict) -> tuple[Order, dict]:
 
 
 # получает или создает Корзину пользователя по ID пользователя в виде словаря
-def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool = False) -> dict:
-    cart_info = {}
+def get_cart_by_user_id(user_pk: int, for_anonymous_user: bool = False) -> Cart:
+    cart = Cart.objects.none()
 
     if user_pk:
-        cartset = Cart.objects.filter(user=user_pk).values()
+        # cartset = Cart.objects.filter(user=user_pk).values()
+        cartset = Cart.objects.filter(user=user_pk)
 
         if cartset.exists():
-            cart_info = cartset[0]
+            cart = cartset[0]
         else:
             new_cart_info = {
                 'user': user_pk,
                 'for_anonymous_user': for_anonymous_user
             }
-            cart_info = create_new_cart(new_cart_info)
+            cart = create_new_cart(new_cart_info)
 
-    return cart_info
+    return cart
 
 
 # получает или создает Корзину пользователя по session_key пользователя в виде словаря
-def get_cart_by_sessionid(session_key: str, for_anonymous_user: bool = False) -> dict:
-    cart_info = {}
+def get_cart_by_sessionid(session_key: str, for_anonymous_user: bool = False) -> Cart:
+    cart = Cart.objects.none()
 
     if session_key:
-        cartset = Cart.objects.filter(sessionid=session_key).values()
+        # cartset = Cart.objects.filter(sessionid=session_key).values()
+        cartset = Cart.objects.filter(sessionid=session_key)
 
         if cartset.exists():
-            cart_info = cartset[0]
+            cart = cartset[0]
         else:
             new_cart_info = {
                 'sessionid': session_key,
                 'for_anonymous_user': for_anonymous_user
             }
-            cart_info = create_new_cart(new_cart_info)
+            cart = create_new_cart(new_cart_info)
 
-    return cart_info
+    return cart
 
 
 # получает одну строку товара из Корзины или Заказа в виде объекта строки product_cart и в виде словаря product_cart_info
@@ -524,14 +526,15 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
 
     if user.is_authenticated:
         user_pk = user.pk
-        cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
+        cart = get_cart_by_user_id(user_pk, for_anonymous_user)
     elif session_key:
-        cart_info = get_cart_by_sessionid(session_key, for_anonymous_user)
+        cart = get_cart_by_sessionid(session_key, for_anonymous_user)
     else:
         data_response = {'error': 'user_pk and session_key is undefined'}
         return data_response
 
-    cart_pk = cart_info.get('id', 0)
+    # cart_pk = cart_info.get('id', 0)
+    cart_pk = cart.pk
 
     # получим актуальные цены
     settings_user = get_settings_user(user)
@@ -605,8 +608,9 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
     else:
         user_pk = user.pk
         for_anonymous_user = request_data.get('for_anonymous_user', False)
-        cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
-        cart_pk = cart_info.get('id', 0)
+        cart = get_cart_by_user_id(user_pk, for_anonymous_user)
+        # cart_pk = cart_info.get('id', 0)
+        cart_pk = cart.pk
         product_cart, _ = get_cart_order_product(
             cart_pk, product_pk, id_messenger)
 
@@ -711,8 +715,9 @@ def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dic
         order_info['amount'] = Decimal(0)
 
     order_pk = order_info['id']
-    cart_info = get_cart_by_user_id(user_pk, for_messenger_user)
-    cart_pk = cart_info.get('id', 0)
+    cart = get_cart_by_user_id(user_pk, for_messenger_user)
+    # cart_pk = cart_info.get('id', 0)
+    cart_pk = cart.pk
 
     # найду и превращу все строки Корзины в строки последнего неоплаченного Заказа
     cart_products = get_cart_order_products(cart_pk, id_messenger)
@@ -764,13 +769,14 @@ def changing_cart_rows_to_order_rows(user: AbstractBaseUser, order: Order, sessi
     user_pk = user.pk if user.is_authenticated else 0
 
     if user_pk:
-        cart_info = get_cart_by_user_id(user_pk)
+        cart = get_cart_by_user_id(user_pk)
         phone = user.phone
     else:
-        cart_info = get_cart_by_sessionid(session_key)
+        cart = get_cart_by_sessionid(session_key)
         phone = ''
 
-    cart_pk = cart_info.get('id', 0)
+    # cart_pk = cart_info.get('id', 0)
+    cart_pk = cart.pk
 
     # найду и переделаю все строки Корзины в строки Заказа
     cart_products = get_cart_order_products(cart_pk)
@@ -881,13 +887,11 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_ke
     id_messenger = int(id_messenger) if id_messenger.isdigit() else 0
 
     if user_pk:
-        cart_info = get_cart_by_user_id(user_pk, for_anonymous_user)
-        cartset = Cart.objects.filter(user=user_pk)
+        cart = get_cart_by_user_id(user_pk, for_anonymous_user)
     else:
-        cart_info = get_cart_by_sessionid(session_key, for_anonymous_user)
-        cartset = Cart.objects.filter(sessionid=session_key)
+        cart = get_cart_by_sessionid(session_key, for_anonymous_user)
 
-    cart_pk = cart_info.get('id', 0)
+    cart_pk = cart.pk
     settings_user = get_settings_user(user)
     price_type = settings_user['price_type']
     price_type_pk = price_type.pk if price_type is not None else 0
@@ -895,38 +899,25 @@ def get_cart_full_info(user: AbstractBaseUser, get_params: dict = {}, session_ke
     # надо обновить строки и корзину если цены не совпадают
     update_price_in_cart_order(cart_pk, id_messenger, False, price_type_pk)
 
-    if cartset.exists():
-        serializer_cart = CartSerializer(cartset[0])
-        cart_info = serializer_cart.data
-        products_cart_set = cart_info['get_cart_products']
+    serializer_cart = CartSerializer(cart)
+    cart_info = serializer_cart.data
+    products_cart_set = cart_info.get('get_cart_products', [])
 
-        for product_cart in products_cart_set:
-            product_info = product_cart['product']
-            if 'get_prices' in product_info:
-                product_cart['product'].pop('get_prices')
+    for product_cart in products_cart_set:
+        product_info = product_cart['product']
+        if 'get_prices' in product_info:
+            product_cart['product'].pop('get_prices')
 
-            if 'get_stock_product' in product_info:
-                product_cart['product'].pop('get_stock_product')
+        if 'get_stock_product' in product_info:
+            product_cart['product'].pop('get_stock_product')
 
-            if not id_messenger:
-                products.append(product_cart)
-            elif id_messenger == product_cart['id_messenger']:
-                products.append(product_cart)
+        if not id_messenger:
+            products.append(product_cart)
+        elif id_messenger == product_cart['id_messenger']:
+            products.append(product_cart)
 
-        cart_info['products'] = products
-        cart_info.pop('get_cart_products')
-    elif user_pk:
-        new_cart_info = {
-            'user': user_pk,
-            'for_anonymous_user': for_anonymous_user
-        }
-        cart_info = create_new_cart(new_cart_info)
-    elif session_key:
-        new_cart_info = {
-            'sessionid': session_key,
-            'for_anonymous_user': for_anonymous_user
-        }
-        cart_info = create_new_cart(new_cart_info)
+    cart_info['products'] = products
+    cart_info.pop('get_cart_products')
 
     return cart_info
 
