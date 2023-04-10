@@ -1,4 +1,5 @@
 from django.views.generic import FormView, ListView, DetailView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.urls import reverse_lazy
 from shop.forms import *
@@ -252,8 +253,10 @@ class AddOrderView(DataMixin, CreateView):
         form.instance.user = self.request.user if self.request.user.is_authenticated else None
         response = super().form_valid(form)
         order = form.instance
+        print(order)
         services.changing_cart_rows_to_order_rows(self.request.user, order,
                                                   self.request.session.session_key)
+        services.send_email_for_order_success(order)
         return response
 
     def get_context_data(self, **kwargs) -> dict:
@@ -283,11 +286,12 @@ class AddOrderSuccessView(DataMixin, FormView):
         return {**context, **c_def}
 
 
-class OrderView(DataMixin, DetailView):
+class OrderView(LoginRequiredMixin, DataMixin, DetailView):
     model = Order
     template_name = 'shop/order.html'
     context_object_name = 'order'
-    pk_url_kwarg = 'number'
+    pk_url_kwarg = 'order_pk'
+    login_url = reverse_lazy('login')
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
@@ -296,13 +300,15 @@ class OrderView(DataMixin, DetailView):
         return {**context, **c_def}
 
 
-class OrderCancelConfirmView(DataMixin, FormView):
+class OrderCancelConfirmView(LoginRequiredMixin, DataMixin, FormView):
     form_class = SimpleForm
     template_name = 'shop/order-cancel-confirm.html'
+    login_url = reverse_lazy('login')
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        order_pk = self.kwargs.get('number', 0)
+        order_pk = self.kwargs.get('order_pk', 0)
+        # services.cancel_order(self.request.user, order_pk)
         c_def = self.get_user_context(title='Отмена заказа', order_pk=order_pk)
         return {**context, **c_def}
 
@@ -313,5 +319,6 @@ class OrderCancelCompleteView(DataMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Заказ отменен')
+        order_pk = int(self.kwargs.get('order_pk', 0))
+        c_def = self.get_user_context(title='Заказ отменен', order_number=order_pk)
         return {**context, **c_def}

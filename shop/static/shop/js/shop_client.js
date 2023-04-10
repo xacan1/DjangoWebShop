@@ -168,7 +168,7 @@ async function delete_cart_product(btn) {
         credentials: 'same-origin'
     }
 
-    let response = await fetch(`/api/v1/carts/products/${product_cart_pk}`, options);
+    let response = await fetch(`/api/v1/carts/products/${product_cart_pk}/`, options);
 
     if (!response.ok) {
         console.log('Ошибка HTTP: ' + response.status);
@@ -293,7 +293,6 @@ async function after_change_quantity(input) {
         body: JSON.stringify(data_cart_product)
     }
 
-    // let response = await fetch(`/api/v1/carts/product_to_cart_update/${product_cart_pk}`, options);
     let response = await fetch('/api/v1/update_product_to_cart', options);
 
     if (!response.ok) {
@@ -468,10 +467,10 @@ async function delete_favorite_product(btn) {
         credentials: 'same-origin'
     };
 
-    let response = await fetch(`/api/v1/products/favorites_delete/${favorite_product_pk}`, options);
+    let response = await fetch(`/api/v1/products/favorites_delete/${favorite_product_pk}/`, options);
 
     if (!response.ok) {
-        console.log('Ошибка HTTP delete_favorite_product: ' + response.status);
+        console.log('Ошибка HTTP /api/v1/products/favorites_delete/: ' + response.status);
         return;
     }
 
@@ -490,20 +489,20 @@ async function cancel_order(btn) {
     const order_pk = btn.getAttribute('data-shop-order-pk');
 
     let data_order = {
-        'order_pk': order_pk
+        'canceled': true
     };
 
     let options = {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json;charset=utf-8', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken') },
         credentials: 'same-origin',
         body: JSON.stringify(data_order)
     };
 
-    let response = await fetch('/api/v1/cancel_order', options);
+    let response = await fetch(`/api/v1/orders/${order_pk}/`, options);
 
     if (!response.ok) {
-        console.log('Ошибка HTTP cancel_order: ' + response.status);
+        console.log('Ошибка HTTP '+ `/api/v1/orders/${order_pk}/ ` + response.status);
         return;
     }
 }

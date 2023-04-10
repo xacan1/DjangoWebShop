@@ -16,7 +16,7 @@ urlpatterns = [
     path('product-details/<slug:product_slug>', ProductDetailView.as_view(), name='product-details'),
     path('checkout/', AddOrderView.as_view(), name='checkout'),
     path('new-order-success/', AddOrderSuccessView.as_view(), name='new-order-success'),
-    path('order/<int:number>', OrderView.as_view(), name='order'),
-    path('order-cancel-confirm/<int:number>', OrderCancelConfirmView.as_view(), name='order-cancel-confirm'),
-    path('order-cancel-complete/', OrderCancelCompleteView.as_view(), name='order-cancel-complete'),
+    path('order/<int:order_pk>', OrderView.as_view(), name='order'),
+    path('order-cancel-confirm/<int:order_pk>', OrderCancelConfirmView.as_view(), name='order-cancel-confirm'),
+    path('order-cancel-complete/<int:order_pk>', OrderCancelCompleteView.as_view(), name='order-cancel-complete'),
 ]

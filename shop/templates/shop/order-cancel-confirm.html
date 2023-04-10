@@ -21,7 +21,7 @@
                         </div>
                         <div class="col-md-6 py-2">
                             <div class="button">
-                                <button class="btn btn-alt" onclick="cancel_order(this);location.href=`{% url 'order-cancel-complete' %}`" data-shop-order-pk="{{ order_pk }}">Отменить заказ</button>
+                                <button class="btn btn-alt" onclick="cancel_order(this);location.href=`{% url 'order-cancel-complete' order_pk %}`" data-shop-order-pk="{{ order_pk }}">Отменить заказ</button>
                             </div>
                         </div>
                     </div>

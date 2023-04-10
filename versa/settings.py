@@ -46,7 +46,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-INSTALLED_APPS += MY_APPS
+VERSA_APPS = [
+    'shop.apps.ShopConfig',
+    'personal_account.apps.PersonalAccountConfig',
+    'main.apps.MainConfig',
+    'api.apps.ApiConfig',
+    'rest_framework',
+    'rest_framework.authtoken',
+]
+
+if DEBUG:
+    DEBUG_APPS = ['debug_toolbar',]
+    INSTALLED_APPS += DEBUG_APPS
+
+INSTALLED_APPS += VERSA_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,7 +71,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-MIDDLEWARE += MY_MIDDLEWARE
+if DEBUG:
+    VERSA_MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware',]
+    MIDDLEWARE += VERSA_MIDDLEWARE
+    INTERNAL_IPS = ['127.0.0.1',]
 
 ROOT_URLCONF = 'versa.urls'
 
@@ -150,10 +166,11 @@ REST_FRAMEWORK = {
 
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_FILE_PATH  =  BASE_DIR / 'sent_emails'
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 EMAIL_HOST = config.EMAIL_SMTP
 EMAIL_HOST_USER = config.EMAIL_USER
 EMAIL_HOST_PASSWORD = config.EMAIL_PASSWORD

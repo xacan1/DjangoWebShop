@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.core.mail import send_mail
 from django.contrib.auth.models import AbstractBaseUser
 from django.db.models import Q, Min, Max, Prefetch
 from api.serializers import *
@@ -533,7 +534,6 @@ def add_delete_update_product_to_cart(user: AbstractBaseUser, request_data: dict
         data_response = {'error': 'user_pk and session_key is undefined'}
         return data_response
 
-    # cart_pk = cart_info.get('id', 0)
     cart_pk = cart.pk
 
     # получим актуальные цены
@@ -609,7 +609,6 @@ def delete_product_from_cart_or_order(user: AbstractBaseUser, request_data: dict
         user_pk = user.pk
         for_anonymous_user = request_data.get('for_anonymous_user', False)
         cart = get_cart_by_user_id(user_pk, for_anonymous_user)
-        # cart_pk = cart_info.get('id', 0)
         cart_pk = cart.pk
         product_cart, _ = get_cart_order_product(
             cart_pk, product_pk, id_messenger)
@@ -716,7 +715,6 @@ def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dic
 
     order_pk = order_info['id']
     cart = get_cart_by_user_id(user_pk, for_messenger_user)
-    # cart_pk = cart_info.get('id', 0)
     cart_pk = cart.pk
 
     # найду и превращу все строки Корзины в строки последнего неоплаченного Заказа
@@ -748,20 +746,20 @@ def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dic
     return order_info
 
 
-def cancel_order(user: AbstractBaseUser, order_pk: int) -> dict:
-    if not user.is_authenticated:
-        data_response = {'error': 'user is not authenticated'}
-        return data_response
+# def cancel_order(user: AbstractBaseUser, order_pk: int) -> dict:
+#     if not user.is_authenticated:
+#         data_response = {'error': 'user is not authenticated'}
+#         return data_response
 
-    order = get_order_for_user(user.pk, order_pk)
+#     order = get_order_for_user(user.pk, order_pk)
 
-    if order and not order.canceled:
-        order.canceled = True
-        order.save()
+#     if order and not order.canceled:
+#         order.canceled = True
+#         order.save()
 
-    data_response = {'canceled': 'complete'}
+#     data_response = {'canceled': 'complete'}
 
-    return data_response
+#     return data_response
 
 
 # Превращает строки Корзины(CartProduct) в строки Заказа при оформлении Заказа из Корзины
@@ -770,12 +768,11 @@ def changing_cart_rows_to_order_rows(user: AbstractBaseUser, order: Order, sessi
 
     if user_pk:
         cart = get_cart_by_user_id(user_pk)
-        phone = user.phone
+        phone = order.phone if order.phone else user.phone
     else:
         cart = get_cart_by_sessionid(session_key)
-        phone = ''
+        phone = order.phone
 
-    # cart_pk = cart_info.get('id', 0)
     cart_pk = cart.pk
 
     # найду и переделаю все строки Корзины в строки Заказа
@@ -1011,3 +1008,11 @@ def count_product_from_to(paginate_by: int, page_number: int, len_object_list: i
     amount_product_upto = amount_product_from + len_object_list - 1
 
     return amount_product_from, amount_product_upto
+
+
+def send_email_for_order_success(order: Order) -> None:
+    send_mail(subject=f'Заказ №{order.external_code}',
+              message=f'Спасибо за Ваш заказ! Заказ №{order.external_code} находится в обработке. После обработки заказа наш сотрудник свяжется с Вами.',
+              from_email='h.smirnov.m@yandex.ru',
+              recipient_list=[order.email],
+              fail_silently=False)
