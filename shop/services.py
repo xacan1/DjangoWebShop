@@ -1010,7 +1010,7 @@ def send_email_for_order_success(order_pk: int) -> None:
     order = Order.objects.get(pk=order_pk)
     send_mail(subject=f'Заказ №{order_pk}',
               message=f'Спасибо за Ваш заказ! Заказ №{order_pk} находится в обработке. После обработки заказа наш сотрудник свяжется с Вами.',
-              from_email='h.smirnov.m@yandex.ru',
+              from_email='robot.uzm@mail.ru',
               recipient_list=[order.email],
               fail_silently=False)
 
@@ -1019,6 +1019,6 @@ def send_email_for_order_cancel(order_pk: int) -> None:
     order = Order.objects.get(pk=order_pk)
     send_mail(subject=f'Заказ №{order_pk} отменен',
               message=f'Вы отменили заказ №{order_pk}.',
-              from_email='h.smirnov.m@yandex.ru',
+              from_email='robot.uzm@mail.ru',
               recipient_list=[order.email],
               fail_silently=False)

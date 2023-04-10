@@ -1,5 +1,6 @@
 from django.views.generic import FormView, ListView, DetailView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from django.core.paginator import Paginator
 from django.urls import reverse_lazy
 from shop.forms import *
@@ -261,11 +262,17 @@ class AddOrderView(DataMixin, CreateView):
     success_url = reverse_lazy('new-order-success')
 
     def form_valid(self, form) -> HttpResponse:
+        cart_info = services.get_cart_full_info(user=self.request.user,
+                                                session_key=self.request.session.session_key)
+        if not cart_info['products']:
+            return redirect('cart') # вдруг корзина пустая, что бы не создавать пустой заказ
+        
         form.instance.user = self.request.user if self.request.user.is_authenticated else None
         response = super().form_valid(form)
         order = form.instance
         services.changing_cart_rows_to_order_rows(self.request.user, order,
                                                   self.request.session.session_key)
+        services.send_email_for_order_success(order.pk)
         return response
 
     def get_context_data(self, **kwargs) -> dict:
@@ -291,8 +298,8 @@ class AddOrderSuccessView(DataMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        order_pk = int(self.kwargs.get('order_pk', 0))
-        services.send_email_for_order_success(order_pk)
+        # order_pk = int(self.kwargs.get('order_pk', 0))
+        # services.send_email_for_order_success(order_pk)
         c_def = self.get_user_context(title='Заказ оформлен')
         return {**context, **c_def}
 
