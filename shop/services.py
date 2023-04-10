@@ -746,20 +746,16 @@ def create_or_update_order_for_messenger(user: AbstractBaseUser, order_info: dic
     return order_info
 
 
-# def cancel_order(user: AbstractBaseUser, order_pk: int) -> dict:
-#     if not user.is_authenticated:
-#         data_response = {'error': 'user is not authenticated'}
-#         return data_response
+# дублирование функции в JS так как в Firefox не отрабатывает AJAX запрос на отмену заказа
+def cancel_order(user: AbstractBaseUser, order_pk: int) -> None:
+    if not user.is_authenticated:
+        return
 
-#     order = get_order_for_user(user.pk, order_pk)
+    order = get_order_for_user(user.pk, order_pk)
 
-#     if order and not order.canceled:
-#         order.canceled = True
-#         order.save()
-
-#     data_response = {'canceled': 'complete'}
-
-#     return data_response
+    if order and not order.canceled:
+        order.canceled = True
+        order.save()
 
 
 # Превращает строки Корзины(CartProduct) в строки Заказа при оформлении Заказа из Корзины
@@ -1010,9 +1006,19 @@ def count_product_from_to(paginate_by: int, page_number: int, len_object_list: i
     return amount_product_from, amount_product_upto
 
 
-def send_email_for_order_success(order: Order) -> None:
-    send_mail(subject=f'Заказ №{order.external_code}',
-              message=f'Спасибо за Ваш заказ! Заказ №{order.external_code} находится в обработке. После обработки заказа наш сотрудник свяжется с Вами.',
+def send_email_for_order_success(order_pk: int) -> None:
+    order = Order.objects.get(pk=order_pk)
+    send_mail(subject=f'Заказ №{order_pk}',
+              message=f'Спасибо за Ваш заказ! Заказ №{order_pk} находится в обработке. После обработки заказа наш сотрудник свяжется с Вами.',
+              from_email='h.smirnov.m@yandex.ru',
+              recipient_list=[order.email],
+              fail_silently=False)
+
+    
+def send_email_for_order_cancel(order_pk: int) -> None:
+    order = Order.objects.get(pk=order_pk)
+    send_mail(subject=f'Заказ №{order_pk} отменен',
+              message=f'Вы отменили заказ №{order_pk}.',
               from_email='h.smirnov.m@yandex.ru',
               recipient_list=[order.email],
               fail_silently=False)
