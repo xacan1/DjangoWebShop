@@ -93,7 +93,7 @@ def get_parents_category(category_slug: str, parents: list) -> list[models.Model
 # Топ продаж из 4-х товаров
 def get_top_sales() -> models.QuerySet[Prices]:
     top_sales = CartProduct.objects.values('product').annotate(
-        total=models.Sum('quantity')).order_by('-total')
+        total=models.Sum('quantity')).order_by('-total')[0:4]
 
     if not top_sales.exists() or top_sales.count() < 4:
         top_sales = Product.objects.all()[0:4]
