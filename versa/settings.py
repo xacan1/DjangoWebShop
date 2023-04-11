@@ -170,6 +170,7 @@ else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+DEFAULT_FROM_EMAIL = f'{ALLOWED_HOSTS[0]} <{config.EMAIL_USER}>'
 EMAIL_HOST = config.EMAIL_SMTP
 EMAIL_HOST_USER = config.EMAIL_USER
 EMAIL_HOST_PASSWORD = config.EMAIL_PASSWORD
