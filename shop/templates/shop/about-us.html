@@ -27,25 +27,25 @@
 <section class="about-us section">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6 col-md-12 col-12">
+            <!-- <div class="col-lg-6 col-md-12 col-12">
                 <div class="content-left">
                     <img src="https://via.placeholder.com/540x420" alt="#">
                     <a href="https://www.youtube.com/watch?v=r44RKWyfcFw&fbclid=IwAR21beSJORalzmzokxDRcGfkZA1AtRTE__l5N4r09HcGS5Y6vOluyouM9EM"
                         class="glightbox video"><i class="lni lni-play"></i></a>
                 </div>
-            </div>
-            <div class="col-lg-6 col-md-12 col-12">
+            </div> -->
+            <div class="col-12">
                 <!-- content-1 start -->
                 <div class="content-right">
-                    <h2>ShopGrids - Ваш надежный партнёр.</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam id purus at risus
-                        pellentesque faucibus a quis eros. In eu fermentum leo. Integer ut eros lacus. Proin ut
-                        accumsan leo. Morbi vitae est eget dolor consequat aliquam eget quis dolor. Mauris rutrum
-                        fermentum erat, at euismod lorem pharetra nec. Duis erat lectus, ultrices euismod sagittis.
-                    </p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eius mod tempor incididunt
-                        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                        laboris nisi aliquip ex ea commodo consequat.</p>
+                    <h2>{{ request.get_host }} - Ваш надежный партнёр.</h2>
+                    <p>{{ request.get_host }} – современный интернет магазин, основной целью которого является реализация
+                        электротехнических товаров по ценам ниже рынка без потери качества.</p>
+                    <p>Как мы работаем?</p>
+                    <p>Мы решили не использовать розничную сеть магазинов и работать на доставке. Уступая в сроках
+                        доставки на 1-2 дня, Вы экономите несколько тысяч рублей на товаре.</p>
+                    <p>Клиентам {{ request.get_host }} доступен удобный интерфейс, комфортная система заказов, консультация с
+                        продавцом и постоянно обновляемый ассортимент товаров.</p>
+                    <p>Мы работаем только с ведущими поставщиками и ценим наших клиентов за выбор нашего магазина.</p>
                 </div>
             </div>
         </div>
@@ -60,8 +60,7 @@
             <div class="col-12">
                 <div class="section-title">
                     <h2 class="wow fadeInUp" data-wow-delay=".4s">Наша команда</h2>
-                    <p class="wow fadeInUp" data-wow-delay=".6s">There are many variations of passages of Lorem
-                        Ipsum available, but the majority have suffered alteration in some form.</p>
+                    <p class="wow fadeInUp" data-wow-delay=".6s">Днями и ночами работаем для Вас.</p>
                 </div>
             </div>
         </div>
