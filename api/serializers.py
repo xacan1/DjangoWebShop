@@ -71,16 +71,31 @@ class CategorySerializer(serializers.ModelSerializer):
                   'photo', 'parent', 'nested_category',)
 
 
+class UnitMeasureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UnitMeasure
+        fields = '__all__'
+
+
 # тут нужен slug только для чтения для фронтэнда , где он используется для формирования поля
 class ProductSerializer(serializers.ModelSerializer):
     get_prices = PriceSerializer(many=True, read_only=True)
     get_stock_product = StockProductSerializer(many=True, read_only=True)
+    unit_measure = UnitMeasureSerializer(read_only=True)
     slug = serializers.SlugField(required=False)
 
     class Meta:
         model = Product
-        fields = ('id', 'name', 'slug', 'external_code', 'category', 'photo',
+        fields = ('id', 'name', 'slug', 'external_code', 'category', 'photo', 'unit_measure',
                   'time_create', 'get_prices', 'get_stock_product', 'description',)
+
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    slug = serializers.SlugField(required=False)
+
+    class Meta:
+        model = Product
+        fields = '__all__'
 
 
 class ImageProductSerializer(serializers.ModelSerializer):

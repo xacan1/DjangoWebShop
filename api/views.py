@@ -64,11 +64,16 @@ class FavoriteProductAPIViewSet(viewsets.ModelViewSet):
         return serializer_class
 
 
+class UnitMeasureAPIViewSet(viewsets.ModelViewSet):
+    queryset = UnitMeasure.objects.all()
+    serializer_class = UnitMeasureSerializer
+    permission_classes = (IsAdminOrIsAuthenticated,)
+
+
 # Выводит список товаров с остатками по складам и ценами
 # category_pk - категория товара (каталог)
 # warehouse_pk - склад
 class ProductAPIViewSet(viewsets.ModelViewSet):
-    serializer_class = ProductSerializer
     permission_classes = (IsAdminOrIsAuthenticated,)
 
     def get_queryset(self):
@@ -91,6 +96,14 @@ class ProductAPIViewSet(viewsets.ModelViewSet):
             queryset = Product.objects.filter(**get_params)
 
         return queryset
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            serializer_class = ProductSerializer
+        else:
+            serializer_class = ProductCreateSerializer
+
+        return serializer_class
 
 
 class ImageProductAPViewSet(viewsets.ModelViewSet):

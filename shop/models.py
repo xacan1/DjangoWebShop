@@ -46,6 +46,23 @@ class Category(models.Model):
         ordering = ('parent__name', 'name',)
 
 
+class UnitMeasure(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Наименование')
+    short_name = models.CharField(max_length=25,
+                                  verbose_name='Краткое наименование')
+    international_short_name = models.CharField(max_length=3,
+                                                verbose_name='Международное сокращение')
+    external_code = models.CharField(max_length=4, unique=True,
+                                     verbose_name='Внешний код')
+
+    def __str__(self) -> str:
+        return self.name
+
+    class Meta:
+        verbose_name = 'Единица измерения'
+        verbose_name_plural = 'Единицы измерения'
+
+
 class Product(models.Model):
     name = models.CharField(max_length=255, verbose_name='Наименование')
     slug = models.SlugField(max_length=255, unique=True)
@@ -60,8 +77,10 @@ class Product(models.Model):
                                        verbose_name='Доступен к покупке')
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name='get_products', verbose_name='Категория')
-    external_code = models.CharField(max_length=11,
-                                     unique=True, verbose_name='Внешний код')
+    unit_measure = models.ForeignKey(UnitMeasure, on_delete=models.CASCADE,
+                                     verbose_name='Единица измерения')
+    external_code = models.CharField(max_length=11, unique=True,
+                                     verbose_name='Внешний код')
     is_service = models.BooleanField(default=False, verbose_name='Услуга')
 
     def save(self, *args, **kwargs):
@@ -450,8 +469,13 @@ class Coupon(models.Model):
                             verbose_name='Номер купона')
     valid_from = models.DateTimeField(verbose_name='Действует с')
     valid_to = models.DateTimeField(verbose_name='Действует до')
-    discount_percentage = models.DecimalField(max_digits=3, decimal_places=0,
+    discount_percentage = models.DecimalField(max_digits=3, decimal_places=0, default=0,
                                               validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='Скидка %')
+    for_discount = models.BooleanField(verbose_name='Скидочный')
+    amount = models.DecimalField(max_digits=15, decimal_places=2,
+                                 default=0, verbose_name='Сумма')
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True,
+                                 blank=True, verbose_name='Валюта заказа')
     active = models.BooleanField(verbose_name='Активен')
     external_code = models.CharField(max_length=11, default='', blank=True,
                                      verbose_name='Внешний код')

@@ -14,10 +14,18 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+class UnitMeasureAdmin(admin.ModelAdmin):
+    model = UnitMeasure
+    list_display = ('name', 'short_name',
+                    'international_short_name', 'external_code',)
+    list_display_links = ('name', 'short_name',)
+    search_fields = ('name', 'short_name', 'international_short_name',)
+
+
 class ProductAdmin(admin.ModelAdmin):
     model = Product
-    list_display = ('name', 'photo', 'category', 'is_service',
-                    'is_published', 'external_code',)
+    list_display = ('name', 'photo', 'category', 'unit_measure',
+                    'is_service', 'is_published', 'external_code',)
     list_filter = ('category', 'is_published', 'is_service',)
     search_fields = ('name', 'external_code',)
     list_editable = ('is_published',)
@@ -171,9 +179,11 @@ class UserSettingsAdmin(admin.ModelAdmin):
 class CouponAdmin(admin.ModelAdmin):
     model = Coupon
     list_display = ('code', 'external_code', 'valid_from',
-                    'valid_to', 'discount_percentage', 'active',)
+                    'valid_to', 'for_discount', 'discount_percentage',
+                    'amount', 'currency', 'active',)
     list_display_links = ('code', 'external_code',)
     list_filter = ('active',)
+    list_editable = ('active',)
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -183,10 +193,12 @@ class OrderAdmin(admin.ModelAdmin):
     list_display_links = ('pk', 'user', 'phone', 'status',)
     list_filter = ('status', 'delivery_type', 'payment_type',
                    'paid', 'canceled', 'time_create',)
-    search_fields = ('user__email', 'phone', 'external_code', 'warehouse__name',)
+    search_fields = ('user__email', 'phone',
+                     'external_code', 'warehouse__name',)
 
 
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(UnitMeasure, UnitMeasureAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ImageProduct, ImageProductAdmin)
 admin.site.register(FavoriteProduct, FavoriteProductAdmin)

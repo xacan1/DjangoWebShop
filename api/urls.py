@@ -4,6 +4,7 @@ from api.views import *
 
 
 router = routers.SimpleRouter()
+router.register(r'units_measured', UnitMeasureAPIViewSet, basename='UnitsMeasured')
 router.register(r'attributes/values', AttributeValuesAPIViewSet, basename='AttributeValues')
 router.register(r'attributes', AttributeAPIViewSet)
 router.register(r'products/attributes/values', AttributeProductValuesAPIViewSet, basename='AttributeProductValues')
