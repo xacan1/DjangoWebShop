@@ -4,7 +4,7 @@ from django.conf import settings
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import django.utils.datetime_safe
+import django.utils.timezone
 import shop.models
 
 
@@ -275,7 +275,7 @@ class Migration(migrations.Migration):
                 ('address', models.CharField(blank=True, default='', max_length=1024, verbose_name='Адрес доставки')),
                 ('time_create', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
                 ('time_update', models.DateTimeField(auto_now=True, verbose_name='Дата изменения')),
-                ('delivery_date', models.DateField(default=django.utils.datetime_safe.date.today, verbose_name='Плановая дата доставки')),
+                ('delivery_date', models.DateField(default=django.utils.timezone.datetime.today, verbose_name='Плановая дата доставки')),
                 ('comment', models.TextField(blank=True, default='', verbose_name='Комментарий к заказу')),
                 ('quantity', models.DecimalField(blank=True, decimal_places=3, default=0, max_digits=15, verbose_name='Общее количество')),
                 ('amount', models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=15, verbose_name='Общая сумма')),

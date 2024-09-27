@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from django.utils import timezone, datetime_safe
+from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework.authtoken.models import Token
 from shop.utils import unique_slugify
@@ -548,7 +548,7 @@ class Order(models.Model):
                                        verbose_name='Дата создания')
     time_update = models.DateTimeField(auto_now=True,
                                        verbose_name='Дата изменения')
-    delivery_date = models.DateField(default=datetime_safe.date.today,
+    delivery_date = models.DateField(default=timezone.datetime.today,
                                      verbose_name='Плановая дата доставки')
     comment = models.TextField(default='', blank=True,
                                verbose_name='Комментарий к заказу')
